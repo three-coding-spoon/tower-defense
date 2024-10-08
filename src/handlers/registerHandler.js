@@ -1,5 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
-import { addUser, getUserById } from '../models/user.model.js';
+import { getUserById } from '../models/userModel.js';
 import { handleConnection, handleDisconnect, handleEvent } from './helper.js';
 
 const registerHandler = (io) => {
@@ -8,20 +7,14 @@ const registerHandler = (io) => {
 
     let user = {};
     if (socket.handshake.query.userId) {
+      // 이미 존재가 확인된 사용자만 들어오는 흐름이므로 소켓ID만 지정해 줌
       user = await getUserById(socket.userId);
-
-      if (!user) {
-        user = {};
-        user.uuid = socket.handshake.query.userId;
-      }
       user.socketId = socket.id;
     } else {
-      user.uuid = uuidv4();
-      user.socketId = socket.id;
+      console.warn('Invaild socket connection request without user name. Disconnecting socket.');
+      return socket.disconnect();
     }
-    await addUser(user); // 사용자 추가
-
-    await handleConnection(socket, user.uuid);
+    await handleConnection(socket, user.id);
 
     // 모든 서비스 이벤트 처리
     socket.on('event', (data) => handleEvent(io, socket, data));

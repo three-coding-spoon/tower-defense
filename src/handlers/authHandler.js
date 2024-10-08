@@ -36,6 +36,7 @@ export const postSignup = async (req, res, next) => {
 export const postLogin = async (req, res, next) => {
   const { username, password } = req.body;
   const { JWT_SECRET } = process.env;
+
   // 해당 유저가 존재하는지 확인하는 쿼리 작성
 
   if (!user) return res.status(401).json({ message: '존재하지 않는 아이디입니다.' });

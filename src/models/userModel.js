@@ -24,9 +24,16 @@ export const getUsers = async () => {
   return rows;
 };
 
-// 사용자 조회
-export const getUserByName = async (uuid) => {
+// 이름 기반 사용자 조회
+export const getUserByName = async (username) => {
   const query = `SELECT * FROM users WHERE username = ?`;
   const row = await pool.execute(query, [username]);
+  return row;
+};
+
+// ID 기반 사용자 조회
+export const getUserById = async (id) => {
+  const query = `SELECT * FROM users WHERE id = ?`;
+  const row = await pool.execute(query, [id]);
   return row;
 };
