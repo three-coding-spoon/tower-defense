@@ -2,13 +2,13 @@ import { removeUser } from '../models/userModel.js';
 import { CLIENT_VERSION } from '../constants.js';
 import handlerMappings from './handlerMapping.js';
 import { getTopHighScore } from '../models/score.model.js';
-import { initWaves } from '../models/waveModel.js';
+import { initWaves } from '../models/mobCountModel.js';
 
 export const handleConnection = async (socket, userId) => {
   console.log(`New user connected: ${userId} with socket ID ${socket.id}`);
 
   // 웨이브? 생성
-  initWaves(userId);
+  initStage(userId);
 
   // 하이 스코어 가져오기
   const highScore = await getHighScore();

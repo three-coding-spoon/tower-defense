@@ -2,7 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
 //** 회원가입 */
-export const postSignup = async (req, res, next) => {
+export const register = async (req, res, next) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -33,7 +33,7 @@ export const postSignup = async (req, res, next) => {
 };
 
 //** 로그인 */
-export const postLogin = async (req, res, next) => {
+export const login = async (req, res, next) => {
   const { username, password } = req.body;
   const { JWT_SECRET } = process.env;
 

@@ -1,7 +1,7 @@
 // 임시
 
 import { moveStageHandler } from './stage.handler.js';
-import { gameEnd, gameStart } from './game.handler.js';
+import { gameEnd, gameStart } from './gameHandler.js';
 import { broadcastNewHighScore } from './broadcast.handler.js';
 
 const handlerMappings = {

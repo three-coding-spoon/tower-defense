@@ -1,23 +1,27 @@
 // 유저가 몹을 얼마나 잡았는지 기록
 
-const waves = {};
+const mobCount = {};
 
-export const initWaves = (userId) => {
-  waves[userId] = new Map();
+export const initmobCounts = (userId) => {
+  mobCount[userId] = new Map();
 };
 
-export const addTakenMonsterToWave = (userId, monsterId) => {
-  const waveInfo = waves[userId];
-  if (waveInfo.get(monsterId)) {
-    waves[userId].set(monsterId, waveInfo.get(monsterId) + 1);
+export const addTakenMonsterTomobCount = (userId, monsterId) => {
+  const mobCountInfo = mobCount[userId];
+  if (mobCountInfo.get(monsterId)) {
+    mobCount[userId].set(monsterId, mobCountInfo.get(monsterId) + 1);
   } else {
-    waves[userId].set(monsterId, 1);
+    mobCount[userId].set(monsterId, 1);
   }
 };
 
-export const getWave = (userId) => {
-  return waves[userId] || [];
+export const getmobCount = (userId) => {
+  return mobCount[userId] || [];
 };
+
+/**
+ *
+ */
 
 /*
 {
