@@ -2,17 +2,23 @@ import express from 'express';
 import { createServer } from 'http';
 import initSocket from './init/socket.js';
 import { loadGameAssets } from './init/assets.js';
+import dotenv from 'dotenv';
+
+import authRoutes from './routes/authRoutes.js';
+// 라우터 더 필요하면 추가
+
+dotenv.config();
 
 const app = express();
-
 const server = createServer(app);
-
 const PORT = 3000;
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
 app.use(express.static('public'));
+app.use(express.urlencoded({ extended: false }));
 initSocket(server);
+
+app.use('/api/auth', authRoutes);
 
 server.listen(PORT, async () => {
   console.log(`Server is ruuning on port ${PORT}`);
