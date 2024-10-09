@@ -1,17 +1,21 @@
-const stages = {};
+// src/models/stageModel.js
 
-export const createStage = (uuid) => {
-  stages[uuid] = []; // 초기 스테이지 배열 생성
+const stages = new Map();
+
+export const createStage = (userId) => {
+  stages.set(userId, []);
 };
 
-export const getStage = (uuid) => {
-  return stages[uuid];
+export const getStage = (userId) => {
+  return stages.get(userId) || [];
 };
 
-export const setStage = (uuid, id, timestamp) => {
-  return stages[uuid].push({ id, timestamp });
+export const setStage = (userId, id, timestamp) => {
+  const userStages = stages.get(userId) || [];
+  userStages.push({ id, timestamp });
+  stages.set(userId, userStages);
 };
 
-export const clearStage = (uuid) => {
-  return (stages[uuid] = []);
+export const clearStage = (userId) => {
+  stages.delete(userId);
 };

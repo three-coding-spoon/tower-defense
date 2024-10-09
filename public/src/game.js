@@ -241,6 +241,10 @@ function initGame() {
   isInitGame = true;
 }
 
+function initGameState() {
+  // 골드나 HP 등의 상태들 초기화
+}
+
 // 이미지 로딩 완료 후 서버와 연결하고 게임 초기화
 Promise.all([
   new Promise((resolve) => (backgroundImage.onload = resolve)),
@@ -250,10 +254,11 @@ Promise.all([
   ...monsterImages.map((img) => new Promise((resolve) => (img.onload = resolve))),
 ]).then(() => {
   /* 서버 접속 코드 (여기도 완성해주세요!) */
-  let somewhere;
-  serverSocket = io('서버주소', {
+  const token = 0;
+  serverSocket = io('http://localhost:3000', {
     auth: {
-      token: somewhere, // 토큰이 저장된 어딘가에서 가져와야 합니다!
+      token: token, // 토큰이 저장된 어딘가에서 가져와야 합니다!
+      clientVersion: CLIENT_VERSION,
     },
   });
 
@@ -265,6 +270,42 @@ Promise.all([
       initGame();
     }
   */
+
+  serverSocket.on('response', async (data) => {
+    if (data.handlerId === 1 && data.status === 'success') {
+      initGameState(data);
+    } else if (data.handlerId === 1 && data.status === 'fail') {
+      console.error(`초기화에 실패했습니다. ${data.message}`);
+    } else console.error(`알 수 없는 초기화 실패. ${data.message}`);
+  });
+
+  serverSocket.on('connection', async (data) => {
+    const token = window.localStorage.getItem('accessToken');
+    if (token) {
+      userId = token;
+    } else {
+      userId = data.uuid;
+      window.localStorage.setItem('accessToken', userId);
+    }
+
+    highScore = data.highScore;
+
+    // 초기화 핸들러
+    sendEvent(1, { payload: userId });
+
+    // 초기화가 안됐으면 초기화
+    if (!isInitGame) {
+      initGame();
+    }
+  });
+
+  serverSocket.on('updateGameState', (syncData) => {
+    updateGameState(syncData);
+  });
+
+  serverSocket.on('updateTowerState', (syncData) => {
+    updateTowerState(syncData);
+  });
 });
 
 const buyTowerButton = document.createElement('button');
@@ -279,3 +320,19 @@ buyTowerButton.style.cursor = 'pointer';
 buyTowerButton.addEventListener('click', placeNewTower);
 
 document.body.appendChild(buyTowerButton);
+
+const sendEvent = (handlerId, payload, timestamp) => {
+  serverSocket.emit('event', {
+    userId,
+    clientVersion: CLIENT_VERSION,
+    handlerId,
+    timestamp,
+    payload,
+  });
+};
+
+const updateGameState = (serverState) => {};
+
+const updateTowerState = (serverState) => {};
+
+export { sendEvent };

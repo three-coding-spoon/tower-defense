@@ -1,46 +1,35 @@
-import { getStage, setStage } from '../models/stagModel.js';
-import { getGameAssets } from '../init/assets.js';
-import calculateTotalScore from '../utils/calculateTotalScore.js';
-import { getmobCount } from '../models/mobCountModel.js';
+// src/handlers/stageHandler.js
 
-export const moveStageHandler = (userId, { currentStage, targetStage }) => {
-  // 사용자의 현재 스테이지 목록을 가져옴
+import { getStage, setStage } from '../models/stageModel.js';
+import { getGameAssets } from '../init/gameAssets.js';
+
+/**
+ * 스테이지 이동 핸들러
+ */
+export const moveStageHandler = (userId, payload) => {
+  const { currentStage, targetStage } = payload;
+
+  // 현재 스테이지 확인
   const currentStages = getStage(userId);
   if (!currentStages.length) {
-    return { status: 'fail', message: 'No stages found for user' };
+    return { status: 'fail', message: 'No stages found for user', handlerId: 11 };
   }
 
-  // 배열 정렬 대신 reduce() 사용해 가장 마지막 스테이지 가져옴
-  const latestStage = currentStages.reduce((prev, curr) => (prev.id > curr.id ? prev : curr));
-
-  // payload 데이터와 비교
+  const latestStage = currentStages[currentStages.length - 1];
   if (latestStage.id !== currentStage) {
-    return { status: 'fail', message: 'Current stage mismatch' };
+    return { status: 'fail', message: 'Current stage mismatch', handlerId: 11 };
   }
 
-  // 게임 에셋에서 스테이지 정보를 가져옴
+  // 목표 스테이지 존재 여부 확인
   const { stages } = getGameAssets();
-
-  // 현재 스테이지 정보 조회
-  const currentStageInfo = stages.data.find((stage) => stage.id === currentStage);
-  if (!currentStageInfo) {
-    return { status: 'fail', message: 'Current stage does not exist' };
+  const targetStageInfo = stages.find((stage) => stage.id === targetStage);
+  if (!targetStageInfo) {
+    return { status: 'fail', message: 'Target stage does not exist', handlerId: 11 };
   }
 
-  // 목표 스테이지 정보 조회
-  //   const nextStageInfo = stages.data.find((stage) => stage.id === targetStage);
-  //   if (!nextStageInfo) {
-  //     return { status: 'fail', message: 'Next stage does not exist' };
-  //   }
+  // 스테이지 업데이트
+  const timestamp = Date.now();
+  setStage(userId, targetStage, timestamp);
 
-  // 서버 현재 시간
-  const serverTime = Date.now();
-
-  // 총 점수 계산
-  const mobCounts = getmobCount(userId);
-  const totalScore = calculateTotalScore(currentStages, serverTime, mobCounts);
-
-  // 유저의 스테이지 정보 업데이트
-  setStage(userId, targetStage, serverTime);
-  return { status: 'success', handler: 11 };
+  return { status: 'success', handlerId: 11 };
 };
