@@ -1,5 +1,6 @@
 // src/handlers/handlerMapping.js
 
+
 import { moveStageHandler } from './stageHandler.js';
 import { gameEnd, gameStart } from './gameHandler.js';
 import { broadcastNewHighScore } from './broadcastHandler.js';
