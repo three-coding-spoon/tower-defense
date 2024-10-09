@@ -3,9 +3,12 @@ import { createServer } from 'http';
 import initSocket from './init/socket.js';
 import { loadGameAssets } from './init/assets.js';
 import dotenv from 'dotenv';
-
 import authRoutes from './routes/authRoutes.js';
 // 라우터 더 필요하면 추가
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __filename = fileURLToPath(import.meta.url);
+export const __dirname = path.dirname(__filename);
 
 dotenv.config();
 
@@ -17,6 +20,21 @@ app.use(express.json());
 app.use(express.static('public'));
 app.use(express.urlencoded({ extended: false }));
 initSocket(server);
+
+// 메인 페이지
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/index.html'));
+});
+
+// 로그인 페이지
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/login.html'));
+});
+
+// 회원가입 페이지
+app.get('/join', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/register.html'));
+});
 
 app.use('/api/auth', authRoutes);
 

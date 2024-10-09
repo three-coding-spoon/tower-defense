@@ -1,8 +1,6 @@
 import { removeUser } from '../models/userModel.js';
-import { CLIENT_VERSION } from '../constants.js';
+// import CLIENT_VERSION from '../../constants.js';
 import handlerMappings from './handlerMapping.js';
-import { getTopHighScore } from '../models/score.model.js';
-import { initWaves } from '../models/mobCountModel.js';
 
 export const handleConnection = async (socket, userId) => {
   console.log(`New user connected: ${userId} with socket ID ${socket.id}`);
@@ -22,11 +20,11 @@ export const handleDisconnect = async (userId) => {
 };
 
 export const handleEvent = async (io, socket, data) => {
-  if (!CLIENT_VERSION.includes(data.clientVersion)) {
-    console.log(`Client version mismatch: ${data.clientVersion}`);
-    socket.emit('response', { status: 'fail', message: 'Client version mismatch' });
-    return;
-  }
+  // if (!CLIENT_VERSION.includes(data.clientVersion)) {
+  //   console.log(`Client version mismatch: ${data.clientVersion}`);
+  //   socket.emit('response', { status: 'fail', message: 'Client version mismatch' });
+  //   return;
+  // }
 
   const handler = handlerMappings[data.handlerId];
   if (!handler) {
