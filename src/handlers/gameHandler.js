@@ -1,33 +1,54 @@
-/**
- * 게임 진행 핸들
- * 1. 게임 시작
- *  - userId
- *  - 여기에서 게임 애샛들에 대한 정보를 보낸다
- *  - 애샛 로드 완료까지 기다려야 함!
- * 2. 게임 종료
- *  - userId
- *  - 서버 스폰 정보와 클라가 잡은 정보 비교하여 바탕으로 스코어 검증 절차 진행
- */
+// src/handlers/gameHandler.js
 
-/**
- * 타워 핸들
- * 1. 타워 구입(설치)
- *  - userId
- *  - 어떤 타워(Type ID)
- *  - 설치할 위치[X, Y]
- * 2. 타워 환불
- *  - userId
- *  - 타워 ID
- * 3. 타워 업그레이드
- *  - userId
- *  - 타워 ID
- */
+import { getGameAssets } from '../init/gameAssets.js';
+import { calculateTotalScore } from '../utils/scoreCalculation.js';
+import { updateHighScore } from '../models/scoreModel.js';
+import { initMobCounts, clearMobCounts } from '../models/mobCountModel.js';
+import { clearStage } from '../models/stageModel.js';
+import { broadcastNewHighScore } from './broadcastHandler.js';
 
-/**
- * 몹 관련 핸들
- * 1. 몹 잡기
- *  - userId
- *  - 몹 ID
- */
+export const gameStart = (userId, payload, io) => {
+  try {
+    const assets = getGameAssets();
+    // 게임 에셋을 클라이언트로 전송
+    io.to(userId).emit('gameAssets', assets);
 
-// 모든 패킷에 타임스탬프가 포함돼야 함!
+    // 유저의 몹 카운트와 스테이지 정보 초기화
+    initMobCounts(userId);
+    clearStage(userId);
+
+    return { status: 'success', handlerId: 2 };
+  } catch (error) {
+    console.error(`Error in gameStart: ${error.message}`);
+    return { status: 'fail', message: 'Failed to start game', handlerId: 2 };
+  }
+};
+
+export const gameEnd = async (userId, payload, io) => {
+  try {
+    const { clientScore } = payload;
+    const serverScore = calculateTotalScore(userId);
+
+    if (clientScore !== serverScore) {
+      return { status: 'fail', message: 'Score mismatch detected', handlerId: 3 };
+    }
+
+    await updateHighScore(userId, serverScore);
+
+    // 하이스코어 갱신 여부 확인
+    const highScore = await getTopHighScore();
+    if (serverScore >= highScore) {
+      // 브로드캐스트 핸들러 호출
+      const broadcastResult = await broadcastNewHighScore(userId, {}, io);
+    }
+
+    // 게임 종료 후 유저 데이터 초기화
+    clearMobCounts(userId);
+    clearStage(userId);
+
+    return { status: 'success', handlerId: 3, score: serverScore };
+  } catch (error) {
+    console.error(`Error in gameEnd: ${error.message}`);
+    return { status: 'fail', message: 'Failed to end game', handlerId: 3 };
+  }
+};
