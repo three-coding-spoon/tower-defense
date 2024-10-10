@@ -44,7 +44,7 @@ export const handleEvent = async (io, socket, data) => {
   }
 
   // 핸들러 실행
-  const response = await handler(data.userId, data.payload, io);
+  const response = await handler(data.userId, data.payload, socket, io);
 
   // 브로드캐스트 처리
   if (response.broadcast) {
