@@ -4,43 +4,43 @@
   "data": [
     {
       "id": 1000,
-      "spawn_value": 1
+      "total_spawn_count": 1
     },
     {
       "id": 1001,
-      "spawn_value": 2
+      "total_spawn_count": 2
     },
     {
       "id": 1002,
-      "spawn_value": 3
+      "total_spawn_count": 3
     },
     {
       "id": 1003,
-      "spawn_value": 4
+      "total_spawn_count": 4
     },
     {
       "id": 1004,
-      "spawn_value": 5
+      "total_spawn_count": 5
     },
     {
       "id": 1005,
-      "spawn_value": 6
+      "total_spawn_count": 6
     },
     {
       "id": 1006,
-      "spawn_value": 7
+      "total_spawn_count": 7
     },
     {
       "id": 1007,
-      "spawn_value": 8
+      "total_spawn_count": 8
     },
     {
       "id": 1008,
-      "spawn_value": 9
+      "total_spawn_count": 9
     },
     {
       "id": 1009,
-      "spawn_value": 10
+      "total_spawn_count": 10
     }
   ]
 }
