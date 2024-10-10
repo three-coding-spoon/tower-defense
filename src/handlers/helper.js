@@ -47,13 +47,13 @@ export const handleEvent = async (io, socket, data) => {
   const response = await handler(data.userId, data.payload, io);
 
   // 브로드캐스트 처리
-  if (response.broadcast) {
-    switch (response.handlerId) {
-      case 4: // 하이 스코어 갱신
-        io.emit('newHighScore', response.data);
-        return;
-    }
-  }
+  // if (response.broadcast) {
+  //   switch (response.handlerId) {
+  //     case 4: // 하이 스코어 갱신
+  //       io.emit('newHighScore', response.data);
+  //       return;
+  //   }
+  // }
 
   // 응답 전송
   socket.emit('response', response);

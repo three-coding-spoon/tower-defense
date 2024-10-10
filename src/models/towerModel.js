@@ -15,6 +15,14 @@ export const updateUserTowerData = (userId, towerData) => {
   userTowers.set(userId, towers);
 };
 
+export const setTower = (userId, id) => {
+  return towers[userId].push({ id });
+};
+
+export const getTowers = (userId) => {
+  return towers[userId];
+};
+
 export const getUserTowerById = (userId, towerId) => {
   const towers = userTowers.get(userId) || [];
   return towers.find((t) => t.id === towerId) || null;
