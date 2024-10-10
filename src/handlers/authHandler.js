@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { addUser, getUserByName } from '../models/userModel.js';
+import { authValidation } from '../middlewares/authMiddleware.js';
 
 //** 회원가입 */
 export const register = async (req, res, next) => {
@@ -53,4 +54,16 @@ export const login = async (req, res, next) => {
   const token = jwt.sign({ userId: user.id }, process.env.MY_SECRET_ACCESSKEY, { expiresIn: '1d' });
   res.header('authorization', `Bearer ${token}`);
   return res.status(200).json({ message: '로그인 되었습니다.', isLogin: 'true' });
+};
+
+export const logout = async (req, res, next) => {
+  const auth = req.header('authorization');
+  console.log(auth);
+
+  const authValid = authValidation(auth);
+  if (!authValid.isVaild) {
+    return res.status(401).json({ message: authValid.message });
+  }
+
+  return res.status(200).json({ message: '로그아웃 되었습니다.' });
 };

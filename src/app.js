@@ -36,6 +36,11 @@ app.get('/join', (req, res) => {
   res.sendFile(path.join(__dirname, '../public/register.html'));
 });
 
+// 대기실 페이지
+app.get('/room', (req, res) => {
+  res.sendFile(path.join(__dirname, '../public/room.html'));
+});
+
 app.use('/api/auth', authRoutes);
 
 server.listen(PORT, async () => {

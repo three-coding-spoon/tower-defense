@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Changmin Kang" />
+    <title>내일배움캠프 Node.js 트랙 타워 디펜스 게임</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #2d2d2d;
+            flex-direction: column;
+        }
+
+        #gameCanvas {
+            border: 2px solid #000;
+            display: none;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .button-container button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #title {
+            color: rgb(231, 231, 231);
+            font-size: 80px;
+            /* font-style: ; */
+            border-bottom: 3px solid;
+            border-color: gray;
+            padding-bottom: 3px;
+            margin-top: 10px;
+        }
+
+        #connectUser {
+            font-size: 30px;
+            color: rgb(231, 231, 231);
+            /* font-style: ; */
+            margin: 10px auto 10px auto;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="button-container">
+        <div id="title">Tower Defence</div>
+        <div id="connectUser"></div>
+        <button id="rankingListButton">랭크 조회</button>
+        <button id="playButton">게임 플레이</button>
+        <button id="logoutButton">로그아웃</button>
+    </div>
+    <canvas id="gameCanvas" width="1920" height="1080"></canvas>
+    <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
+    <script type="module">
+        const userDiv = document.getElementById('connectUser');
+        const username = sessionStorage.getItem('username');
+        userDiv.innerText += `${username} 님 로그인 되었습니다. `
+
+        document
+            .getElementById("rankingListButton")
+            .addEventListener("click", () => {
+                alert('랭킹 조회가 열릴 예정');
+            });
+
+        document.getElementById("playButton").addEventListener("click", () => {
+            document.querySelector(".button-container").style.display = "none";
+            document.getElementById("gameCanvas").style.display = "block";
+            import("./src/game.js");
+        });
+
+        document.getElementById("logoutButton").addEventListener("click", () => {
+            const authObj = JSON.parse(sessionStorage.getItem('authorization'));
+            fetch('/api/auth/logout', {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'authorization': `${authObj.value}`
+                }
+            })
+                .then(res => {
+                    if (res.status === 200) {
+                        alert('로그아웃이 되었습니다. 메인화면으로 이동합니다.');
+                    }
+                    else {
+                        return res.json()
+                    }
+                })
+                .then(json => {
+                    alert(json.message);
+                })
+            window.location.href = "/";
+        });
+    </script>
+</body>
+
+</html>
