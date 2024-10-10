@@ -1,7 +1,7 @@
 // src/handlers/helper.js
 
 import { removeUser } from '../models/userModel.js';
-// import CLIENT_VERSION from '../../constants.js';
+import { CLIENT_VERSION } from '../../constants.js';
 import handlerMappings from './handlerMapping.js';
 import { getTopHighScore } from '../models/scoreModel.js';
 import { initMobCounts } from '../models/mobCountModel.js';

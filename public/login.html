@@ -57,17 +57,12 @@
         로그인 API 호출 후 로그인 성공 시 index.html로 이동시켜주세요!
         이 때, 엑세스 토큰은 어딘가에 저장을 해놔야겠죠?! 
 
-          여기 인증부분 api로 할건지, localStorage 만료기간으로 확인해서 할건지 회의 필요
-  
-          1. localStorage로 할 경우
-            > 만료가 되었는지 확인하는 코드 클라이언트에서 검증 필요
-            > localStorage이기 때문에 로그인을 하지 않고도 accessToken이 있다면 게임시작이 가능함.
-            > 특정 상황에 localStorage를 비워주는 작업도 필요
+          여기 인증부분 api로 할건지, sessionStorage 만료기간으로 확인해서 할건지 회의 필요
 
           2. api로 인증 후 게임시작 시퀀스 시작하는 경우
             > 인증 미들웨어 추가 필요
             > accessToken 인증 작업은 간단해짐 (원래 했던거 그대로)
-            > 인증이 안된 경우 localStorage 비워주는 작업도 간단
+            > 인증이 안된 경우 sessionStorage 비워주는 작업도 간단
       */
       const body = { username, password };
 
@@ -81,7 +76,8 @@
             const expiresIn = Date.now() + 1000 * 60 * 60  // 임시 유효기간 1일
             const accessToken = res.headers.get('authorization');
             const tokenObj = { value: accessToken, expire: expiresIn }
-            localStorage.setItem('authorization', JSON.stringify(tokenObj));
+            sessionStorage.setItem('authorization', JSON.stringify(tokenObj));
+            sessionStorage.setItem('username', username);
           }
           return res.json();
         })
@@ -90,7 +86,6 @@
           if (json.isLogin = 'true')
             window.location.href = "/";
         })
-
     });
 
     document.getElementById("back").addEventListener("click", () => {

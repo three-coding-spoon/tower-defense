@@ -1,12 +1,13 @@
 import { Base } from './base.js';
 import { Monster } from './monster.js';
 import { Tower } from './tower.js';
+import { CLIENT_VERSION } from './constant.js';
 
 /* 
   어딘가에 엑세스 토큰이 저장이 안되어 있다면 로그인을 유도하는 코드를 여기에 추가해주세요!
 */
-const authObj = JSON.parse(localStorage.getItem('authorization'));
-const accessToken = authObj.value;
+let userId = null;
+const authObj = JSON.parse(sessionStorage.getItem('authorization'));
 
 let serverSocket; // 서버 웹소켓 객체
 const canvas = document.getElementById('gameCanvas');
@@ -21,7 +22,7 @@ let baseHp = 0; // 기지 체력
 let towerCost = 0; // 타워 구입 비용
 let numOfInitialTowers = 0; // 초기 타워 개수
 let monsterLevel = 0; // 몬스터 레벨
-let monsterSpawnInterval = 0; // 몬스터 생성 주기
+let monsterSpawnInterval = 1000; // 몬스터 생성 주기
 const monsters = [];
 const towers = [];
 
@@ -254,11 +255,11 @@ Promise.all([
   ...monsterImages.map((img) => new Promise((resolve) => (img.onload = resolve))),
 ]).then(() => {
   /* 서버 접속 코드 (여기도 완성해주세요!) */
-  const token = 0;
   serverSocket = io('http://localhost:3000', {
     auth: {
-      token: token, // 토큰이 저장된 어딘가에서 가져와야 합니다!
+      token: authObj.value, // 토큰이 저장된 어딘가에서 가져와야 합니다!
       clientVersion: CLIENT_VERSION,
+      username: sessionStorage.getItem('username'),
     },
   });
 
@@ -280,18 +281,9 @@ Promise.all([
   });
 
   serverSocket.on('connection', async (data) => {
-    const token = window.localStorage.getItem('accessToken');
-    if (token) {
-      userId = token;
-    } else {
-      userId = data.uuid;
-      window.localStorage.setItem('accessToken', userId);
-    }
-
     highScore = data.highScore;
-
     // 초기화 핸들러
-    sendEvent(1, { payload: userId });
+    sendEvent(1, { payload: data.userId });
 
     // 초기화가 안됐으면 초기화
     if (!isInitGame) {

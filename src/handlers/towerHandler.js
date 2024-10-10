@@ -1,7 +1,7 @@
 // src/handlers/towerHandler.js
 
 import { getUserById, updateUserGold } from '../models/userModel.js';
-import { getTowerById } from '../init/gameAssets.js';
+import { getTowerById } from '../init/assets.js';
 import { updateUserTowerData, getUserTowerById, removeUserTower } from '../models/towerModel.js';
 import { calculateRefundAmount, calculateUpgradeCost } from '../utils/towerCalculator.js';
 

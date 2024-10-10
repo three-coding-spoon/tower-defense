@@ -1,6 +1,6 @@
 // src/handlers/gameHandler.js
 
-import { getGameAssets } from '../init/gameAssets.js';
+import { getGameAssets } from '../init/assets.js';
 import { calculateTotalScore } from '../utils/scoreCalculation.js';
 import { updateHighScore } from '../models/scoreModel.js';
 import { initMobCounts, clearMobCounts } from '../models/mobCountModel.js';

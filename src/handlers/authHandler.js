@@ -1,6 +1,6 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { prisma } from '../utils/prisma/index.js';
+import { addUser, getUserByName } from '../models/userModel.js';
 
 //** 회원가입 */
 export const register = async (req, res, next) => {
@@ -22,22 +22,19 @@ export const register = async (req, res, next) => {
   if (password.length < 6)
     return res.status(400).send({ message: '비밀번호를 다시 작성해주세요.' });
 
-  const ExistUsername = await prisma.users.findFirst({
-    where: { username },
-  });
+  const ExistUsername = await getUserByName(username);
+
   // 해당 유저가 존재하는지 확인하는 쿼리 작성
   if (ExistUsername) {
     return res.status(400).json({ message: '이미 존재하는 username 입니다.' });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);
-  // 여기에 DB에 유저 정보 넣는 쿼리 작성
+  await addUser(username, hashedPassword);
 
-  const user = await prisma.users.create({
-    data: { username, password: hashedPassword },
-  });
+  const user = getUserByName(username);
 
-  return res.status(201).json({ id: user.id, username: user.username, message: '회원가입 성공.' });
+  return res.status(201).json({ username: user.username, message: '회원가입 성공.' });
 };
 
 //** 로그인 */
@@ -45,9 +42,7 @@ export const login = async (req, res, next) => {
   const { username, password } = req.body;
 
   // 해당 유저가 존재하는지 확인하는 쿼리 작성
-  const user = await prisma.users.findUnique({
-    where: { username },
-  });
+  const user = await getUserByName(username);
 
   if (!user)
     return res.status(401).json({ message: '존재하지 않는 아이디입니다.', isLogin: 'false' });

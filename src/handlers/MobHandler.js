@@ -1,7 +1,7 @@
 // src/handlers/MobHandler.js
 
 import { addTakenMonsterToMobCount } from '../models/mobCountModel.js';
-import { getMobById } from '../init/gameAssets.js';
+import { getMobById } from '../init/assets.js';
 
 /**
  * 몹 잡기 핸들러

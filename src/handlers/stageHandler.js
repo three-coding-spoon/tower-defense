@@ -1,7 +1,7 @@
 // src/handlers/stageHandler.js
 
 import { getStage, setStage } from '../models/stageModel.js';
-import { getGameAssets } from '../init/gameAssets.js';
+import { getGameAssets } from '../init/assets.js';
 
 /**
  * 스테이지 이동 핸들러

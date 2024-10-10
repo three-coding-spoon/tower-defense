@@ -46,3 +46,7 @@ export const loadGameAssets = async () => {
 export const getGameAssets = () => {
   return gameAssets;
 };
+
+export const getMobById = () => {};
+
+export const getTowerById = () => {};

@@ -1,13 +1,10 @@
 // src/models/userModel.js
-
 import pool from '../utils/db.js';
-import bcrypt from 'bcrypt';
 
 // 사용자 추가
 export const addUser = async (username, password) => {
-  const hashedPassword = await bcrypt.hash(password, 10);
   const query = `INSERT INTO users (username, password) VALUES (?, ?)`;
-  await pool.execute(query, [username, hashedPassword]);
+  await pool.execute(query, [username, password]);
 };
 
 // 사용자 제거
@@ -29,3 +26,5 @@ export const getUserById = async (userId) => {
   const [rows] = await pool.execute(query, [userId]);
   return rows[0];
 };
+
+export const updateUserGold = () => {};
