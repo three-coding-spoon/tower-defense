@@ -254,40 +254,69 @@ Promise.all([
   new Promise((resolve) => (pathImage.onload = resolve)),
   ...monsterImages.map((img) => new Promise((resolve) => (img.onload = resolve))),
 ]).then(() => {
-  /* 서버 접속 코드 (여기도 완성해주세요!) */
-  serverSocket = io('http://localhost:3000', {
-    auth: {
-      token: authObj.value, // 토큰이 저장된 어딘가에서 가져와야 합니다!
-      clientVersion: CLIENT_VERSION,
-      username: sessionStorage.getItem('username'),
-    },
-  });
+  if (!authObj) {
+    // 여기 접속이 안되어도 게임화면이 렌더링됨. => 초기화 문제가 있는지 확인이 필요.
+    alert('로그인이 필요합니다.');
+    window.location.href = '/';
+  } else {
+    /* 서버 접속 코드 (여기도 완성해주세요!) */
+    serverSocket = io('http://localhost:3000', {
+      auth: {
+        token: authObj.value,
+        clientVersion: CLIENT_VERSION,
+        username: sessionStorage.getItem('username'),
+      },
+    });
+  }
 
   /* 
     서버의 이벤트들을 받는 코드들은 여기다가 쭉 작성해주시면 됩니다! 
     e.g. serverSocket.on("...", () => {...});
     이 때, 상태 동기화 이벤트의 경우에 아래의 코드를 마지막에 넣어주세요! 최초의 상태 동기화 이후에 게임을 초기화해야 하기 때문입니다! 
-    if (!isInitGame) {
-      initGame();
-    }
   */
 
-  serverSocket.on('response', async (data) => {
-    if (data.handlerId === 1 && data.status === 'success') {
-      initGameState(data);
-    } else if (data.handlerId === 1 && data.status === 'fail') {
-      console.error(`초기화에 실패했습니다. ${data.message}`);
-    } else console.error(`알 수 없는 초기화 실패. ${data.message}`);
-  });
+  serverSocket.on('response', async (data) => {});
 
   serverSocket.on('connection', async (data) => {
     highScore = data.highScore;
     // 초기화 핸들러
-    sendEvent(1, { payload: data.userId });
+    sendEvent(2, { payload: data.userId });
+  });
 
-    // 초기화가 안됐으면 초기화
-    if (!isInitGame) {
-      initGame();
+  serverSocket.on('disconnect', () => {
+    alert('접속이 해제되었습니다. 메인홈으로 이동합니다.');
+    // 메인홈으로 이동하면 세션스토리지를 비운다. (초기화 과정 및 재로그인 필요)
+    sessionStorage.clear();
+    window.location.href = '/';
+  });
+
+  serverSocket.on('authorization', (data) => {
+    if (data.status === 'fail') {
+      alert(data.message);
+      window.location.href = '/';
+    }
+  });
+
+  serverSocket.on('gameStart', (data) => {
+    console.log(data.message);
+    if (data.status === 'fail') {
+      alert(data.message);
+      window.location.href = '/';
+    } else {
+      // [수빈] 추후 초기화 작업도 서버에서 data로 보내줄 예정. 초기화 데이터는 서버 인메모리 형식
+      // [수빈] initGame() 이든 initGameState() 이든 둘 중 하나만 초기화로 써야 할거같음.
+      if (!isInitGame) {
+        initGame();
+      }
+      // initGameState(data);
+    }
+  });
+
+  serverSocket.on('gameEnd', (data) => {
+    console.log(data.message);
+    if (data.status === 'fail') {
+      alert(data.message);
+      window.location.href = '/';
     }
   });
 
