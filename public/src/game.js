@@ -17,6 +17,7 @@ const ctx = canvas.getContext('2d');
 
 const NUM_OF_MONSTERS = 5; // 몬스터 개수
 
+// 클래스로 만들고싶다.....
 let userGold = 0; // 유저 골드
 let base; // 기지 객체
 let baseHp = 0; // 기지 체력
@@ -175,10 +176,6 @@ function placeBase() {
   base.draw(ctx, baseImage);
 }
 
-// function initAssets(assetData) {
-
-// }
-
 function spawnMonster() {
   monsters.push(new Monster(monsterPath, monsterImages, monsterLevel));
 }
@@ -246,11 +243,10 @@ function gameLoop() {
   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
 }
 
-function initGame(assetData) {
+function initGame() {
   if (isInitGame) {
     return;
   }
-  assets = { ...assetData };
 
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
@@ -262,8 +258,14 @@ function initGame(assetData) {
   isInitGame = true;
 }
 
-function initGameState() {
-  // 골드나 HP 등의 상태들 초기화
+function initGameState(initGameStateInfo) {
+  // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
+  userGold = initGameStateInfo.userGold;
+  baseHp = initGameStateInfo.baseHp;
+  numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
+  monsterLevel = initGameStateInfo.monsterLevel;
+  monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
+  score = initGameStateInfo.score;
 }
 
 // 이미지 로딩 완료 후 서버와 연결하고 게임 초기화
@@ -317,6 +319,10 @@ Promise.all([
     }
   });
 
+  serverSocket.on('gameAssets', (data) => {
+    assets = { ...data };
+  });
+
   serverSocket.on('gameStart', (data) => {
     console.log(data.message);
     if (data.status === 'fail') {
@@ -326,9 +332,10 @@ Promise.all([
       // [수빈] 추후 초기화 작업도 서버에서 data로 보내줄 예정. 초기화 데이터는 서버 인메모리 형식
       // [수빈] initGame() 이든 initGameState() 이든 둘 중 하나만 초기화로 써야 할거같음.
       if (!isInitGame) {
-        initGame(data.assets);
+        console.log(data.initGameStateInfo);
+        initGameState(data.initGameStateInfo);
+        initGame();
       }
-      // initGameState(data);
     }
   });
 
