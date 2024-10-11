@@ -39,7 +39,7 @@ export const gameEnd = async (userId, payload, io) => {
     const highScore = await getTopHighScore();
     if (serverScore >= highScore) {
       // 브로드캐스트 핸들러 호출
-      const broadcastResult = await broadcastNewHighScore(userId, {}, io);
+      const broadcastResult = await broadcastNewHighScore(userId, io);
     }
 
     // 게임 종료 후 유저 데이터 초기화
