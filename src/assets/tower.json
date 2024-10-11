@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "data": [
     {
-      "id": 300,
+      "typeId": 300,
       "attackPower": 40,
       "beamDuration": 200,
       "cost": 1000,
@@ -11,7 +11,7 @@
       "cooldown": 180
     },
     {
-      "id": 301,
+      "typeId": 301,
       "attackPower": 5,
       "beamDuration": 50,
       "cost": 1000,
@@ -19,7 +19,7 @@
       "cooldown": 180
     },
     {
-      "id": 302,
+      "typeId": 302,
       "attackPower": 200,
       "beamDuration": 800,
       "cost": 1000,

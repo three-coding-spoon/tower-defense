@@ -1,6 +1,18 @@
-// 잡은 몬스터들의 점수를 합산해 검증
+// src/utils/scoreCalculation.js
 
-export const calculateTotalScore = (waves) => {
-  // 여긴 그냥 계산만 해서 리턴
-  // 검즘은 하지 않음
+// 잡은 몬스터들의 점수를 합산해 검증
+export const calculateTotalScore = (mobCount) => {
+  let totalScore = 0;
+
+  for (const [monsterId, count] of mobCount.entries()) {
+    const monster = monsterMap.get(monsterId);
+    if (monster) {
+      totalScore += monster.score * count;
+    } else {
+      console.warn(`존재하지 않는 몬스터 ID: ${monsterId}`);
+      return -1; // 부정행위로 판단할 수 있기에 -1 리턴
+    }
+  }
+
+  return totalScore;
 };
