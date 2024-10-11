@@ -1,3 +1,4 @@
+import { authValidation } from '../middlewares/authMiddleware.js';
 import { getUserByName } from '../models/userModel.js';
 import { handleConnection, handleDisconnect, handleEvent } from './helper.js';
 
@@ -8,8 +9,20 @@ const registerHandler = (io) => {
     const token = socket.handshake.auth.token;
     const username = socket.handshake.auth.username;
 
-    let user = {};
+    console.log(token);
+
+    const auth = authValidation(token);
+    console.log(auth);
     // 토큰 인증 확인 필요
+    if (!auth.isVaild) {
+      socket.emit('authorization', {
+        status: 'fail',
+        message: '토큰이 유효하지 않습니다. 재로그인이 필요합니다.',
+      });
+      return socket.disconnect();
+    }
+
+    let user = {};
     if (socket.handshake.auth.username) {
       // 이미 존재가 확인된 사용자만 들어오는 흐름이므로 소켓ID만 지정해 줌
       user = await getUserByName(username);
@@ -25,7 +38,7 @@ const registerHandler = (io) => {
     socket.on('event', (data) => handleEvent(io, socket, data));
 
     // 접속 해제시 이벤트 처리
-    socket.on('disconnect', () => handleDisconnect(socket, user.uuid));
+    socket.on('disconnect', () => handleDisconnect(socket, user.id));
   });
 };
 
