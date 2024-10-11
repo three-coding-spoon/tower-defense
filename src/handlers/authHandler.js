@@ -45,14 +45,15 @@ export const login = async (req, res, next) => {
     return res.status(401).json({ message: '비밀번호가 일치하지 않습니다.', isLogin: 'false' });
 
   // 임시 유효기간 1Day (1d)
-  const token = jwt.sign({ userId: user.id }, process.env.MY_SECRET_ACCESSKEY, { expiresIn: '1d' });
+  const token = jwt.sign({ username: user.username }, process.env.MY_SECRET_ACCESSKEY, {
+    expiresIn: '1d',
+  });
   res.header('authorization', `Bearer ${token}`);
   return res.status(200).json({ message: '로그인 되었습니다.', isLogin: 'true' });
 };
 
 export const logout = async (req, res, next) => {
   const auth = req.header('authorization');
-  console.log(auth);
 
   const authValid = authValidation(auth);
   if (!authValid.isVaild) {

@@ -14,3 +14,12 @@ export const updateHighScore = async (userId, score) => {
   const query = `UPDATE users SET high_score = ? WHERE id = ?`;
   await pool.execute(query, [score, userId]);
 };
+
+// 랭크 리스트 불러오기
+
+// 내 하이스코어 불러오기
+export const getMyHighScore = async (userId) => {
+  const query = `SELECT * FROM users WHERE id = ?`;
+  const [rows] = await pool.execute(query, [userId]);
+  return rows[0].high_score;
+};

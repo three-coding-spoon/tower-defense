@@ -22,12 +22,12 @@ export const authValidation = (accessToken) => {
     const decodedToken = jwt.verify(token, process.env.MY_SECRET_ACCESSKEY);
 
     // decodedToken에서 userId 추출 및 검증
-    const userId = decodedToken.userId;
-    if (typeof userId !== 'number' || userId <= 0) {
+    const username = decodedToken.username;
+    if (!username) {
       return { isVaild: false, message: '유효하지 않은 사용자 ID입니다.' };
     }
 
-    return { isVaild: true, message: '토큰 인증 완료' };
+    return { isVaild: true, username, message: '토큰 인증 완료' };
   } catch (error) {
     switch (error.name) {
       case 'TokenExpiredError':
