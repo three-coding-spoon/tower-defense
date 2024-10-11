@@ -6,12 +6,16 @@ import { updateHighScore } from '../models/scoreModel.js';
 import { initMobCounts, clearMobCounts, getMobCount } from '../models/mobCountModel.js';
 import { clearStage, getStage } from '../models/stageModel.js';
 import { broadcastNewHighScore } from './broadcastHandler.js';
+import { initGameStateInfo } from '../../constants.js';
 
 export const gameStart = (userId, payload, socket, io) => {
   try {
     const assets = getGameAssets();
     // 게임 에셋을 클라이언트로 전송
-    socket.to(userId).emit('gameAssets', assets);
+    if (assets === 'undefined' || assets === null) {
+      socket.emit('gameAssets', { status: 'fail', message: '에셋을 불러오지 못했습니다.' });
+    }
+    socket.emit('gameAssets', assets);
 
     // 유저의 몹 카운트와 스테이지 정보 초기화
     initMobCounts(userId);
@@ -27,7 +31,7 @@ export const gameStart = (userId, payload, socket, io) => {
     socket.emit('gameStart', {
       status: 'success',
       message: '게임 시작에 성공했습니다.',
-      assets,
+      initGameStateInfo,
     });
     return;
   } catch (err) {
