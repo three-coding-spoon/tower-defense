@@ -20,7 +20,7 @@ let base; // 기지 객체
 let baseHp = 0; // 기지 체력
 
 let towerCost = 0; // 타워 구입 비용
-let numOfInitialTowers = 0; // 초기 타워 개수
+let numOfInitialTowers = 3; // 초기 타워 개수
 let monsterLevel = 0; // 몬스터 레벨
 let monsterSpawnInterval = 1000; // 몬스터 생성 주기
 const monsters = [];
@@ -149,6 +149,7 @@ function placeInitialTowers() {
   */
   for (let i = 0; i < numOfInitialTowers; i++) {
     const { x, y } = getRandomPositionNearPath(200);
+    console.log(x, y);
     const tower = new Tower(x, y, towerCost);
     towers.push(tower);
     tower.draw(ctx, towerImage);
@@ -220,7 +221,18 @@ function gameLoop() {
       monster.draw(ctx);
     } else {
       /* 몬스터가 죽었을 때 */
-      monsters.splice(i, 1);
+      score += monster.score;
+      // 여기에 몬스터 킬 핸들러 호출 코드 작성
+
+      // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
+      if (monsters.length === 0) {
+        const clientTime = Date.now();
+        sendEvent(11, { monsterLevel, clientTime });
+      }
+
+      // 기존 코드
+      // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
+      monsters.splice(i, 1); //
     }
   }
 
@@ -297,6 +309,16 @@ Promise.all([
 
   serverSocket.on('updateTowerState', (syncData) => {
     updateTowerState(syncData);
+  });
+
+  serverSocket.on('moveStage', async (data) => {
+    if (data.status === 'success') {
+      userGold += data.reward;
+      monsterLevel = data.targetStage;
+    } else {
+      console.error('Error occured on Wave transition!');
+      alert('Error occured on Wave transition!');
+    }
   });
 });
 
