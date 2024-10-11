@@ -6,6 +6,7 @@ const stages = new Map();
 
 export const createStage = (userId) => {
   stages.set(userId, []); // 배열로 초기화
+  setStage(userId, 1, Date.now());
 };
 
 export const getStage = (userId) => {
