@@ -13,34 +13,54 @@ export const moveStageHandler = (userId, payload, socket) => {
   // 현재 스테이지 확인
   const currentStages = getStage(userId);
   if (!currentStages.length) {
-    return { status: 'fail', message: 'No stages found for user', handlerId: 11 };
+    socket.emit('moveStage', {
+      status: 'fail',
+      message: 'No stages found for user',
+    });
+    return;
   }
 
   // 페이로드 데이터와 비교
   const latestStage = currentStages[currentStages.length - 1];
-  if (latestStage.id !== currentStage) {
-    return { status: 'fail', message: 'Current stage mismatch', handlerId: 11 };
+  if (latestStage.stageId !== currentStage) {
+    socket.emit('moveStage', {
+      status: 'fail',
+      message: 'Current stage mismatch',
+    });
+    return;
   }
 
-  const { stages } = getGameAssets();
+  const { wave } = getGameAssets();
 
   // 목표 스테이지 존재 여부 확인
-  const targetStageInfo = stages.find((stage) => stage.id === targetStage);
+  const targetStageInfo = wave.data.find((stage) => stage.id - 999 === targetStage);
   if (!targetStageInfo) {
-    return { status: 'fail', message: 'Target stage does not exist', handlerId: 11 };
+    socket.emit('moveStage', {
+      status: 'fail',
+      message: 'Target stage does not exist',
+    });
+    return;
   }
 
-  // 스테이지를 건너뛰진 않는지 확인
+  // 스테이지를 건너뛰지 않는지 확인
   if (targetStage !== currentStage + 1) {
-    return { status: 'fail', message: 'Invalid stage progression', handlerId: 11 };
+    socket.emit('moveStage', {
+      status: 'fail',
+      message: 'Invalid stage progression',
+    });
+    return;
   }
 
   // 스테이지 업데이트
   const timestamp = Date.now();
   setStage(userId, targetStage, timestamp);
-  addLog(userId, 11, targetStage, timestamp);
+  addLog(userId, 11, `${userId}번 유저가 ${targetStage}번 스테이지로 이동했습니다.`, timestamp);
 
-  socket.emit('moveStage', { status: 'sucess', targetStage, reward: 1000 });
+  socket.emit('moveStage', {
+    status: 'success', // 오타 수정
+    targetStage,
+    reward: 1000,
+  });
 
   return;
 };

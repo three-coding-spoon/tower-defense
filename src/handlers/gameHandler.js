@@ -3,8 +3,8 @@
 import { getGameAssets } from '../init/assets.js';
 import { calculateTotalScore } from '../utils/scoreCalculation.js';
 import { getMyHighScore, updateHighScore } from '../models/scoreModel.js';
-import { initMobCounts, clearMobCounts, getMobCount } from '../models/mobCountModel.js';
-import { clearStage, getStage } from '../models/stageModel.js';
+import { initMobCounts, getMobCount } from '../models/mobCountModel.js';
+import { createStage, getStage } from '../models/stageModel.js';
 import { broadcastNewHighScore } from './broadcastHandler.js';
 import { initGameStateInfo } from '../../constants.js';
 import { getTopHighScore } from '../models/scoreModel.js';
@@ -21,12 +21,12 @@ export const gameStart = (userId, payload, socket, io) => {
 
     // 유저의 몹 카운트와 스테이지 정보 초기화
     initMobCounts(userId);
-    clearStage(userId);
+    createStage(userId);
 
     // 유저의 몹 카운트와 스테이지 정보가 초기화가 되었는지 확인
     const userMobCount = getMobCount(userId);
     const userStage = getStage(userId);
-    if (userMobCount.length > 0 || userStage.length > 0) {
+    if (!userMobCount || !userStage) {
       socket.emit('gameStart', { status: 'fail', message: '게임 초기화에 실패했습니다.' });
     }
 
@@ -58,12 +58,12 @@ export const gameEnd = async (userId, payload, socket, io) => {
     }
 
     // 내 최고점수 확인
-    const myHighScore = getMyHighScore(userId);
-    console.log(myHighScore);
+    const myHighScore = await getMyHighScore(userId);
+    console.log('Pending', myHighScore);
 
     await updateHighScore(userId, serverScore);
 
-    const user = getUserById(userId);
+    const user = await getUserById(userId);
 
     // 하이스코어 갱신 여부 확인
     const highScore = await getTopHighScore();
