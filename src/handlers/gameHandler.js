@@ -24,7 +24,11 @@ export const gameStart = (userId, payload, socket, io) => {
       socket.emit('gameStart', { status: 'fail', message: '게임 초기화에 실패했습니다.' });
     }
 
-    socket.emit('gameStart', { status: 'success', message: '게임 시작에 성공했습니다.' });
+    socket.emit('gameStart', {
+      status: 'success',
+      message: '게임 시작에 성공했습니다.',
+      assets,
+    });
     return;
   } catch (err) {
     socket.emit('gameStart', {

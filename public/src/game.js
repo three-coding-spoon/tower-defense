@@ -7,6 +7,8 @@ import { CLIENT_VERSION } from './constant.js';
   어딘가에 엑세스 토큰이 저장이 안되어 있다면 로그인을 유도하는 코드를 여기에 추가해주세요!
 */
 let userId = null;
+let assets = {};
+
 const authObj = JSON.parse(sessionStorage.getItem('authorization'));
 
 let serverSocket; // 서버 웹소켓 객체
@@ -172,6 +174,10 @@ function placeBase() {
   base.draw(ctx, baseImage);
 }
 
+// function initAssets(assetData) {
+
+// }
+
 function spawnMonster() {
   monsters.push(new Monster(monsterPath, monsterImages, monsterLevel));
 }
@@ -227,10 +233,11 @@ function gameLoop() {
   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
 }
 
-function initGame() {
+function initGame(assetData) {
   if (isInitGame) {
     return;
   }
+  assets = { ...assetData };
 
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
@@ -306,7 +313,7 @@ Promise.all([
       // [수빈] 추후 초기화 작업도 서버에서 data로 보내줄 예정. 초기화 데이터는 서버 인메모리 형식
       // [수빈] initGame() 이든 initGameState() 이든 둘 중 하나만 초기화로 써야 할거같음.
       if (!isInitGame) {
-        initGame();
+        initGame(data.assets);
       }
       // initGameState(data);
     }

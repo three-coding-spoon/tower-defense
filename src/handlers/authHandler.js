@@ -7,12 +7,6 @@ import { authValidation } from '../middlewares/authMiddleware.js';
 export const register = async (req, res, next) => {
   const { username, password } = req.body;
 
-  if (!username || !password) {
-    return res.status(400).json({
-      error: 'username , password를 입력하세요.',
-    });
-  }
-
   const usernameRegex = /^[a-z0-9]+$/;
   if (!usernameRegex.test(username)) {
     return res.status(400).json({
