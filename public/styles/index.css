@@ -1,0 +1,98 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  margin: 0;
+  background-color: #2d2d2d;
+  color: white;
+  font-family: Arial, sans-serif;
+  flex-direction: column;
+}
+
+#gameCanvas {
+  border: 2px solid #000;
+  display: none;
+}
+
+.button-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.button-container button {
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#title {
+  color: rgb(231, 231, 231);
+  font-size: 80px;
+  /* font-style: ; */
+  border-bottom: 3px solid;
+  border-color: gray;
+  padding-bottom: 3px;
+  margin-top: 10px;
+}
+
+.user-container {
+  width: 100%;
+  background-color: rgba(24, 22, 51, 0.3);
+  border-color: rgba(31, 31, 31, 0.2);
+  border-radius: 5px;
+  border: 2px solid;
+  padding: 20px;
+}
+
+.user-container button {
+  padding: 5px 5px;
+  margin-bottom: 5px;
+  font-size: 16px;
+  color: rgb(224, 224, 224);
+  width: 100%;
+  cursor: pointer;
+  background-color: rgba(231, 231, 231, 0.212);
+}
+
+.user-container input {
+  background-color: rgb(153, 153, 153);
+  width: 100%;
+  height: 30px;
+  padding-left: 8px;
+  border: rgb(224, 224, 224) 2px solid;
+}
+
+input::placeholder {
+  color: rgb(224, 224, 224);
+}
+
+li {
+  display: table;
+  width: 100%;
+  margin-bottom: 5px;
+}
+
+li > span {
+  display: table-cell;
+  width: 100px;
+  vertical-align: middle;
+  padding: 5px;
+}
+
+li > div {
+  display: table-cell;
+  padding: 8px 5px;
+}

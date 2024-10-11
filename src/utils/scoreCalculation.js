@@ -1,13 +1,18 @@
+// src/utils/scoreCalculation.js
+
 // 잡은 몬스터들의 점수를 합산해 검증
+export const calculateTotalScore = (mobCount) => {
+  let totalScore = 0;
 
-import { getMobCount } from '../models/mobCountModel.js';
+  for (const [monsterId, count] of mobCount.entries()) {
+    const monster = monsterMap.get(monsterId);
+    if (monster) {
+      totalScore += monster.score * count;
+    } else {
+      console.warn(`존재하지 않는 몬스터 ID: ${monsterId}`);
+      return -1; // 부정행위로 판단할 수 있기에 -1 리턴
+    }
+  }
 
-export const calculateTotalScore = (userId) => {
-  const takenMobs = getMobCount(userId);
-
-  const score = takenMobs.reduce((p, n) => p + n, 0);
-  console.log('최종 스코어: ', score);
-  // 여긴 그냥 계산만 해서 리턴
-  // 검즘은 하지 않음
-  return score;
+  return totalScore;
 };

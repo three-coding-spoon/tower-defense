@@ -2,6 +2,7 @@
 
 import { getStage, setStage } from '../models/stageModel.js';
 import { getGameAssets } from '../init/assets.js';
+import { addLog } from '../utils/log.js';
 
 /**
  * 스테이지 이동 핸들러
@@ -37,6 +38,7 @@ export const moveStageHandler = (userId, payload, socket) => {
   // 스테이지 업데이트
   const timestamp = Date.now();
   setStage(userId, targetStage, timestamp);
+  addLog(userId, 11, targetStage, timestamp);
 
   socket.emit('moveStage', { status: 'sucess', targetStage, reward: 1000 });
 

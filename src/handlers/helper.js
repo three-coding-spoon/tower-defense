@@ -21,7 +21,7 @@ export const handleConnection = async (socket, userId) => {
   socket.emit('connection', { userId: userId, highScore: highScore || 0 });
 };
 
-export const handleDisconnect = async (userId) => {
+export const handleDisconnect = async (socket, userId) => {
   // 사용자 정리
 
   console.log(`User disconnected: ${userId}`);
@@ -47,14 +47,20 @@ export const handleEvent = async (io, socket, data) => {
   const response = await handler(data.userId, data.payload, socket, io);
 
   // 브로드캐스트 처리
-  if (response.broadcast) {
-    switch (response.handlerId) {
-      case 4: // 하이 스코어 갱신
-        io.emit('newHighScore', response.data);
-        return;
+  try {
+    if (response.broadcast) {
+      switch (response.handlerId) {
+        case 4: // 하이 스코어 갱신
+          io.emit('newHighScore', response.data);
+          return;
+      }
+    } else {
+      throw new Error('Not Broadcast!!');
     }
+  } catch (err) {
+    console.log(err.message);
+  } finally {
+    // 응답 전송
+    socket.emit('response', response);
   }
-
-  // 응답 전송
-  socket.emit('response', response);
 };
