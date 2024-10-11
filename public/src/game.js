@@ -176,8 +176,11 @@ function placeBase() {
   base.draw(ctx, baseImage);
 }
 
+
+
 function spawnMonster() {
-  monsters.push(new Monster(monsterPath, monsterImages, monsterLevel));
+  const monsterUnlock = assets.monsterUnlock.data
+  monsters.push(new Monster(monsterPath, monsterImages, monsterLevel, monsterUnlock,));
 }
 
 function gameLoop() {
@@ -209,7 +212,7 @@ function gameLoop() {
     });
   });
 
-  // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
+  // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기monsterLevel 
   base.draw(ctx, baseImage);
 
   for (let i = monsters.length - 1; i >= 0; i--) {
@@ -226,6 +229,7 @@ function gameLoop() {
       /* 몬스터가 죽었을 때 */
       score += monster.score;
       // 여기에 몬스터 킬 핸들러 호출 코드 작성
+      sendEvent(5, { mobId: monster.monsterNumber + 99 });
 
       // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
       if (monsters.length === 0) {
@@ -297,10 +301,11 @@ Promise.all([
     이 때, 상태 동기화 이벤트의 경우에 아래의 코드를 마지막에 넣어주세요! 최초의 상태 동기화 이후에 게임을 초기화해야 하기 때문입니다! 
   */
 
-  serverSocket.on('response', async (data) => {});
+  serverSocket.on('response', async (data) => { });
 
   serverSocket.on('connection', async (data) => {
     highScore = data.highScore;
+    userId = data.userId;
     // 초기화 핸들러
     sendEvent(2, { payload: data.userId });
   });
@@ -389,8 +394,8 @@ const sendEvent = (handlerId, payload, timestamp) => {
   });
 };
 
-const updateGameState = (serverState) => {};
+const updateGameState = (serverState) => { };
 
-const updateTowerState = (serverState) => {};
+const updateTowerState = (serverState) => { };
 
 export { sendEvent };

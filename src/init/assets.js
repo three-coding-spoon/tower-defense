@@ -48,6 +48,8 @@ export const getGameAssets = () => {
   return gameAssets;
 };
 
-export const getMobById = () => {};
+export const getMobById = (mobId) => {
+  return gameAssets.monster.data.find((monster) => monster.id === mobId)
+};
 
-export const getTowerById = () => {};
+export const getTowerById = () => { };

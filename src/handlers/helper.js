@@ -47,20 +47,20 @@ export const handleEvent = async (io, socket, data) => {
   const response = await handler(data.userId, data.payload, socket, io);
 
   // 브로드캐스트 처리
-  try {
-    if (response.broadcast) {
-      switch (response.handlerId) {
-        case 4: // 하이 스코어 갱신
-          io.emit('newHighScore', response.data);
-          return;
-      }
-    } else {
-      throw new Error('Not Broadcast!!');
-    }
-  } catch (err) {
-    console.log(err.message);
-  } finally {
-    // 응답 전송
-    socket.emit('response', response);
-  }
+  // try {
+  //   if (response.broadcast) {
+  //     switch (response.handlerId) {
+  //       case 4: // 하이 스코어 갱신
+  //         io.emit('newHighScore', response.data);
+  //         return;
+  //     }
+  //   } else {
+  //     throw new Error('Not Broadcast!!');
+  //   }
+  // } catch (err) {
+  //   console.log(err.message);
+  // } finally {
+  //   // 응답 전송
+  //   socket.emit('response', response);
+  // }
 };
