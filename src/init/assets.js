@@ -49,7 +49,8 @@ export const getGameAssets = () => {
 };
 
 export const getMobById = (mobId) => {
-  return gameAssets.monster.data.find((monster) => monster.id === mobId)
+  const index = gameAssets.monster.data.findIndex((monster) => monster.id === mobId);
+  return gameAssets.monster.data[index];
 };
 
 export const getTowerById = () => { };

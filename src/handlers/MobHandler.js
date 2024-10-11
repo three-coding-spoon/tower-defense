@@ -7,10 +7,11 @@ import { getStage } from '../models/stageModel.js';
 /**
  * 몹 잡기 핸들러
  */
+
 export const handleKillMob = (userId, payload, socket) => {
-  const { mobId } = payload;
+  const mobId = payload.monsterId;
   const { monsterUnlock } = getGameAssets()
-  console.log(mobId)
+
   // 몹 존재 여부 확인
   const mob = getMobById(mobId);
   if (!mob) {

@@ -2,7 +2,7 @@ export class Monster {
   constructor(path, monsterImages, level, monsterUnlock) {
     // 생성자 안에서 몬스터의 속성을 정의한다고 생각하시면 됩니다!
     if (!path || path.length <= 0) {
-      throw new Error("몬스터가 이동할 경로가 필요합니다.");
+      throw new Error('몬스터가 이동할 경로가 필요합니다.');
     }
 
     const allowedMonster = this.getAllowedMonster(monsterUnlock, level).monster_id
@@ -17,6 +17,7 @@ export class Monster {
     this.speed = 2; // 몬스터의 이동 속도
     this.image = monsterImages[this.monsterNumber]; // 몬스터 이미지
     this.level = level; // 몬스터 레벨
+    this.score = 10;
     this.init(level);
   }
 
@@ -57,12 +58,8 @@ export class Monster {
 
   draw(ctx) {
     ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-    ctx.font = "12px Arial";
-    ctx.fillStyle = "white";
-    ctx.fillText(
-      `(레벨 ${this.level}) ${this.hp}/${this.maxHp}`,
-      this.x,
-      this.y - 5
-    );
+    ctx.font = '12px Arial';
+    ctx.fillStyle = 'white';
+    ctx.fillText(`(레벨 ${this.level}) ${this.hp}/${this.maxHp}`, this.x, this.y - 5);
   }
 }
