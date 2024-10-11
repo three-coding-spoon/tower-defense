@@ -227,7 +227,8 @@ function gameLoop() {
       // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
       if (monsters.length === 0) {
         const clientTime = Date.now();
-        sendEvent(11, { monsterLevel, clientTime });
+        const targetLevel = monsterLevel + 1;
+        sendEvent(11, { monsterLevel, targetLevel, clientTime });
       }
 
       // 기존 코드
