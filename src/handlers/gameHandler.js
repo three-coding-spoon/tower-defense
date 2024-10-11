@@ -2,11 +2,13 @@
 
 import { getGameAssets } from '../init/assets.js';
 import { calculateTotalScore } from '../utils/scoreCalculation.js';
-import { updateHighScore } from '../models/scoreModel.js';
+import { getMyHighScore, updateHighScore } from '../models/scoreModel.js';
 import { initMobCounts, clearMobCounts, getMobCount } from '../models/mobCountModel.js';
 import { clearStage, getStage } from '../models/stageModel.js';
 import { broadcastNewHighScore } from './broadcastHandler.js';
 import { initGameStateInfo } from '../../constants.js';
+import { getTopHighScore } from '../models/scoreModel.js';
+import { getUserById } from '../models/userModel.js';
 
 export const gameStart = (userId, payload, socket, io) => {
   try {
@@ -45,27 +47,31 @@ export const gameStart = (userId, payload, socket, io) => {
 
 export const gameEnd = async (userId, payload, socket, io) => {
   try {
-    const { clientScore } = payload;
+    const clientScore = payload.clientScore;
     const serverScore = calculateTotalScore(userId);
+
+    console.log(clientScore, serverScore);
 
     if (clientScore !== serverScore) {
       socket.emit('gameEnd', { status: 'fail', message: 'Score mismatch detected.' });
       return;
     }
 
+    // 내 최고점수 확인
+    const myHighScore = getMyHighScore(userId);
+    console.log(myHighScore);
+
     await updateHighScore(userId, serverScore);
+
+    const user = getUserById(userId);
 
     // 하이스코어 갱신 여부 확인
     const highScore = await getTopHighScore();
+    console.log('highScore: ', highScore);
     if (serverScore >= highScore) {
       // 브로드캐스트 핸들러 호출
-      const broadcastResult = await broadcastNewHighScore(userId, {}, io);
+      await broadcastNewHighScore(user.username, io, serverScore);
     }
-
-    // 게임 종료 후 유저 데이터 초기화
-    // [수빈] 시작할 때 초기화하는데 한번 더 초기화할 필요 없다고 판단.
-    // clearMobCounts(userId);
-    // clearStage(userId);
 
     socket.emit('gameEnd', { status: 'success', message: '게임이 종료되었습니다.' });
     return;

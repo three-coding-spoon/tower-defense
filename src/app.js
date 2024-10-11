@@ -4,6 +4,7 @@ import initSocket from './init/socket.js';
 import { loadGameAssets } from './init/assets.js';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes.js';
+import rankRoutes from './routes/rankRoutes.js';
 // 라우터 더 필요하면 추가
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -42,6 +43,7 @@ app.get('/room', (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/rank', rankRoutes);
 
 server.listen(PORT, async () => {
   console.log(`Server is ruuning on port ${PORT}`);

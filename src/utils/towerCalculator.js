@@ -1,7 +1,5 @@
 // src/utils/towerCalculator.js
 
-import { v4 as uuidv4 } from 'uuid';
-
 const BASE_UPGRADE_COST = 100;
 
 // 타워 환불 금액 계산

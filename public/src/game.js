@@ -32,6 +32,7 @@ const towers = [];
 let score = 0; // 게임 점수
 let highScore = 0; // 기존 최고 점수
 let isInitGame = false;
+let stopGameLoop = false;
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -218,14 +219,21 @@ function gameLoop() {
       const isDestroyed = monster.move(base);
       if (isDestroyed) {
         /* 게임 오버 */
+        sendEvent(3, {
+          clientScore: score,
+        });
         alert('게임 오버. 스파르타 본부를 지키지 못했다...ㅠㅠ');
-        location.reload();
+        stopGameLoop = true;
       }
       monster.draw(ctx);
     } else {
       /* 몬스터가 죽었을 때 */
       score += monster.score;
       // 여기에 몬스터 킬 핸들러 호출 코드 작성
+
+      sendEvent(5, {
+        monsterId: 100,
+      });
 
       // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
       if (monsters.length === 0) {
@@ -240,7 +248,9 @@ function gameLoop() {
     }
   }
 
-  requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
+  if (!stopGameLoop) {
+    requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
+  }
 }
 
 function initGame() {
@@ -296,11 +306,13 @@ Promise.all([
     e.g. serverSocket.on("...", () => {...});
     이 때, 상태 동기화 이벤트의 경우에 아래의 코드를 마지막에 넣어주세요! 최초의 상태 동기화 이후에 게임을 초기화해야 하기 때문입니다! 
   */
-
-  serverSocket.on('response', async (data) => {});
+  serverSocket.on('response', async (data) => {
+    console.log(data);
+  });
 
   serverSocket.on('connection', async (data) => {
     highScore = data.highScore;
+    userId = data.userId;
     // 초기화 핸들러
     sendEvent(2, { payload: data.userId });
   });
@@ -345,6 +357,10 @@ Promise.all([
       alert(data.message);
       window.location.href = '/';
     }
+  });
+
+  serverSocket.on('newHighScore', (data) => {
+    console.log(data);
   });
 
   serverSocket.on('updateGameState', (syncData) => {
