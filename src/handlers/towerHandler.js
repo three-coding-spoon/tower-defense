@@ -4,6 +4,7 @@ import { getUserById, updateUserGold } from '../models/userModel.js';
 import { getTowerById } from '../init/assets.js';
 import { updateUserTowerData, getUserTowerById, removeUserTower } from '../models/towerModel.js';
 import { calculateRefundAmount, calculateUpgradeCost } from '../utils/towerCalculator.js';
+import towerInfo from '../assets/tower.json' with { type: 'json' }
 
 /**
  * 타워 구입 핸들러
@@ -28,16 +29,20 @@ export const handleBuyTower = async (userId, payload, io) => {
  * 타워 환불 핸들러
  */
 export const handleRefundTower = async (userId, payload, io) => {
-  const { towerId } = payload;
+  const { towerId, userGold } = payload; 
+  console.log(towerId)
 
-  // 유저의 타워 조회
+  // // 유저의 타워 조회
+  // const tower = getTowerById(towerId)
 
-  // 환불 금액 계산
 
-  // 골드 추가
+  // // 환불 금액 계산
+  // let refundAmount = towerInfo.data[0].cost
 
-  // 타워 제거
-
+  // // 골드 추가
+  // let goldRefund = userGold + refundAmount
+  const refundAmount = userGold += 500
+  
   return { status: 'success', handlerId: 22, refundAmount };
 };
 

@@ -1,13 +1,14 @@
 // src/utils/towerCalculator.js
 
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
+import { getUserTowerByIndex } from '../models/towerModel.js'
 
 const BASE_UPGRADE_COST = 100;
 
 // 타워 환불 금액 계산
 export const calculateRefundAmount = (tower) => {
   // 예시: 구매 가격의 50% 환불
-  const towerInfo = getTowerById(tower.typeId);
+  const towerInfo = getUserTowerByIndex(tower.typeId);
   if (!towerInfo) {
     console.warn(`존재하지 않는 타워 타입: ${tower.typeId}`);
     return 0;

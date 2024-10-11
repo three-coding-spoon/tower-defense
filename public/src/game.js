@@ -1,6 +1,7 @@
 import { Base } from './base.js';
 import { Monster } from './monster.js';
 import { Tower } from './tower.js';
+import towerData from '../assets/tower.json' with { type: 'json' }
 import { CLIENT_VERSION } from './constant.js';
 
 /* 
@@ -17,15 +18,16 @@ const ctx = canvas.getContext('2d');
 
 const NUM_OF_MONSTERS = 5; // 몬스터 개수
 
-let userGold = 0; // 유저 골드
+let userGold = 10000; // 유저 골드
 let base; // 기지 객체
 let baseHp = 0; // 기지 체력
 
-let towerCost = 0; // 타워 구입 비용
+let towerCost = 1000; // 타워 구입 비용
 let numOfInitialTowers = 3; // 초기 타워 개수
 let towerId = 0;
 let isrefund = false;
 let isupgrade = false;
+let towerUpgradeCost = 1000
 
 let monsterLevel = 0; // 몬스터 레벨
 let monsterSpawnInterval = 1000; // 몬스터 생성 주기
@@ -40,14 +42,21 @@ let isInitGame = false;
 const backgroundImage = new Image();
 backgroundImage.src = 'images/bg.webp';
 
-const towerImage = new Image();
-towerImage.src = 'images/tower.png';
-
 const baseImage = new Image();
 baseImage.src = 'images/base.png';
 
 const pathImage = new Image();
 pathImage.src = 'images/path.png';
+
+const towerImage = new Image();
+towerImage.src = 'images/tower0.png';
+
+// const towerImages = [];
+// for (let i = 0; i <= NUM_OF_TOWERS; i++) {
+//   const img = new Image();
+//   img.src = `images/tower${i}.png`;
+//   towerImages[i] = img;
+// }
 
 const monsterImages = [];
 for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
@@ -151,7 +160,7 @@ function getRandomPositionNearPath(maxDistance) {
 function placeInitialTowers() {
   for (let i = 0; i < numOfInitialTowers; i++) {
     const { x, y } = getRandomPositionNearPath(200);
-    const tower = new Tower(x, y);
+    const tower = new Tower(x, y, 0);
     towers.push(tower);
     tower.draw(ctx, towerImage);
     towerId++; // 타워 건설 후, 타워 Id를 더한다.
@@ -166,7 +175,7 @@ function placeNewTower() {
     alert('잔액이 부족합니다.');
   } else if (userGold >= towerCost) {
     const { x, y } = getRandomPositionNearPath(200);
-    const tower = new Tower(x, y);
+    const tower = new Tower(x, y, 0);
     towers.push(tower);
     tower.draw(ctx, towerImage);
     towerId++; // 타워 건설 후, 타워 Id를 더한다.
@@ -182,6 +191,10 @@ function refundTower() {
     isrefund = true;
     isupgrade = false;
   }
+}
+
+function upgradeTower() {
+
 }
 
 
@@ -375,7 +388,7 @@ Promise.all([
   });
 });
 
-// 타워 클릭하여 지정하기
+// 타워 클릭하여 환불하기
 canvas.addEventListener('click', (event) => {
   const rect = canvas.getBoundingClientRect();
   const clickX = event.clientX - rect.left;
@@ -393,12 +406,42 @@ canvas.addEventListener('click', (event) => {
     const deltaY = Math.abs(towerCenterY - clickY);
 
     if (deltaX <= towerRangeX && deltaY <= towerRangeY && isrefund) {
-      sendEvent(22, {
-        towerId: tower.towerId,
-        towerpos: { x: tower.x, y: tower.y },
-        towers: towers,
-      });
+      // sendEvent(22, {
+      //   towerId: tower.id,
+      //   towerpos: { x: tower.x, y: tower.y },
+      //   userGold,
+      // });
       towers.splice(i, 1);
+      userGold += towerCost * 0.5
+    }
+  }
+});
+
+// 타워 클릭하여 강화하기
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+  const towerRangeX = 50;
+  const towerRangeY = 50;
+
+  for (let i = 0; i < towers.length; i++) {
+    const tower = towers[i];
+
+    const towerCenterX = tower.x + tower.width / 2;
+    const towerCenterY = tower.y + tower.height / 2;
+
+    const deltaX = Math.abs(towerCenterX - clickX);
+    const deltaY = Math.abs(towerCenterY - clickY);
+
+    if (deltaX <= towerRangeX && deltaY <= towerRangeY && isrefund) {
+      // sendEvent(23, {
+      //   towerId: tower.id,
+      //   towerpos: { x: tower.x, y: tower.y },
+      //   userGold,
+      // });
+      tower.upgrade();
+      userGold -= towerUpgradeCost
     }
   }
 });
@@ -431,6 +474,19 @@ refundTowerButton.addEventListener('click', refundTower);
 
 document.body.appendChild(refundTowerButton);
 
+// 타워 업그레이드 버튼
+const upgradeTowerButton = document.createElement('button');
+upgradeTowerButton.textContent = '타워 강화';
+upgradeTowerButton.style.position = 'absolute';
+upgradeTowerButton.style.top = '10px';
+upgradeTowerButton.style.right = '290px';
+upgradeTowerButton.style.padding = '10px 20px';
+upgradeTowerButton.style.fontSize = '16px';
+upgradeTowerButton.style.cursor = 'pointer';
+
+upgradeTowerButton.addEventListener('click', upgradeTower);
+
+document.body.appendChild(upgradeTowerButton);
 
 const sendEvent = (handlerId, payload, timestamp) => {
   serverSocket.emit('event', {

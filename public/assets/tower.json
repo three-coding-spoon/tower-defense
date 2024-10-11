@@ -5,32 +5,29 @@
     {
       "typeId": 300,
       "attackPower": 40,
-      "beamDuration": 200,
+      "beamDuration": 50,
       "cost": 1000,
       "range": 300,
       "cooldown": 180,
-      "level": 0,
-      "image": "/images/tower0.png"
+      "level": 0
     },
     {
       "typeId": 301,
       "attackPower": 80,
-      "beamDuration": 200,
+      "beamDuration": 50,
       "cost": 2000,
       "range": 300,
       "cooldown": 180,
-      "level": 1,
-      "image": "/images/tower1.png"
+      "level": 1
     },
     {
       "typeId": 302,
       "attackPower": 160,
-      "beamDuration": 300,
+      "beamDuration": 50,
       "cost": 3000,
       "range": 300,
       "cooldown": 180,
-      "level": 2,
-      "image": "/images/tower2.png"
+      "level": 2
     }
   ]
 }

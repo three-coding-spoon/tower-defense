@@ -37,3 +37,8 @@ export const removeUserTower = (userId, index) => {
 export const getAllUserTowers = (userId) => {
   return userTowers.get(userId) || [];
 };
+
+
+export const getUserTowerById = (userId) => {
+  return userTowers.get(userId) || [];
+};

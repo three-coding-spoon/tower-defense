@@ -1,0 +1,46 @@
+{
+  "name": "wave",
+  "version": "1.0.0",
+  "data": [
+    {
+      "id": 1000,
+      "total_spawn_count": 1
+    },
+    {
+      "id": 1001,
+      "total_spawn_count": 2
+    },
+    {
+      "id": 1002,
+      "total_spawn_count": 3
+    },
+    {
+      "id": 1003,
+      "total_spawn_count": 4
+    },
+    {
+      "id": 1004,
+      "total_spawn_count": 5
+    },
+    {
+      "id": 1005,
+      "total_spawn_count": 6
+    },
+    {
+      "id": 1006,
+      "total_spawn_count": 7
+    },
+    {
+      "id": 1007,
+      "total_spawn_count": 8
+    },
+    {
+      "id": 1008,
+      "total_spawn_count": 9
+    },
+    {
+      "id": 1009,
+      "total_spawn_count": 10
+    }
+  ]
+}
