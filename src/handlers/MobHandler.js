@@ -1,6 +1,6 @@
 // src/handlers/MobHandler.js
 
-import { addTakenMonsterToMobCount } from '../models/mobCountModel.js';
+import { addTakenMonsterToMobCount, getMobCount } from '../models/mobCountModel.js';
 import { getMobById } from '../init/assets.js';
 
 /**

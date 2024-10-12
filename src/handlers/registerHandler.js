@@ -9,10 +9,8 @@ const registerHandler = (io) => {
     const token = socket.handshake.auth.token;
     const username = socket.handshake.auth.username;
 
-    console.log(token);
-
     const auth = authValidation(token);
-    console.log(auth);
+
     // 토큰 인증 확인 필요
     if (!auth.isVaild) {
       socket.emit('authorization', {

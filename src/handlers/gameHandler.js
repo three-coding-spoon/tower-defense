@@ -57,17 +57,20 @@ export const gameEnd = async (userId, payload, socket, io) => {
       return;
     }
 
-    // 내 최고점수 확인
-    const myHighScore = getMyHighScore(userId);
-    console.log(myHighScore);
-
-    await updateHighScore(userId, serverScore);
+    // 내 최고점수 확인 후 갱신 요청
+    const myHighScore = await getMyHighScore(userId);
+    console.log('myHighScore: ', myHighScore);
+    if (myHighScore < serverScore) {
+      await updateHighScore(userId, serverScore);
+      console.log('내 최고 점수를 갱신하여 점수를 새로 등록합니다. ' + serverScore);
+    }
 
     const user = getUserById(userId);
+    console.log(user);
 
     // 하이스코어 갱신 여부 확인
     const highScore = await getTopHighScore();
-    console.log('highScore: ', highScore);
+
     if (serverScore >= highScore) {
       // 브로드캐스트 핸들러 호출
       await broadcastNewHighScore(user.username, io, serverScore);
