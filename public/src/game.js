@@ -247,6 +247,7 @@ function gameLoop() {
       if (monster.isKilledByPlayer) {
         // 플레이어 공격에 의해 몬스터가 죽었을 때
         score += monster.score;
+        userGold += monster.score;
 
         sendEvent(5, {
           monsterId: monster.monsterNumber,
