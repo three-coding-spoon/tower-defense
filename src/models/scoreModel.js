@@ -16,6 +16,11 @@ export const updateHighScore = async (userId, score) => {
 };
 
 // 랭크 리스트 불러오기
+export const getRankList = async () => {
+  const query = `SELECT username, high_score as highScore FROM users`;
+  const [rows] = await pool.execute(query);
+  return rows;
+};
 
 // 내 하이스코어 불러오기
 export const getMyHighScore = async (userId) => {

@@ -96,3 +96,10 @@ li > div {
   display: table-cell;
   padding: 8px 5px;
 }
+
+#connectUser {
+  font-size: 30px;
+  color: rgb(231, 231, 231);
+  /* font-style: ; */
+  margin: 10px auto 10px auto;
+}

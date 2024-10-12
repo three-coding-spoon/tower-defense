@@ -8,6 +8,7 @@ export const initMobCounts = (userId) => {
 
 export const addTakenMonsterToMobCount = (userId, monsterId) => {
   const userMobCount = mobCount.get(userId);
+
   if (userMobCount.has(monsterId)) {
     userMobCount.set(monsterId, userMobCount.get(monsterId) + 1);
   } else {

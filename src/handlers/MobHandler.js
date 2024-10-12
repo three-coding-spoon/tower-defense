@@ -1,5 +1,6 @@
 // src/handlers/MobHandler.js
 
+
 import { addTakenMonsterToMobCount } from '../models/mobCountModel.js';
 import { getGameAssets, getMobById } from '../init/assets.js';
 import { getStage } from '../models/stageModel.js';
