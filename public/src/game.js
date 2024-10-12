@@ -15,7 +15,7 @@ let serverSocket; // 서버 웹소켓 객체
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
-const NUM_OF_MONSTERS = 5; // 몬스터 개수
+const NUM_OF_MONSTERS = 6; // 몬스터 개수
 
 // 클래스로 만들고싶다.....
 let userGold = 0; // 유저 골드
@@ -257,15 +257,26 @@ function gameLoop() {
       // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
       monsters.splice(i, 1);
 
+      const clientTime = Date.now();
+
       // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
       if (monsters.length === 0) {
-        const clientTime = Date.now();
         const targetLevel = monsterLevel + 1;
-        sendEvent(11, {
-          currentStage: monsterLevel,
-          targetStage: targetLevel,
-          clientTimestamp: clientTime,
-        });
+        console.log(assets.wave.data.length);
+        if (targetLevel > assets.wave.data.length) {
+          // 모든 웨이브 완료 시
+          sendEvent(3, {
+            clientScore: score,
+          });
+          alert('게임 클리어!');
+          stopGameLoop = true;
+        } else {
+          sendEvent(11, {
+            currentStage: monsterLevel,
+            targetStage: targetLevel,
+            clientTimestamp: clientTime,
+          });
+        }
       }
     }
   }

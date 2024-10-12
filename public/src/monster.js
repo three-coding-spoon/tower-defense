@@ -1,7 +1,7 @@
 // public/src/monster.js
 
 export class Monster {
-  constructor(path, monsterImages, level, monster_unlock, monster_data) {
+  constructor(path, monsterImages, level, monster_unlock, monster_data, isBonus = false) {
     // 생성자 안에서 몬스터의 속성을 정의한다고 생각하시면 됩니다!
     if (!path || path.length <= 0) {
       throw new Error('몬스터가 이동할 경로가 필요합니다.');
@@ -16,7 +16,7 @@ export class Monster {
     this.speed = 2; // 몬스터의 이동 속도
     this.speed = 7; // 몬스터의 이동 속도
     this.level = level; // 몬스터 레벨
-    this.monsterNumber = this.createMonster(monster_unlock); // 몬스터 번호 (현재 스테이지에 나올 수 있는 몬스터 번호)
+    this.monsterNumber = !isBonus ? this.createMonster(monster_unlock) : 5; // 몬스터 번호 (현재 스테이지에 나올 수 있는 몬스터 번호)
     this.image = monsterImages[this.monsterNumber]; // 몬스터 이미지
     this.score = monster_data.data[this.monsterNumber].score;
     this.isKilledByPlayer = false; // 몹이 플레이어에 의해 죽었는지 여부

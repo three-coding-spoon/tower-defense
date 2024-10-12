@@ -31,6 +31,12 @@
       "hp": 150,
       "attackPower": 16,
       "score": 50
+    },
+    {
+      "id": 105,
+      "hp": 300,
+      "attackPower": 30,
+      "score": 300
     }
   ]
 }
