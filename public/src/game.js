@@ -12,6 +12,7 @@ let assets = {};
 const authObj = JSON.parse(sessionStorage.getItem('authorization'));
 
 let serverSocket; // 서버 웹소켓 객체
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -155,31 +156,23 @@ function getRandomPositionNearPath(maxDistance) {
   };
 }
 
-function placeInitialTowers() {
-  for (let i = 0; i < numOfInitialTowers; i++) {
-    const { x, y } = getRandomPositionNearPath(200);
+function placeInitialTowers(x, y) {
     const tower = new Tower(x, y, 1);
     towers.push(tower);
-    tower.draw(ctx, towerImage);
-    towerId++; // 타워 건설 후, 타워 Id를 더한다.
-    console.log(towerId);
-  }
+    sendEvent(30, { towerData: tower, index: towers.length -1 });
+}
+
+function clickBuyTower() {
+  sendEvent((21), { userGold: userGold })
 }
 
 function placeNewTower() {
-  if (towers.length >= 10) {
-    alert('타워는 10개까지만 건설할 수 있습니다.');
-  } else if (userGold < towerCost) {
-    alert('잔액이 부족합니다.');
-  } else if (userGold >= towerCost) {
     const { x, y } = getRandomPositionNearPath(200);
     const tower = new Tower(x, y, 1);
     towers.push(tower);
-    tower.draw(ctx, towerImage);
+    sendEvent(30, { towerData: tower, index: towers.length -1 });
     towerId++; // 타워 건설 후, 타워 Id를 더한다.
     console.log(towerId);
-    userGold -= towerCost;
-  }
 }
 
 function refundTower() {
@@ -311,7 +304,13 @@ function initGame() {
 
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
-  placeInitialTowers(); // 설정된 초기 타워 개수만큼 사전에 타워 배치
+
+  for (let i = 0; i < numOfInitialTowers; i++) {
+    const { x, y } = getRandomPositionNearPath(200);
+    sendEvent(20, { towerData: { x, y }, towerId });
+    towerId++;
+  } // 설정된 초기 타워 개수만큼 사전에 타워 배치
+
   placeBase(); // 기지 배치
 
   // 현재 스테이지의 total_spawn_count 설정
@@ -456,15 +455,42 @@ Promise.all([
       alert('Error occured on Wave transition!');
     }
   });
+
+  serverSocket.on('InitialTower', (data) => {
+    if (data.status === 'success') {
+      placeInitialTowers(data.towerData.x, data.towerData.y); // 설정된 초기 타워 개수만큼 사전에 타워 배치
+    } else {
+      alert('Error on InitialTower');
+    }
+  });
+
+  serverSocket.on('BuyTower', (data) => {
+    if (data.status === 'success') {
+      placeNewTower();
+      userGold -= towerCost;
+    } 
+    else if (data.status === 'fail') {
+      alert('타워는 10개까지만 구매 가능합니다.');
+    }
+    else if (data.status === 'fail') {
+      alert('잔액이 부족합니다.');
+    }
+    else {
+      console.error('Error occurred while buy the tower!');
+      alert('Error occurred while buy the tower!');
+    }
+  });
+
 });
+
 
 // 타워 클릭하여 환불하기
 canvas.addEventListener('click', (event) => {
   const rect = canvas.getBoundingClientRect();
   const clickX = event.clientX - rect.left;
   const clickY = event.clientY - rect.top;
-  const towerRangeX = 50;
-  const towerRangeY = 50;
+  const towerRangeX = 40;
+  const towerRangeY = 40;
 
   for (let i = 0; i < towers.length; i++) {
     const tower = towers[i];
@@ -477,7 +503,7 @@ canvas.addEventListener('click', (event) => {
 
     if (deltaX <= towerRangeX && deltaY <= towerRangeY && isrefund) {
       // sendEvent(22, {
-      //   towerId: tower.id,
+      //   towers,
       //   towerpos: { x: tower.x, y: tower.y },
       //   userGold,
       // });
@@ -497,7 +523,7 @@ buyTowerButton.style.padding = '10px 20px';
 buyTowerButton.style.fontSize = '16px';
 buyTowerButton.style.cursor = 'pointer';
 
-buyTowerButton.addEventListener('click', placeNewTower);
+buyTowerButton.addEventListener('click', clickBuyTower);
 
 document.body.appendChild(buyTowerButton);
 
