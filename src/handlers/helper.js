@@ -48,19 +48,24 @@ export const handleEvent = async (io, socket, data) => {
 
   // 브로드캐스트 처리
   try {
-    if (response.broadcast) {
-      switch (response.handlerId) {
-        case 4: // 하이 스코어 갱신
-          io.emit('newHighScore', response.data);
-          return;
+    // response에 broadcast가 있는지 먼저 확인
+    if (response && 'broadcast' in response) {
+      if (response.broadcast) {
+        switch (response.handlerId) {
+          case 4: // 하이 스코어 갱신
+            io.emit('newHighScore', response.data);
+            return;
+        }
+      } else {
+        console.log(`HandlerId ${response.handlerId} is not a broadcast response`);
       }
-    } else {
-      throw new Error('Not Broadcast!!');
     }
   } catch (err) {
-    console.log(err.message);
-  } finally {
-    // 응답 전송
-    socket.emit('response', response);
+    console.error(err.message);
   }
+
+  // finally {
+  //   // 응답 전송
+  //   socket.emit('response', response);
+  // }
 };
