@@ -34,6 +34,10 @@ let highScore = 0; // 기존 최고 점수
 let isInitGame = false;
 let stopGameLoop = false;
 
+let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
+let totalSpawnCount = 0; // 현재 스테이지에서 스폰해야 할 총 몬스터 수
+let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
+
 // 이미지 로딩 파트
 const backgroundImage = new Image();
 backgroundImage.src = 'images/bg.webp';
@@ -178,7 +182,20 @@ function placeBase() {
 }
 
 function spawnMonster() {
-  monsters.push(new Monster(monsterPath, monsterImages, monsterLevel));
+  if (monstersSpawned < totalSpawnCount) {
+    const newMonster = new Monster(
+      monsterPath,
+      monsterImages,
+      monsterLevel,
+      assets.monster_unlock,
+      assets.monster,
+    );
+    monsters.push(newMonster);
+    console.log(newMonster);
+    monstersSpawned++;
+  } else {
+    clearInterval(monsterSpawnTimer); // 모든 몬스터를 스폰하면 타이머 정지
+  }
 }
 
 function gameLoop() {
@@ -227,24 +244,29 @@ function gameLoop() {
       }
       monster.draw(ctx);
     } else {
-      /* 몬스터가 죽었을 때 */
-      score += monster.score;
-      // 여기에 몬스터 킬 핸들러 호출 코드 작성
+      if (monster.isKilledByPlayer) {
+        // 플레이어 공격에 의해 몬스터가 죽었을 때
+        score += monster.score;
 
-      sendEvent(5, {
-        monsterId: 100,
-      });
+        sendEvent(5, {
+          monsterId: monster.monsterNumber,
+        });
+      }
+
+      // 기존 코드
+      // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
+      monsters.splice(i, 1);
 
       // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
       if (monsters.length === 0) {
         const clientTime = Date.now();
         const targetLevel = monsterLevel + 1;
-        sendEvent(11, { monsterLevel, targetLevel, clientTime });
+        sendEvent(11, {
+          currentStage: monsterLevel,
+          targetStage: targetLevel,
+          clientTimestamp: clientTime,
+        });
       }
-
-      // 기존 코드
-      // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
-      monsters.splice(i, 1); //
     }
   }
 
@@ -263,9 +285,32 @@ function initGame() {
   placeInitialTowers(); // 설정된 초기 타워 개수만큼 사전에 타워 배치
   placeBase(); // 기지 배치
 
-  setInterval(spawnMonster, monsterSpawnInterval); // 설정된 몬스터 생성 주기마다 몬스터 생성
+  // 현재 스테이지의 total_spawn_count 설정
+  const { wave } = assets;
+  totalSpawnCount = wave.data[monsterLevel - 1].total_spawn_count;
+  monstersSpawned = 0;
+
+  // 몬스터를 주기적으로 스폰
+  monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
   gameLoop(); // 게임 루프 최초 실행
   isInitGame = true;
+}
+
+function startStage() {
+  // 스테이지 이동 시 필요한 초기화
+  // monsterPath = generateRandomMonsterPath();
+  // initMap();
+
+  const { wave } = assets;
+  totalSpawnCount = wave.data[monsterLevel - 1].total_spawn_count;
+  monstersSpawned = 0;
+
+  monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
+
+  if (!isInitGame) {
+    gameLoop();
+    isInitGame = true;
+  }
 }
 
 function initGameState(initGameStateInfo) {
@@ -306,9 +351,7 @@ Promise.all([
     e.g. serverSocket.on("...", () => {...});
     이 때, 상태 동기화 이벤트의 경우에 아래의 코드를 마지막에 넣어주세요! 최초의 상태 동기화 이후에 게임을 초기화해야 하기 때문입니다! 
   */
-  serverSocket.on('response', async (data) => {
-    console.log(data);
-  });
+  //serverSocket.on('response', async (data) => {});
 
   serverSocket.on('connection', async (data) => {
     highScore = data.highScore;
@@ -371,10 +414,13 @@ Promise.all([
     updateTowerState(syncData);
   });
 
-  serverSocket.on('moveStage', async (data) => {
+  serverSocket.on('moveStage', (data) => {
+    console.log('Received moveStage', data);
     if (data.status === 'success') {
       userGold += data.reward;
       monsterLevel = data.targetStage;
+
+      startStage();
     } else {
       console.error('Error occured on Wave transition!');
       alert('Error occured on Wave transition!');
