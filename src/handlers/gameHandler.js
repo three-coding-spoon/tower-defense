@@ -59,7 +59,6 @@ export const gameEnd = async (userId, payload, socket, io) => {
 
     // 내 최고점수 확인
     const myHighScore = await getMyHighScore(userId);
-    console.log('Pending', myHighScore);
 
     await updateHighScore(userId, serverScore);
 
@@ -67,7 +66,6 @@ export const gameEnd = async (userId, payload, socket, io) => {
 
     // 하이스코어 갱신 여부 확인
     const highScore = await getTopHighScore();
-    console.log('highScore: ', highScore);
     if (serverScore >= highScore) {
       // 브로드캐스트 핸들러 호출
       await broadcastNewHighScore(user.username, io, serverScore);

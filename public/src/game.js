@@ -273,19 +273,18 @@ function gameLoop() {
       }
       monster.draw(ctx);
     } else {
-      /* 몬스터가 죽었을 때 */
-      score += monster.score;
-      // 여기에 몬스터 킬 핸들러 호출 코드 작성
+      if (monster.isKilledByPlayer) {
+        // 플레이어 공격에 의해 몬스터가 죽었을 때
+        score += monster.score;
 
-      sendEvent(5, {
-        monsterId: monster.monsterNumber,
-      });
-
-      console.log(monster);
+        sendEvent(5, {
+          monsterId: monster.monsterNumber,
+        });
+      }
 
       // 기존 코드
       // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
-      monsters.splice(i, 1); //
+      monsters.splice(i, 1);
 
       // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
       if (monsters.length === 0) {
@@ -382,7 +381,7 @@ Promise.all([
     e.g. serverSocket.on("...", () => {...});
     이 때, 상태 동기화 이벤트의 경우에 아래의 코드를 마지막에 넣어주세요! 최초의 상태 동기화 이후에 게임을 초기화해야 하기 때문입니다! 
   */
-  serverSocket.on('response', async (data) => {});
+  //serverSocket.on('response', async (data) => {});
 
   serverSocket.on('connection', async (data) => {
     highScore = data.highScore;
