@@ -469,10 +469,10 @@ Promise.all([
       placeNewTower();
       userGold -= towerCost;
     } 
-    else if (data.status === 'fail') {
+    else if (data.status === 'fail' && data.message === 'tower limit') {
       alert('타워는 10개까지만 구매 가능합니다.');
     }
-    else if (data.status === 'fail') {
+    else if (data.status === 'fail' && data.message === 'money issue') {
       alert('잔액이 부족합니다.');
     }
     else {

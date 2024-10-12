@@ -35,18 +35,16 @@ export const handleBuyTower = async (userId, payload, socket) => {
   
   // 타워 개수 확인
   if (towers.length >= 10) {
-    return { status: 'fail', message: '10 towers already built on the field', handlerId: 21 }
+    socket.emit('BuyTower', { status: 'fail', message: 'tower limit' });
   }
   // 골드 확인
   else if(userGold < tower.data[0].cost) {
-    return { status: 'fail', message: 'Not enough Gold', handlerId: 21 }
+    socket.emit('BuyTower', { status: 'fail', message: 'money issue' });
+    return
   }
   // 골드 차감
   else if (userGold >= tower.data[0].cost){
-    socket.emit('BuyTower', {
-      status: 'success', 
-      cost: tower.data[0].cost,
-    });
+    socket.emit('BuyTower', { status: 'success', cost: tower.data[0].cost });
     return;
   }
 };
