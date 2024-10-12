@@ -16,6 +16,8 @@ export class Monster {
     this.speed = 7; // 몬스터의 이동 속도
     this.level = level; // 몬스터 레벨
     this.monsterNumber = !isBonus ? this.createMonster(monster_unlock) : 5; // 몬스터 번호 (현재 스테이지에 나올 수 있는 몬스터 번호)
+    this.baseHp = monster_data.data[this.monsterNumber].hp;
+    this.baseAttackPower = monster_data.data[this.monsterNumber].attackPower;
     this.image = monsterImages[this.monsterNumber]; // 몬스터 이미지
     this.score = monster_data.data[this.monsterNumber].score;
     this.isKilledByPlayer = false; // 몹이 플레이어에 의해 죽었는지 여부
@@ -56,13 +58,15 @@ export class Monster {
     }
 
     // monster_id 배열에서 무작위 몬스터 선택
-    return allowedMonsters[Math.floor(Math.random() * allowedMonsters.length)];
+    const monsterId = allowedMonsters[Math.floor(Math.random() * allowedMonsters.length)];
+    console.log(monsterId);
+    return monsterId;
   }
 
   init(level) {
-    this.maxHp = 100 + 10 * level; // 몬스터의 현재 HP
+    this.maxHp = this.baseHp + 10 * level; // 몬스터의 현재 HP
     this.hp = this.maxHp; // 몬스터의 현재 HP
-    this.attackPower = 10 + 1 * level; // 몬스터의 공격력 (기지에 가해지는 데미지)
+    this.attackPower = this.baseAttackPower + 1 * level; // 몬스터의 공격력 (기지에 가해지는 데미지)
   }
 
   move(base) {

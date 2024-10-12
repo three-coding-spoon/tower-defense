@@ -3,6 +3,7 @@
 import { addTakenMonsterToMobCount } from '../models/mobCountModel.js';
 import { getGameAssets, getMobById } from '../init/assets.js';
 import { getStage } from '../models/stageModel.js';
+import { addLog } from '../utils/log.js';
 
 /**
  * 몹 잡기 핸들러
@@ -39,13 +40,18 @@ export const handleKillMob = (userId, payload, socket) => {
   const allowedMonsters = stageData.monster_id;
 
   // 현재 stage에서 나올 수 있는 몬스터인지 검증
-  if (!allowedMonsters.includes(mobId - 100)) {
-    console.log('몬스터 스테이지 검증 실패');
-    socket.emit('addMonsterCount', {
-      status: 'fail',
-      message: 'Monster not allowed in current stage',
-    });
-    return;
+  if (mobId !== 105) {
+    // 황고 검증 패스
+    if (!allowedMonsters.includes(mobId - 100)) {
+      console.log('몬스터 스테이지 검증 실패');
+      socket.emit('addMonsterCount', {
+        status: 'fail',
+        message: 'Monster not allowed in current stage',
+      });
+      return;
+    }
+  } else {
+    addLog(userId, 5, `${userId}번 유저가 황금 고블린을 잡았다.`);
   }
 
   // 몹 카운트에 추가

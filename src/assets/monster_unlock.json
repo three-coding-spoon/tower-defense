@@ -5,17 +5,17 @@
     {
       "id": 200,
       "wave_id": 1000,
-      "monster_id": [1, 2, 3, 5]
+      "monster_id": [1, 2, 3]
     },
     {
       "id": 201,
       "wave_id": 1001,
-      "monster_id": [2, 3, 4, 5]
+      "monster_id": [2, 3, 4]
     },
     {
       "id": 202,
       "wave_id": 1002,
-      "monster_id": [1, 2, 3, 5]
+      "monster_id": [1, 2, 3]
     },
     {
       "id": 203,

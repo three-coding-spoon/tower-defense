@@ -38,6 +38,8 @@ let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
 let totalSpawnCount = 0; // 현재 스테이지에서 스폰해야 할 총 몬스터 수
 let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
 
+let isBonusSpawned = false;
+
 // 이미지 로딩 파트
 const backgroundImage = new Image();
 backgroundImage.src = 'images/bg.webp';
@@ -182,16 +184,31 @@ function placeBase() {
 }
 
 function spawnMonster() {
+  const bonuseChance = 0.5;
   if (monstersSpawned < totalSpawnCount) {
+    const isBonus = Math.random() <= bonuseChance;
+
+    // 보너스 몬스터가 이미 스폰되었다면 마지막 파라미터를 false로 설정
+    const shouldSpawnBonus = isBonus && !isBonusSpawned;
+
     const newMonster = new Monster(
       monsterPath,
       monsterImages,
       monsterLevel,
       assets.monster_unlock,
       assets.monster,
+      shouldSpawnBonus, // 정확한 보너스 스폰 여부 설정
     );
+
     monsters.push(newMonster);
-    console.log(newMonster);
+
+    // 이때 몹의 고유 ID는 monster.length - 1;
+
+    // 새로운 보너스 몬스터가 스폰되었을 때 플래그 설정
+    if (shouldSpawnBonus) {
+      isBonusSpawned = true;
+      console.log('황고 출현');
+    }
     monstersSpawned++;
   } else {
     clearInterval(monsterSpawnTimer); // 모든 몬스터를 스폰하면 타이머 정지
@@ -316,6 +333,7 @@ function startStage() {
   const { wave } = assets;
   totalSpawnCount = wave.data[monsterLevel - 1].total_spawn_count;
   monstersSpawned = 0;
+  isBonusSpawned = false;
 
   monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
 
@@ -328,7 +346,7 @@ function startStage() {
 function initGameState(initGameStateInfo) {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameStateInfo.userGold;
-  baseHp = initGameStateInfo.baseHp;
+  baseHp = initGameStateInfo.baseHp + 500;
   numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
   monsterLevel = initGameStateInfo.monsterLevel;
   monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
