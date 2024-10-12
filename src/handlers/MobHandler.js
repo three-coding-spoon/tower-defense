@@ -8,9 +8,7 @@ import { getStage } from '../models/stageModel.js';
  * 몹 잡기 핸들러
  */
 export const handleKillMob = (userId, payload, socket) => {
-  console.log(payload);
   const mobId = payload.monsterId + 100;
-  console.log(mobId);
   const { monster_unlock } = getGameAssets();
 
   // 몹 존재 여부 확인
@@ -36,7 +34,6 @@ export const handleKillMob = (userId, payload, socket) => {
   }
 
   const allowedMonsters = stageData.monster_id;
-  console.log(allowedMonsters);
 
   // 현재 stage에서 나올 수 있는 몬스터인지 검증
   if (!allowedMonsters.includes(mobId - 100)) {

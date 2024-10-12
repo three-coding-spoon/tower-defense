@@ -1,3 +1,5 @@
+// public/src/monster.js
+
 export class Monster {
   constructor(path, monsterImages, level, monster_unlock, monster_data) {
     // 생성자 안에서 몬스터의 속성을 정의한다고 생각하시면 됩니다!
@@ -17,6 +19,7 @@ export class Monster {
     this.monsterNumber = this.createMonster(monster_unlock); // 몬스터 번호 (현재 스테이지에 나올 수 있는 몬스터 번호)
     this.image = monsterImages[this.monsterNumber]; // 몬스터 이미지
     this.score = monster_data.data[this.monsterNumber].score;
+    this.isKilledByPlayer = false; // 몹이 플레이어에 의해 죽었는지 여부
     this.init(level);
   }
 
@@ -71,7 +74,16 @@ export class Monster {
     } else {
       const isDestroyed = base.takeDamage(this.attackPower); // 기지에 도달하면 기지에 데미지를 입힙니다!
       this.hp = 0; // 몬스터는 이제 기지를 공격했으므로 자연스럽게 소멸해야 합니다.
+      this.isKilledByPlayer = false; // 베이스에 도착해서 사라진 경우
       return isDestroyed;
+    }
+  }
+
+  takeDamage(damage) {
+    this.hp -= damage;
+    if (this.hp <= 0) {
+      this.hp = 0;
+      this.isKilledByPlayer = true; // 플레이어가 보내버림
     }
   }
 
