@@ -41,7 +41,7 @@ export const handleBuyTower = async (userId, payload, socket) => {
   }
   // 골드 확인
   else if(userGold < tower.data[0].cost) {
-    socket.emit('BuyTower', { status: 'fail', message: 'money issue' });
+    socket.emit('BuyTower', { status: 'fail', message: 'not enough gold' });
     return;
   }
   // 골드 차감
@@ -58,7 +58,6 @@ export const handleRefundTower = async (userId, payload, socket) => {
   // 유저의 타워 조회
   const towers = getAllUserTowers(userId);
   const index = towerIndex;
-  console.log(towers)
   // 판매 금액 계산
   const refundAmount = tower.price / 2;
   // 서버 데이터에서 타워 제거
@@ -78,18 +77,28 @@ export const handleRefundTower = async (userId, payload, socket) => {
 };
 
 /** 타워 업그레이드 핸들러 **/
-export const handleUpgradeTower = async (userId, payload, io) => {
-  const { towerId } = payload;
+export const handleUpgradeTower = async (userId, payload, socket) => {
+  const { userGold, tower, index } = payload;
 
   // 유저의 타워 조회
-
+  const towers = getAllUserTowers(userId);
+  if(towers[index].x !== tower.x && towers[index].y !== tower.y && towers[index].level !== towers.level) {
+    socket.emit('upgradeTower', {status: 'fail', message: 'Tower data corrupted'})
+    return;
+  }
   // 업그레이드 비용 계산
-
+  const cost = tower.cost * (tower.level * 1.5);
+  if (tower.level === 3){
+    socket.emit('upgradeTower', {status: 'fail', message: 'max level'})
+    return;
+  } 
   // 골드 확인
-
-  // 골드 차감
-
-  // 타워 레벨 업그레이드
-
-  // return { status: 'success', handlerId: 23, towerData: tower };
+  else if (userGold < cost) {
+    socket.emit('upgradeTower', {status: 'fail', message: 'not enough gold'})
+    return;
+  } 
+  else if(userGold >= cost){
+    socket.emit('upgradeTower', {status: 'success', message: 'not enough gold', index, cost})
+    return;
+  }
 };

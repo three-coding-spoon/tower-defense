@@ -217,17 +217,20 @@ function refundTower(index, refundAmount) {
   userGold += refundAmount;
 }
 
-function upgradeTower() {
-const towerIndex = Math.floor(Math.random() * towers.length)
-const tower = towers[towerIndex]
-if (tower.level === 3){
-  alert('[강화 실패] 이미 최대 레벨에 도달한 타워입니다.');
-} else if (userGold < towerUpgradeCost) {
-  alert('잔액이 부족합니다.');
-} else if(userGold >= towerUpgradeCost){
+// 타워 강화
+function clickupgradeTower() {
+  const towerIndex = Math.floor(Math.random() * towers.length);
+  const tower = towers[towerIndex];
+  sendEvent((23), {userGold: userGold, tower: tower, index: towerIndex});
+} 
+
+function upgradeTower(index, cost) {
+  const tower = towers[index];
+  const upgradeCost = cost;
+
   tower.upgrade()
-  userGold -= towerUpgradeCost
-}
+  userGold -= upgradeCost
+  sendEvent((30), {towerData: tower, index: index});
 }
 
 function placeBase() {
@@ -505,8 +508,8 @@ Promise.all([
     else if (data.status === 'fail' && data.message === 'tower limit') {
       alert('타워는 10개까지만 구매 가능합니다.');
     }
-    else if (data.status === 'fail' && data.message === 'money issue') {
-      alert('잔액이 부족합니다.');
+    else if (data.status === 'fail' && data.message === 'not enough gold') {
+      alert('골드가 부족합니다.');
     }
     else {
       console.error('Error occurred while buy the tower!');
@@ -518,15 +521,34 @@ Promise.all([
     if (data.status === 'fail' && data.message === 'tower mismatch') {
       alert('존재하지 않는 타워입니다.');
     }
-    if (data.status === 'fail' && data.message === 'No towers on the field') {
+    else if (data.status === 'fail' && data.message === 'No towers on the field') {
       alert('환불할 수 있는 타워가 없습니다.');
     }
-    if (data.status === 'success') {
+    else if (data.status === 'success') {
       refundTower(data.index, data.refundAmount) 
     }
     else {
       console.error('Error occurred while refund the tower!');
       alert('Error occurred while refund the tower!');
+    }
+  });
+
+  serverSocket.on('upgradeTower', (data) => {
+    if(data.status === 'fail' && data.message === 'Tower data corrupted'){
+      alert('타워 데이터가 손상되었습니다.');
+    }
+    else if (data.status === 'fail' && data.message === 'max level') {
+      alert('이미 최대로 강화된 타워가 선택되었습니다.');
+    }
+    else if (data.status === 'fail' && data.message === 'not enough gold') {
+      alert('골드가 부족합니다.');
+    }
+    else if (data.status === 'success') {
+      upgradeTower(data.index, data.cost) 
+    }
+    else {
+      console.error('Error occurred while upgrade the tower!');
+      alert('Error occurred while upgrade the tower!');
     }
   })
 });
@@ -572,7 +594,7 @@ upgradeTowerButton.style.padding = '10px 20px';
 upgradeTowerButton.style.fontSize = '16px';
 upgradeTowerButton.style.cursor = 'pointer';
 
-upgradeTowerButton.addEventListener('click', upgradeTower);
+upgradeTowerButton.addEventListener('click', clickupgradeTower);
 
 document.body.appendChild(upgradeTowerButton);
 
