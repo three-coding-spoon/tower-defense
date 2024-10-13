@@ -2,6 +2,10 @@
 
 const userTowers = new Map();
 
+export const initTowers = (userId) => {
+  userTowers.set(userId, []);
+};
+
 export const updateUserTowerData = (userId, towerData, index = null) => {
   const towers = userTowers.get(userId) || [];
 
