@@ -205,7 +205,6 @@ function clickRefundTower() {
 
     if (deltaX <= towerRangeX && deltaY <= towerRangeY) {
       sendEvent(22, { tower: tower, towerIndex: towerIndex });
-      console.log(towers)
       break;
     }
     }
@@ -219,10 +218,31 @@ function refundTower(index, refundAmount) {
 
 // 타워 강화
 function clickupgradeTower() {
-  const towerIndex = Math.floor(Math.random() * towers.length);
-  const tower = towers[towerIndex];
-  sendEvent((23), {userGold: userGold, tower: tower, index: towerIndex});
-} 
+  canvas.addEventListener('click', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+    const clickY = event.clientY - rect.top;
+    const towerRangeX = 40;
+    const towerRangeY = 40;
+    
+    // 클릭한 타워의 정보 확인
+    for (let i = 0; i < towers.length; i++) {
+      const tower = towers[i];
+      const towerIndex = i;
+  
+      const towerCenterX = tower.x + tower.width / 2;
+      const towerCenterY = tower.y + tower.height / 2;
+  
+      const deltaX = Math.abs(towerCenterX - clickX);
+      const deltaY = Math.abs(towerCenterY - clickY);
+  
+      if (deltaX <= towerRangeX && deltaY <= towerRangeY) {
+        sendEvent(23, { userGold: userGold, tower: tower, towerIndex: towerIndex });
+        break;
+      }
+      }
+    }, { once : true });
+  };
 
 function upgradeTower(index, cost) {
   const tower = towers[index];

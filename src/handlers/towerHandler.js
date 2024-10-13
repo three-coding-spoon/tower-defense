@@ -78,10 +78,11 @@ export const handleRefundTower = async (userId, payload, socket) => {
 
 /** 타워 업그레이드 핸들러 **/
 export const handleUpgradeTower = async (userId, payload, socket) => {
-  const { userGold, tower, index } = payload;
+  const { userGold, tower, towerIndex } = payload;
 
   // 유저의 타워 조회
   const towers = getAllUserTowers(userId);
+  const index = towerIndex;
   if(towers[index].x !== tower.x && towers[index].y !== tower.y && towers[index].level !== towers.level) {
     socket.emit('upgradeTower', {status: 'fail', message: 'Tower data corrupted'})
     return;
