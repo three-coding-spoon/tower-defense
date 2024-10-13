@@ -7,14 +7,15 @@ import { updateUserTowerData, getAllUserTowers, removeUserTower } from '../model
 
 /** 타워 기본 제공 핸들러 **/
 export const InitialTowerHandler = async (userId, payload, socket) => {
-  const { towerData, towerId } = payload;
+  const { towerPos, towerId } = payload;
   const towers = getAllUserTowers(userId);
 
-  if (!towerData) {
-    return { status: 'fail', message: 'No Data', handlerId: 20 }
+  if (!towerPos) {
+    socket.emit('InitialTower', { status: 'fail', message: 'No Data'});
+    return;
   }
   if (towers.length === towerId){
-    socket.emit('InitialTower', { status: 'success', message: 'Initial Tower complete', towerData });
+    socket.emit('InitialTower', { status: 'success', message: 'Initial Tower complete', towerPos });
     return;
   }
 }
@@ -36,11 +37,12 @@ export const handleBuyTower = async (userId, payload, socket) => {
   // 타워 개수 확인
   if (towers.length >= 10) {
     socket.emit('BuyTower', { status: 'fail', message: 'tower limit' });
+    return;
   }
   // 골드 확인
   else if(userGold < tower.data[0].cost) {
     socket.emit('BuyTower', { status: 'fail', message: 'money issue' });
-    return
+    return;
   }
   // 골드 차감
   else if (userGold >= tower.data[0].cost){
@@ -49,27 +51,33 @@ export const handleBuyTower = async (userId, payload, socket) => {
   }
 };
 
-/**
- * 타워 환불 핸들러
- */
-export const handleRefundTower = async (userId, payload, io) => {
-  const { towers, towerId } = payload;
+/** 타워 판매 핸들러 **/
+export const handleRefundTower = async (userId, payload, socket) => {
+  const { tower, towerIndex } = payload;
 
   // 유저의 타워 조회
-  
-
-  // 환불 금액 계산
-
-  // 골드 추가
-
-  // 타워 제거
-
-  return { status: 'success', handlerId: 22, refundAmount };
+  const towers = getAllUserTowers(userId);
+  const index = towerIndex;
+  console.log(towers)
+  // 판매 금액 계산
+  const refundAmount = tower.price / 2;
+  // 서버 데이터에서 타워 제거
+  if(towers.length === 0) {
+    socket.emit('RefundTower', { status: 'fail', message: 'No towers on the field' }); 
+    return;
+  }
+  if(towers[index].x === tower.x && towers[index].y === tower.y) {
+    removeUserTower(userId, index)
+    socket.emit('RefundTower', { status: 'success', index, refundAmount });
+    return;
+  }
+  else {
+    socket.emit('RefundTower', { status: 'fail', message: 'tower mismatch' }); 
+    return;
+  }
 };
 
-/**
- * 타워 업그레이드 핸들러
- */
+/** 타워 업그레이드 핸들러 **/
 export const handleUpgradeTower = async (userId, payload, io) => {
   const { towerId } = payload;
 

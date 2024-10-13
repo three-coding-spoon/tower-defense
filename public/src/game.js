@@ -175,13 +175,46 @@ function placeNewTower() {
     console.log(towerId);
 }
 
-function refundTower() {
-  if (isrefund) {
-    isrefund = false;
-  } else {
-    isrefund = true;
-    isupgrade = false;
-  }
+// function btnDiplay()  {
+//   const target = document.getElementsByTagName('button');
+//   if (target.style.display !== 'none') {
+//     target.style.display === 'none';
+//   }
+// }
+
+function clickRefundTower() {
+  // btnDiplay()
+  // 클릭하여 환불할 타워 지정하기
+  canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+  const towerRangeX = 40;
+  const towerRangeY = 40;
+  
+  // 클릭한 타워의 정보 확인
+  for (let i = 0; i < towers.length; i++) {
+    const tower = towers[i];
+    const towerIndex = i;
+
+    const towerCenterX = tower.x + tower.width / 2;
+    const towerCenterY = tower.y + tower.height / 2;
+
+    const deltaX = Math.abs(towerCenterX - clickX);
+    const deltaY = Math.abs(towerCenterY - clickY);
+
+    if (deltaX <= towerRangeX && deltaY <= towerRangeY) {
+      sendEvent(22, { tower: tower, towerIndex: towerIndex });
+      console.log(towers)
+      break;
+    }
+    }
+  }, { once : true });
+};
+
+function refundTower(index, refundAmount) {
+  towers.splice(index, 1);
+  userGold += refundAmount;
 }
 
 function upgradeTower() {
@@ -307,7 +340,7 @@ function initGame() {
 
   for (let i = 0; i < numOfInitialTowers; i++) {
     const { x, y } = getRandomPositionNearPath(200);
-    sendEvent(20, { towerData: { x, y }, towerId });
+    sendEvent(20, { towerPos: { x, y }, towerId });
     towerId++;
   } // 설정된 초기 타워 개수만큼 사전에 타워 배치
 
@@ -458,7 +491,7 @@ Promise.all([
 
   serverSocket.on('InitialTower', (data) => {
     if (data.status === 'success') {
-      placeInitialTowers(data.towerData.x, data.towerData.y); // 설정된 초기 타워 개수만큼 사전에 타워 배치
+      placeInitialTowers(data.towerPos.x, data.towerPos.y); // 설정된 초기 타워 개수만큼 사전에 타워 배치
     } else {
       alert('Error on InitialTower');
     }
@@ -481,41 +514,29 @@ Promise.all([
     }
   });
 
-});
-
-
-// 타워 클릭하여 환불하기
-canvas.addEventListener('click', (event) => {
-  const rect = canvas.getBoundingClientRect();
-  const clickX = event.clientX - rect.left;
-  const clickY = event.clientY - rect.top;
-  const towerRangeX = 40;
-  const towerRangeY = 40;
-
-  for (let i = 0; i < towers.length; i++) {
-    const tower = towers[i];
-
-    const towerCenterX = tower.x + tower.width / 2;
-    const towerCenterY = tower.y + tower.height / 2;
-
-    const deltaX = Math.abs(towerCenterX - clickX);
-    const deltaY = Math.abs(towerCenterY - clickY);
-
-    if (deltaX <= towerRangeX && deltaY <= towerRangeY && isrefund) {
-      // sendEvent(22, {
-      //   towers,
-      //   towerpos: { x: tower.x, y: tower.y },
-      //   userGold,
-      // });
-      towers.splice(i, 1);
-      userGold += towerCost * 0.5
+  serverSocket.on('RefundTower', (data) => {
+    if (data.status === 'fail' && data.message === 'tower mismatch') {
+      alert('존재하지 않는 타워입니다.');
     }
-  }
+    if (data.status === 'fail' && data.message === 'No towers on the field') {
+      alert('환불할 수 있는 타워가 없습니다.');
+    }
+    if (data.status === 'success') {
+      refundTower(data.index, data.refundAmount) 
+    }
+    else {
+      console.error('Error occurred while refund the tower!');
+      alert('Error occurred while refund the tower!');
+    }
+  })
 });
 
-// 타워 구입 버튼
+
+
+
+// 타워 구매 버튼
 const buyTowerButton = document.createElement('button');
-buyTowerButton.textContent = '타워 구입';
+buyTowerButton.textContent = '타워 구매';
 buyTowerButton.style.position = 'absolute';
 buyTowerButton.style.top = '10px';
 buyTowerButton.style.right = '10px';
@@ -527,9 +548,9 @@ buyTowerButton.addEventListener('click', clickBuyTower);
 
 document.body.appendChild(buyTowerButton);
 
-// 타워 환불 버튼
+// 타워 판매 버튼
 const refundTowerButton = document.createElement('button');
-refundTowerButton.textContent = '타워 환불';
+refundTowerButton.textContent = '타워 판매';
 refundTowerButton.style.position = 'absolute';
 refundTowerButton.style.top = '10px';
 refundTowerButton.style.right = '150px';
@@ -537,11 +558,11 @@ refundTowerButton.style.padding = '10px 20px';
 refundTowerButton.style.fontSize = '16px';
 refundTowerButton.style.cursor = 'pointer';
 
-refundTowerButton.addEventListener('click', refundTower);
+refundTowerButton.addEventListener('click', clickRefundTower);
 
 document.body.appendChild(refundTowerButton);
 
-// 타워 업그레이드 버튼
+// 타워 강화 버튼
 const upgradeTowerButton = document.createElement('button');
 upgradeTowerButton.textContent = '타워 강화';
 upgradeTowerButton.style.position = 'absolute';

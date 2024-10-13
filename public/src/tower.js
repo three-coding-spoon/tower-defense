@@ -8,7 +8,7 @@ export class Tower {
     this.width = 78; // 타워 이미지 가로 길이 (이미지 파일 길이에 따라 변경 필요하며 세로 길이와 비율을 맞춰주셔야 합니다!)
     this.height = 150; // 타워 이미지 세로 길이
     this.range = 300; // 타워 사거리
-    this.cost = 1000; // 타워 구입 비용
+    this.cost = 1000; // 타워 구매 가격
     this.cooldown = 180; // 타워 공격 쿨타임
     this.beamDuration = 50; // 타워 광선 지속 시간
     this.init(level);
@@ -21,6 +21,7 @@ export class Tower {
 
   init(level) {
     this.level = level; // 타워 레벨
+    this.price = 1000 * level; // 레벨당 타워 가치 
     this.attackPower = 50 * level; // 타워 공격력
   }
 

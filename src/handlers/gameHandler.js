@@ -22,6 +22,7 @@ export const gameStart = (userId, payload, socket, io) => {
     // 유저의 몹 카운트와 스테이지 정보 초기화
     initMobCounts(userId);
     createStage(userId);
+    // initTowers(userId);
 
     // 유저의 몹 카운트와 스테이지 정보가 초기화가 되었는지 확인
     const userMobCount = getMobCount(userId);
