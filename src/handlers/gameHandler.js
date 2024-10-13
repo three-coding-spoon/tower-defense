@@ -9,6 +9,7 @@ import { broadcastNewHighScore } from './broadcastHandler.js';
 import { initGameStateInfo } from '../../constants.js';
 import { getTopHighScore } from '../models/scoreModel.js';
 import { getUserById } from '../models/userModel.js';
+import { addLog } from '../utils/log.js';
 
 export const gameStart = (userId, payload, socket, io) => {
   try {
@@ -16,6 +17,7 @@ export const gameStart = (userId, payload, socket, io) => {
     // 게임 에셋을 클라이언트로 전송
     if (assets === 'undefined' || assets === null) {
       socket.emit('gameAssets', { status: 'fail', message: '에셋을 불러오지 못했습니다.' });
+      addLog(userId, 2, `${userId}번 유저의 애샛 로드에 실패했습니다.`);
     }
     socket.emit('gameAssets', assets);
 
@@ -28,6 +30,7 @@ export const gameStart = (userId, payload, socket, io) => {
     const userStage = getStage(userId);
     if (!userMobCount || !userStage) {
       socket.emit('gameStart', { status: 'fail', message: '게임 초기화에 실패했습니다.' });
+      addLog(userId, 2, `${userId}번 유저의 게임 초기화에 실패했습니다.`);
     }
 
     socket.emit('gameStart', {
@@ -35,12 +38,14 @@ export const gameStart = (userId, payload, socket, io) => {
       message: '게임 시작에 성공했습니다.',
       initGameStateInfo,
     });
+    addLog(userId, 2, `${userId}번 유저가 게임을 시작했습니다.`);
     return;
   } catch (err) {
     socket.emit('gameStart', {
       status: 'fail',
       message: '게임 시작에 실패했습니다. ' + err.message,
     });
+    addLog(userId, 2, `${userId}번 유저의 게임 시작에 실패했습니다.`);
     return;
   }
 };
@@ -49,11 +54,20 @@ export const gameEnd = async (userId, payload, socket, io) => {
   try {
     const clientScore = payload.clientScore;
     const serverScore = calculateTotalScore(userId);
+    if (serverScore === -1) {
+      socket.emit('gameEnd', { status: 'fail', message: '부정행위 검출' });
+      addLog(userId, 3, `${userId}번 유저의 스코어 검증 중 부정행위가 발견되었습니다.`);
+    }
 
     console.log(clientScore, serverScore);
 
     if (clientScore !== serverScore) {
       socket.emit('gameEnd', { status: 'fail', message: 'Score mismatch detected.' });
+      addLog(
+        userId,
+        3,
+        `${userId}번 유저의 스코어가 일치하지 않습니다. 서버: ${serverScore}, 클라이언트: ${clientScore}`,
+      );
       return;
     }
 
@@ -73,15 +87,18 @@ export const gameEnd = async (userId, payload, socket, io) => {
     if (serverScore >= highScore) {
       // 브로드캐스트 핸들러 호출
       await broadcastNewHighScore(user.username, io, serverScore);
+      addLog(userId, 3, `${userId}번 유저가 하이 스코어 갱신. 최종 스코어: ${serverScore}`);
     }
 
     socket.emit('gameEnd', { status: 'success', message: '게임이 종료되었습니다.' });
+    addLog(userId, 3, `${userId}번 유저의 게임이 종료되었습니다. 최종 스코어: ${serverScore}`);
     return;
   } catch (error) {
     socket.emit('gameEnd', {
       status: 'fail',
       message: '게임이 비정상적으로 종료되었습니다.' + error.message,
     });
+    addLog(userId, 3, `${userId}번 유저의 게임이 비정상적으로 종료되었습니다.`);
     return;
   }
 };
