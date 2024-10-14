@@ -11,7 +11,6 @@ import { Button } from './button.js';
 let userId = null;
 let assets = {};
 let gameOver = false;
-let gamePause = false;
 
 const authObj = JSON.parse(sessionStorage.getItem('authorization'));
 
@@ -30,7 +29,6 @@ let isInitGame = false;
 let userGold = 0; // 유저 골드
 let base; // 기지 객체
 let baseHp = 1000; // 기지 체력
-let towerCost = 0; // 타워 구입 비용
 let numOfInitialTowers = 3; // 초기 타워 개수
 let towerId = 0;
 
