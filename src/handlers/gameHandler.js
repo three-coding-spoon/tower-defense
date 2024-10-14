@@ -9,7 +9,7 @@ import { broadcastNewHighScore } from './broadcastHandler.js';
 import { initGameStateInfo } from '../../constants.js';
 import { getTopHighScore } from '../models/scoreModel.js';
 import { getUserById } from '../models/userModel.js';
-import { initTowers, getAllUserTowers } from '../models/towerModel.js';
+import { initTowers, getAllUserTowers, clearTowers } from '../models/towerModel.js';
 import { addLog } from '../utils/log.js';
 
 export const gameStart = (userId, payload, socket, io) => {
@@ -90,7 +90,7 @@ export const gameEnd = async (userId, payload, socket, io) => {
 
     // 하이스코어 갱신 여부 확인
     const highScore = await getTopHighScore();
-    if (serverScore >= highScore) {
+    if (serverScore > highScore) {
       // 브로드캐스트 핸들러 호출
       await broadcastNewHighScore(user.username, io, serverScore);
       addLog(userId, 3, `${userId}번 유저가 하이 스코어 갱신. 최종 스코어: ${serverScore}`);
@@ -102,6 +102,7 @@ export const gameEnd = async (userId, payload, socket, io) => {
     // 유저 게임 데이터 초기화
     clearMobCounts(userId);
     clearStage(userId);
+    clearTowers(userId);
     return;
   } catch (error) {
     socket.emit('gameEnd', {

@@ -485,14 +485,14 @@ function startStage() {
   }
 }
 
-function initGameState(initGameStateInfo) {
+function initGameState() {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
-  userGold = initGameStateInfo.userGold;
-  baseHp = initGameStateInfo.baseHp + 1000;
-  numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
-  monsterLevel = initGameStateInfo.monsterLevel;
-  monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
-  score = initGameStateInfo.score;
+  userGold = initGameData.userGold;
+  baseHp = initGameData.baseHp + 1000;
+  numOfInitialTowers = initGameData.numOfInitialTowers;
+  monsterLevel = initGameData.monsterLevel;
+  monsterSpawnInterval = initGameData.monsterSpawnInterval;
+  score = initGameData.score;
 }
 
 function retryGame() {
@@ -602,7 +602,7 @@ Promise.all([
       // [수빈] initGame() 이든 initGameState() 이든 둘 중 하나만 초기화로 써야 할거같음.
       if (!isInitGame) {
         initGameData = data.initGameStateInfo;
-        initGameState(initGameData);
+        initGameState();
         initGame();
       }
     }
@@ -696,6 +696,8 @@ Promise.all([
     }
   });
 });
+
+// 서버에 이벤트 요청
 const sendEvent = (handlerId, payload, timestamp) => {
   serverSocket.emit('event', {
     userId,

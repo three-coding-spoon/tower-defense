@@ -10,10 +10,6 @@ import { createStage } from '../models/stageModel.js';
 export const handleConnection = async (socket, userId) => {
   console.log(`New user connected: ${userId} with socket ID ${socket.id}`);
 
-  // 사용자별 몹 카운트 및 스테이지 초기화
-  initMobCounts(userId);
-  createStage(userId);
-
   // 하이 스코어 가져오기
   const highScore = await getTopHighScore();
 

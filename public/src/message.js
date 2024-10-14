@@ -125,17 +125,6 @@ export class GameEndMessage {
     ctx.textAlign = 'center';
     ctx.fillStyle = this.isVictory ? 'yellow' : 'red';
     ctx.fillText(title, halfWidth, halfHeight - ctx.canvas.height * 0.15);
-
-    // // 버튼 그리기
-    // ctx.fillStyle = 'gray';
-    // ctx.fillRect(halfWidth - 100, halfHeight, 200, 40);
-    // ctx.fillStyle = 'gray';
-    // ctx.fillRect(halfWidth - 100, halfHeight + 60, 200, 40);
-
-    // // 버튼 텍스트
-    // ctx.fillStyle = 'white';
-    // ctx.fillText('재도전', halfWidth, halfHeight + 25);
-    // ctx.fillText('게임 종료', halfWidth, halfHeight + 85);
   }
 
   show() {
