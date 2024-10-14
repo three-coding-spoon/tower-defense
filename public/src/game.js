@@ -24,28 +24,35 @@ const gameEndMessage = new GameEndMessage();
 const NUM_OF_MONSTERS = 6; // 몬스터 개수
 
 // 초기화할 게임 세팅 파트
+let initGameData = null; // 초기화 데이터 묶음. 게임 시작 핸들러 이벤트로 데이터 받아올 예정
+let isInitGame = false;
+
 let userGold = 0; // 유저 골드
 let base; // 기지 객체
-let baseHp = 0; // 기지 체력
+let baseHp = 1000; // 기지 체력
 let towerCost = 0; // 타워 구입 비용
 let numOfInitialTowers = 3; // 초기 타워 개수
 let towerId = 0;
+
+// 몬스터 초기 세팅
+const monsters = [];
 let monsterLevel = 0; // 몬스터 레벨
 let monsterSpawnInterval = 1000; // 몬스터 생성 주기
-let initGameData = null; // 초기화 데이터 묶음. 게임 시작 핸들러 이벤트로 데이터 받아올 예정
-let animationId = null; // 애니메이션 아이디
-const monsters = [];
-const towers = [];
-let score = 0; // 게임 점수
-let highScore = 0; // 기존 최고 랭킹 점수
-let isInitGame = false;
 let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
 let totalSpawnCount = 0; // 현재 스테이지에서 스폰해야 할 총 몬스터 수
-let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
+let monsterSpawnTimer = null; // 몬스터 스폰을 위한 타이머
 let isBonusSpawned = false;
 
-// 선택된 타워 인덱스
-let selectedTowerIndex = null;
+// 애니메이션 세팅
+let animationId = null; // 애니메이션 아이디
+
+// 타워 세팅
+const towers = [];
+let selectedTowerIndex = null; // 선택된 타워 인덱스
+
+// 점수 세팅
+let score = 0; // 게임 점수
+let highScore = 0; // 기존 최고 랭킹 점수
 
 // 버튼 생성 파트
 const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame); // 재도전 버튼
@@ -220,7 +227,7 @@ function placeNewTower() {
 
 function clickRefundTower() {
   if (selectedTowerIndex === null) {
-    alert('환불할 타워를 먼저 선택해주세요.');
+    gameStateMessage.showMessage(15);
     return;
   }
   const tower = towers[selectedTowerIndex];
@@ -240,7 +247,7 @@ function refundTower(index, refundAmount) {
 // 타워 강화
 function clickupgradeTower() {
   if (selectedTowerIndex === null) {
-    alert('강화할 타워를 먼저 선택해주세요.');
+    gameStateMessage.showMessage(16);
     return;
   }
 
@@ -302,114 +309,112 @@ function spawnMonster() {
 
 function gameLoop() {
   // 렌더링 시에는 항상 배경 이미지부터 그려야 합니다! 그래야 다른 이미지들이 배경 이미지 위에 그려져요!
-  if (!gamePause) {
-    if (!gameOver) {
-      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
-      drawPath(monsterPath); // 경로 다시 그리기
+  if (!gameOver) {
+    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
+    drawPath(monsterPath); // 경로 다시 그리기
 
-      ctx.font = '25px Times New Roman';
-      ctx.textAlign = 'start';
-      ctx.fillStyle = 'skyblue';
-      ctx.fillText(`최고 랭킹 점수: ${highScore}`, 100, 50); // 최고 기록 표시
-      ctx.fillStyle = 'white';
-      ctx.fillText(`점수: ${score}`, 100, 100); // 현재 스코어 표시
-      ctx.fillStyle = 'yellow';
-      ctx.fillText(`골드: ${userGold}`, 100, 150); // 골드 표시
-      ctx.fillStyle = 'black';
-      ctx.fillText(`현재 레벨: ${monsterLevel}`, 100, 200); // 최고 기록 표시
+    ctx.font = '25px Times New Roman';
+    ctx.textAlign = 'start';
+    ctx.fillStyle = 'skyblue';
+    ctx.fillText(`최고 랭킹 점수: ${highScore}`, 100, 50); // 최고 기록 표시
+    ctx.fillStyle = 'white';
+    ctx.fillText(`점수: ${score}`, 100, 100); // 현재 스코어 표시
+    ctx.fillStyle = 'yellow';
+    ctx.fillText(`골드: ${userGold}`, 100, 150); // 골드 표시
+    ctx.fillStyle = 'black';
+    ctx.fillText(`현재 레벨: ${monsterLevel}`, 100, 200); // 최고 기록 표시
 
-      // 타워 그리기 및 몬스터 공격 처리
-      towers.forEach((tower) => {
-        tower.draw(ctx, towerImage);
-        tower.updateCooldown();
-        monsters.forEach((monster) => {
-          const distance = Math.sqrt(
-            Math.pow(tower.x - monster.x, 2) + Math.pow(tower.y - monster.y, 2),
-          );
-          if (distance < tower.range) {
-            tower.attack(monster);
-          }
-        });
+    // 타워 그리기 및 몬스터 공격 처리
+    towers.forEach((tower) => {
+      tower.draw(ctx, towerImage);
+      tower.updateCooldown();
+      monsters.forEach((monster) => {
+        const distance = Math.sqrt(
+          Math.pow(tower.x - monster.x, 2) + Math.pow(tower.y - monster.y, 2),
+        );
+        if (distance < tower.range) {
+          tower.attack(monster);
+        }
       });
+    });
 
-      // 선택된 타워 하이라이팅
-      highlightSelectedTower();
+    // 선택된 타워 하이라이팅
+    highlightSelectedTower();
 
-      // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
-      base.draw(ctx, baseImage);
+    // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
+    base.draw(ctx, baseImage);
 
-      for (let i = monsters.length - 1; i >= 0; i--) {
-        const monster = monsters[i];
-        if (monster.hp > 0) {
-          const isDestroyed = monster.move(base);
-          if (isDestroyed) {
-            /* 게임 오버 */
+    for (let i = monsters.length - 1; i >= 0; i--) {
+      const monster = monsters[i];
+      if (monster.hp > 0) {
+        const isDestroyed = monster.move(base);
+        if (isDestroyed) {
+          /* 게임 오버 */
+          sendEvent(3, {
+            clientScore: score,
+          });
+          // 게임 오버에 따른 메시지 박스 출력 (재도전, 게임 종료)
+          gameEndMessage.show();
+          gameOver = true;
+        }
+        monster.draw(ctx);
+      } else {
+        if (monster.isKilledByPlayer) {
+          // 플레이어 공격에 의해 몬스터가 죽었을 때
+          score += monster.score;
+          userGold += monster.score;
+
+          sendEvent(5, {
+            monsterId: monster.monsterNumber,
+          });
+        }
+
+        // 기존 코드
+        // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
+        monsters.splice(i, 1);
+
+        const clientTime = Date.now();
+
+        // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
+        if (monsters.length === 0 && monstersSpawned === totalSpawnCount) {
+          const targetLevel = monsterLevel + 1;
+          // console.log(assets.wave.data.length);
+          if (targetLevel > assets.wave.data.length) {
+            // 모든 웨이브 완료 시
             sendEvent(3, {
               clientScore: score,
             });
-            // 게임 오버에 따른 메시지 박스 출력 (재도전, 게임 종료)
+            // 게임 클리어에 따른 메시지 박스 출력 (재도전, 게임 종료)
+            gameEndMessage.isVictory = true;
             gameEndMessage.show();
             gameOver = true;
-          }
-          monster.draw(ctx);
-        } else {
-          if (monster.isKilledByPlayer) {
-            // 플레이어 공격에 의해 몬스터가 죽었을 때
-            score += monster.score;
-            userGold += monster.score;
-
-            sendEvent(5, {
-              monsterId: monster.monsterNumber,
+          } else {
+            sendEvent(11, {
+              currentStage: monsterLevel,
+              targetStage: targetLevel,
+              clientTimestamp: clientTime,
             });
-          }
-
-          // 기존 코드
-          // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
-          monsters.splice(i, 1);
-
-          const clientTime = Date.now();
-
-          // 총 스폰 수 만큼 스폰이 됐고 필드에 몬스터가 더 없을 때
-          if (monsters.length === 0 && monstersSpawned === totalSpawnCount) {
-            const targetLevel = monsterLevel + 1;
-
-            if (targetLevel > assets.wave.data.length) {
-              // 모든 웨이브 완료 시
-              sendEvent(3, {
-                clientScore: score,
-              });
-              // 게임 클리어에 따른 메시지 박스 출력 (재도전, 게임 종료)
-              gameEndMessage.isVictory = true;
-              gameEndMessage.show();
-              gameOver = true;
-            } else {
-              sendEvent(11, {
-                currentStage: monsterLevel,
-                targetStage: targetLevel,
-                clientTimestamp: clientTime,
-              });
-              gameStateMessage.showMessage(2);
-            }
+            gameStateMessage.showMessage(2);
           }
         }
       }
     }
-    // 게임 현황에 대한 메시지 표시
-    gameStateMessage.draw(ctx);
+  }
 
-    // 게임 종료 시 메뉴판 표시
-    gameEndMessage.draw(ctx);
+  // 게임 현황에 대한 메시지 표시
+  gameStateMessage.draw(ctx);
 
-    // 게임 종료 시 게임 종료, 재도전 버튼 표시할 수 있도록 설정
-    // 또한 타워 구입, 판매, 업그레이드는 가려주기로 설정
-    if (gameOver) {
-      retryButton.show();
-      exitButton.show();
-      buyTowerButton.hide();
-      buyTowerButton.hide();
-      refundTowerButton.hide();
-      upgradeTowerButton.hide();
-    }
+  // 게임 종료 시 메뉴판 표시
+  gameEndMessage.draw(ctx);
+
+  // 게임 종료 시 게임 종료, 재도전 버튼 표시할 수 있도록 설정
+  // 또한 타워 구입, 판매, 업그레이드는 가려주기로 설정
+  if (gameOver) {
+    retryButton.show();
+    exitButton.show();
+    buyTowerButton.hide();
+    refundTowerButton.hide();
+    upgradeTowerButton.hide();
   }
 
   // 선택된 타워 정보 업데이트
@@ -424,6 +429,7 @@ function gameLoop() {
   } else {
     selectedTowerInfo.innerHTML = '선택된 타워: 없음';
   }
+
   animationId = requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
 }
 
@@ -454,7 +460,8 @@ function initGame() {
   monstersSpawned = 0;
 
   // 몬스터를 주기적으로 스폰
-  monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
+  startSpawnMonster();
+  // monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
   gameLoop(); // 게임 루프 최초 실행
   isInitGame = true;
 }
@@ -469,7 +476,8 @@ function startStage() {
   totalSpawnCount = wave.data[monsterLevel - 1].total_spawn_count;
   monstersSpawned = 0;
   isBonusSpawned = false;
-  monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
+  startSpawnMonster();
+  // monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
 
   if (!isInitGame) {
     gameLoop();
@@ -480,7 +488,7 @@ function startStage() {
 function initGameState(initGameStateInfo) {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameStateInfo.userGold;
-  baseHp = initGameStateInfo.baseHp + 10000;
+  baseHp = initGameStateInfo.baseHp + 1000;
   numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
   monsterLevel = initGameStateInfo.monsterLevel;
   monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
@@ -506,6 +514,13 @@ function retryGame() {
   cancelAnimationFrame(animationId);
   animationId = null;
   sendEvent(2);
+}
+
+function startSpawnMonster() {
+  if (monsterSpawnTimer !== null) {
+    clearInterval(monsterSpawnTimer);
+  }
+  monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
 }
 
 function pauseGame() {
@@ -644,9 +659,9 @@ Promise.all([
       placeNewTower();
       userGold -= data.cost;
     } else if (data.status === 'fail' && data.message === 'tower limit') {
-      alert('타워는 10개까지만 구매 가능합니다.');
+      gameStateMessage.showMessage(9);
     } else if (data.status === 'fail' && data.message === 'not enough gold') {
-      alert('골드가 부족합니다.');
+      gameStateMessage.showMessage(10);
     } else {
       console.error('Error occurred while buy the tower!');
       alert('Error occurred while buy the tower!');
@@ -655,9 +670,9 @@ Promise.all([
 
   serverSocket.on('RefundTower', (data) => {
     if (data.status === 'fail' && data.message === 'tower mismatch') {
-      alert('존재하지 않는 타워입니다.');
+      gameStateMessage.showMessage(11);
     } else if (data.status === 'fail' && data.message === 'No towers on the field') {
-      alert('환불할 수 있는 타워가 없습니다.');
+      gameStateMessage.showMessage(12);
     } else if (data.status === 'success') {
       refundTower(data.index, data.refundAmount);
     } else {
@@ -668,11 +683,11 @@ Promise.all([
 
   serverSocket.on('upgradeTower', (data) => {
     if (data.status === 'fail' && data.message === 'Tower data corrupted') {
-      alert('타워 데이터가 손상되었습니다.');
+      gameStateMessage.showMessage(13);
     } else if (data.status === 'fail' && data.message === 'max level') {
-      alert('이미 최대로 강화된 타워가 선택되었습니다.');
+      gameStateMessage.showMessage(14);
     } else if (data.status === 'fail' && data.message === 'not enough gold') {
-      alert('골드가 부족합니다.');
+      gameStateMessage.showMessage(10);
     } else if (data.status === 'success') {
       upgradeTower(data.index, data.cost);
     } else {
