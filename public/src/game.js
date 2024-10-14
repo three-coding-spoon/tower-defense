@@ -5,9 +5,6 @@ import { CLIENT_VERSION } from './constant.js';
 import { GameStateMessage, GameEndMessage } from './message.js';
 import { Button } from './button.js';
 
-/* 
-  어딘가에 엑세스 토큰이 저장이 안되어 있다면 로그인을 유도하는 코드를 여기에 추가해주세요!
-*/
 let userId = null;
 let assets = {};
 let gameOver = false;
@@ -287,8 +284,6 @@ function spawnMonster() {
 
     monsters.push(newMonster);
 
-    // 이때 몹의 고유 ID는 monster.length - 1;
-
     // 새로운 보너스 몬스터가 스폰되었을 때 플래그 설정
     if (shouldSpawnBonus) {
       isBonusSpawned = true;
@@ -512,14 +507,6 @@ function startSpawnMonster() {
     clearInterval(monsterSpawnTimer);
   }
   monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
-}
-
-function pauseGame() {
-  gamePause = true;
-}
-
-function continueGame() {
-  gamePause = false;
 }
 
 function exitGame() {
