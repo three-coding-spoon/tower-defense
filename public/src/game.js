@@ -11,7 +11,7 @@ import { Button } from './button.js';
 let userId = null;
 let assets = {};
 let gameOver = false;
-let isVictory = false;
+let gamePause = false;
 
 const authObj = JSON.parse(sessionStorage.getItem('authorization'));
 
@@ -23,7 +23,7 @@ const gameEndMessage = new GameEndMessage();
 
 const NUM_OF_MONSTERS = 6; // 몬스터 개수
 
-// 초기화할 게임 세팅들 ...
+// 초기화할 게임 세팅 파트
 let userGold = 0; // 유저 골드
 let base; // 기지 객체
 let baseHp = 0; // 기지 체력
@@ -33,25 +33,23 @@ let towerId = 0;
 let monsterLevel = 0; // 몬스터 레벨
 let monsterSpawnInterval = 1000; // 몬스터 생성 주기
 let initGameData = null; // 초기화 데이터 묶음. 게임 시작 핸들러 이벤트로 데이터 받아올 예정
+let animationId = null; // 애니메이션 아이디
 const monsters = [];
 const towers = [];
-
 let score = 0; // 게임 점수
 let highScore = 0; // 기존 최고 랭킹 점수
 let isInitGame = false;
-
 let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
 let totalSpawnCount = 0; // 현재 스테이지에서 스폰해야 할 총 몬스터 수
 let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
-
 let isBonusSpawned = false;
 
 // 선택된 타워 인덱스
 let selectedTowerIndex = null;
 
 // 버튼 생성 파트
-const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame);
-const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 160}px`, null, exitGame);
+const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame); // 재도전 버튼
+const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 160}px`, null, exitGame); // 게임 종료 버튼
 const buyTowerButton = new Button('타워 구입', '10px', '10px', clickBuyTower);
 const refundTowerButton = new Button('타워 판매', '10px', '150px', clickRefundTower);
 const upgradeTowerButton = new Button('타워 강화', '10px', '290px', clickupgradeTower);
@@ -304,108 +302,115 @@ function spawnMonster() {
 
 function gameLoop() {
   // 렌더링 시에는 항상 배경 이미지부터 그려야 합니다! 그래야 다른 이미지들이 배경 이미지 위에 그려져요!
+  if (!gamePause) {
+    if (!gameOver) {
+      ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
+      drawPath(monsterPath); // 경로 다시 그리기
 
-  if (!gameOver) {
-    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
-    drawPath(monsterPath); // 경로 다시 그리기
+      ctx.font = '25px Times New Roman';
+      ctx.textAlign = 'start';
+      ctx.fillStyle = 'skyblue';
+      ctx.fillText(`최고 랭킹 점수: ${highScore}`, 100, 50); // 최고 기록 표시
+      ctx.fillStyle = 'white';
+      ctx.fillText(`점수: ${score}`, 100, 100); // 현재 스코어 표시
+      ctx.fillStyle = 'yellow';
+      ctx.fillText(`골드: ${userGold}`, 100, 150); // 골드 표시
+      ctx.fillStyle = 'black';
+      ctx.fillText(`현재 레벨: ${monsterLevel}`, 100, 200); // 최고 기록 표시
 
-    ctx.font = '25px Times New Roman';
-    ctx.textAlign = 'start';
-    ctx.fillStyle = 'skyblue';
-    ctx.fillText(`최고 랭킹 점수: ${highScore}`, 100, 50); // 최고 기록 표시
-    ctx.fillStyle = 'white';
-    ctx.fillText(`점수: ${score}`, 100, 100); // 현재 스코어 표시
-    ctx.fillStyle = 'yellow';
-    ctx.fillText(`골드: ${userGold}`, 100, 150); // 골드 표시
-    ctx.fillStyle = 'black';
-    ctx.fillText(`현재 레벨: ${monsterLevel}`, 100, 200); // 최고 기록 표시
-
-    // 타워 그리기 및 몬스터 공격 처리
-    towers.forEach((tower) => {
-      tower.draw(ctx, towerImage);
-      tower.updateCooldown();
-      monsters.forEach((monster) => {
-        const distance = Math.sqrt(
-          Math.pow(tower.x - monster.x, 2) + Math.pow(tower.y - monster.y, 2),
-        );
-        if (distance < tower.range) {
-          tower.attack(monster);
-        }
+      // 타워 그리기 및 몬스터 공격 처리
+      towers.forEach((tower) => {
+        tower.draw(ctx, towerImage);
+        tower.updateCooldown();
+        monsters.forEach((monster) => {
+          const distance = Math.sqrt(
+            Math.pow(tower.x - monster.x, 2) + Math.pow(tower.y - monster.y, 2),
+          );
+          if (distance < tower.range) {
+            tower.attack(monster);
+          }
+        });
       });
-    });
-    
-    // 선택된 타워 하이라이팅
-    highlightSelectedTower();
-    // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
-    base.draw(ctx, baseImage);
 
-    for (let i = monsters.length - 1; i >= 0; i--) {
-      const monster = monsters[i];
-      if (monster.hp > 0) {
-        const isDestroyed = monster.move(base);
-        if (isDestroyed) {
-          /* 게임 오버 */
-          sendEvent(3, {
-            clientScore: score,
-          });
-          gameEndMessage.show();
-          gameOver = true;
+      // 선택된 타워 하이라이팅
+      highlightSelectedTower();
 
-          // alert('게임 오버. 스파르타 본부를 지키지 못했다...ㅠㅠ');
-          // stopGameLoop = true;
+      // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
+      base.draw(ctx, baseImage);
 
-          // 게임 오버에 따른 메시지 박스 출력 (재도전, 게임 종료)
-        }
-        monster.draw(ctx);
-      } else {
-        if (monster.isKilledByPlayer) {
-          // 플레이어 공격에 의해 몬스터가 죽었을 때
-          score += monster.score;
-          userGold += monster.score;
-
-          sendEvent(5, {
-            monsterId: monster.monsterNumber,
-          });
-        }
-
-        // 기존 코드
-        // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
-        monsters.splice(i, 1);
-
-        const clientTime = Date.now();
-
-        // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
-        if (monsters.length === 0) {
-          const targetLevel = monsterLevel + 1;
-          console.log(assets.wave.data.length);
-          if (targetLevel > assets.wave.data.length) {
-            // 모든 웨이브 완료 시
+      for (let i = monsters.length - 1; i >= 0; i--) {
+        const monster = monsters[i];
+        if (monster.hp > 0) {
+          const isDestroyed = monster.move(base);
+          if (isDestroyed) {
+            /* 게임 오버 */
             sendEvent(3, {
               clientScore: score,
             });
+            // 게임 오버에 따른 메시지 박스 출력 (재도전, 게임 종료)
+            gameEndMessage.show();
             gameOver = true;
-            // 게임 클리어에 따른 메시지 박스 출력 (재도전, 게임 종료)
-            isVictory = true;
-            alert('게임 클리어!');
+          }
+          monster.draw(ctx);
+        } else {
+          if (monster.isKilledByPlayer) {
+            // 플레이어 공격에 의해 몬스터가 죽었을 때
+            score += monster.score;
+            userGold += monster.score;
 
-            // stopGameLoop = true;
-          } else {
-            sendEvent(11, {
-              currentStage: monsterLevel,
-              targetStage: targetLevel,
-              clientTimestamp: clientTime,
+            sendEvent(5, {
+              monsterId: monster.monsterNumber,
             });
-            gameStateMessage.showMessage(2);
+          }
+
+          // 기존 코드
+          // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
+          monsters.splice(i, 1);
+
+          const clientTime = Date.now();
+
+          // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
+          if (monsters.length === 0) {
+            const targetLevel = monsterLevel + 1;
+            // console.log(assets.wave.data.length);
+            if (targetLevel > assets.wave.data.length) {
+              // 모든 웨이브 완료 시
+              sendEvent(3, {
+                clientScore: score,
+              });
+              // 게임 클리어에 따른 메시지 박스 출력 (재도전, 게임 종료)
+              gameEndMessage.isVictory = true;
+              gameEndMessage.show();
+              gameOver = true;
+            } else {
+              sendEvent(11, {
+                currentStage: monsterLevel,
+                targetStage: targetLevel,
+                clientTimestamp: clientTime,
+              });
+              gameStateMessage.showMessage(2);
+            }
           }
         }
       }
     }
-  }
-  // 게임 현황에 대한 메시지 표시
-  gameStateMessage.draw(ctx);
+    // 게임 현황에 대한 메시지 표시
+    gameStateMessage.draw(ctx);
 
-  // 게임 종료 시 메뉴판 표시
-  gameEndMessage.draw(ctx, isVictory);
+    // 게임 종료 시 메뉴판 표시
+    gameEndMessage.draw(ctx);
+
+    // 게임 종료 시 게임 종료, 재도전 버튼 표시할 수 있도록 설정
+    // 또한 타워 구입, 판매, 업그레이드는 가려주기로 설정
+    if (gameOver) {
+      retryButton.show();
+      exitButton.show();
+      buyTowerButton.hide();
+      buyTowerButton.hide();
+      refundTowerButton.hide();
+      upgradeTowerButton.hide();
+    }
+  }
 
   // 선택된 타워 정보 업데이트
   if (selectedTowerIndex !== null) {
@@ -419,25 +424,7 @@ function gameLoop() {
   } else {
     selectedTowerInfo.innerHTML = '선택된 타워: 없음';
   }
-
-  // 게임 현황에 대한 메시지 표시
-  gameStateMessage.draw(ctx);
-
-  // 게임 종료 시 메뉴판 표시
-  gameEndMessage.draw(ctx, isVictory);
-
-  // 게임 종료 시 게임 종료, 재도전 버튼 표시할 수 있도록 설정
-  if (gameOver) {
-    retryButton.show();
-    exitButton.show();
-    buyTowerButton.hide();
-    refundTowerButton.hide();
-    upgradeTowerButton.hide();
-  }
-  requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
-  // if (!gameOver) {
-  //   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
-  // }
+  animationId = requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
 }
 
 function initGame() {
@@ -492,7 +479,7 @@ function startStage() {
 function initGameState(initGameStateInfo) {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameStateInfo.userGold;
-  baseHp = initGameStateInfo.baseHp - 90;
+  baseHp = initGameStateInfo.baseHp + 10000;
   numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
   monsterLevel = initGameStateInfo.monsterLevel;
   monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
@@ -502,16 +489,29 @@ function initGameState(initGameStateInfo) {
 function retryGame() {
   // 게임 재시작 해주기 위한 초기화 작업
   console.log('게임 재시작 합니다.');
+
+  // 배열안에 있는 값을 모두 삭제하는 법 => arr.length = 0
+  monsters.length = 0;
+  towers.length = 0;
   gameOver = false;
-  isVictory = false;
   isInitGame = false;
   isBonusSpawned = false;
   monstersSpawned = 0;
   totalSpawnCount = 0;
-  // 배열안에 있는 값을 모두 삭제하는 법 => arr.length = 0
-  monsters.length = 0;
-  towers.length = 0;
-  initGame(initGameData);
+  gameEndMessage.isVictory = false;
+
+  // 현재 진행중인 애니메이션 프레임을 종료 시킴 => 안하면 게임 속도가 빨라짐 (중첩)
+  cancelAnimationFrame(animationId);
+  animationId = null;
+  sendEvent(2);
+}
+
+function pauseGame() {
+  gamePause = true;
+}
+
+function continueGame() {
+  gamePause = false;
 }
 
 function exitGame() {
@@ -554,7 +554,7 @@ Promise.all([
     highScore = data.highScore;
     userId = data.userId;
     // 초기화 핸들러
-    sendEvent(2, { payload: data.userId });
+    sendEvent(2);
   });
 
   serverSocket.on('disconnect', () => {
