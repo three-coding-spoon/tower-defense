@@ -6,6 +6,8 @@ export class Button {
     this.button = document.createElement('button');
     this.button.textContent = text;
     this.button.style.position = 'absolute';
+    this.button.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    this.button.style.color = 'rgb(225,225,225)';
     this.button.style.top = top;
     this.button.style.right = right;
     this.button.style.padding = '10px 20px';

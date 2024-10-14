@@ -7,7 +7,7 @@ import { authValidation } from '../middlewares/authMiddleware.js';
 export const register = async (req, res, next) => {
   const { username, password } = req.body;
 
-  const usernameRegex = /^[a-z0-9]+$/;
+  const usernameRegex = /^(?=.*[a-z])(?=.*[0-9])[a-z0-9]+$/;
   if (!usernameRegex.test(username)) {
     return res.status(400).json({
       error: 'username 을 소문자와 숫자를 혼합하여 사용하세요.',

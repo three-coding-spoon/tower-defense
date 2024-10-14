@@ -3,8 +3,8 @@
 import { getGameAssets } from '../init/assets.js';
 import { calculateTotalScore } from '../utils/scoreCalculation.js';
 import { getMyHighScore, updateHighScore } from '../models/scoreModel.js';
-import { initMobCounts, getMobCount } from '../models/mobCountModel.js';
-import { createStage, getStage } from '../models/stageModel.js';
+import { initMobCounts, getMobCount, clearMobCounts } from '../models/mobCountModel.js';
+import { clearStage, createStage, getStage } from '../models/stageModel.js';
 import { broadcastNewHighScore } from './broadcastHandler.js';
 import { initGameStateInfo } from '../../constants.js';
 import { getTopHighScore } from '../models/scoreModel.js';
@@ -95,6 +95,10 @@ export const gameEnd = async (userId, payload, socket, io) => {
 
     socket.emit('gameEnd', { status: 'success', message: '게임이 종료되었습니다.' });
     addLog(userId, 3, `${userId}번 유저의 게임이 종료되었습니다. 최종 스코어: ${serverScore}`);
+
+    // 유저 게임 데이터 초기화
+    clearMobCounts(userId);
+    clearStage(userId);
     return;
   } catch (error) {
     socket.emit('gameEnd', {

@@ -79,11 +79,12 @@ export class GameStateMessage {
  */
 export class GameEndMessage {
   constructor() {
+    this.isVictory = false;
     this.isVisible = false; // 메뉴판의 표시 여부
   }
 
-  draw(ctx, isVicory) {
-    const title = isVicory ? 'Game Clear!' : 'Game Over';
+  draw(ctx) {
+    const title = this.isVictory ? 'Game Clear!' : 'Game Over';
     const halfWidth = ctx.canvas.width / 2;
     const halfHeight = ctx.canvas.height / 2;
     if (!this.isVisible) return; // 메뉴판이 표시되지 않을 때는 그리지 않음
@@ -95,7 +96,7 @@ export class GameEndMessage {
     // 텍스트 설정
     ctx.font = '50px Arial';
     ctx.textAlign = 'center';
-    ctx.fillStyle = isVicory ? 'yellow' : 'red';
+    ctx.fillStyle = this.isVictory ? 'yellow' : 'red';
     ctx.fillText(title, halfWidth, halfHeight - ctx.canvas.height * 0.15);
 
     // // 버튼 그리기
