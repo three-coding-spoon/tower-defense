@@ -216,7 +216,6 @@ function placeNewTower() {
   towers.push(tower);
   sendEvent(30, { towerData: tower, index: towers.length - 1 });
   towerId++; // 타워 건설 후, 타워 Id를 더한다.
-  console.log(towerId);
 }
 
 function clickRefundTower() {
@@ -372,7 +371,7 @@ function gameLoop() {
         // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
         if (monsters.length === 0 && monstersSpawned === totalSpawnCount) {
           const targetLevel = monsterLevel + 1;
-          // console.log(assets.wave.data.length);
+
           if (targetLevel > assets.wave.data.length) {
             // 모든 웨이브 완료 시
             sendEvent(3, {
@@ -388,6 +387,7 @@ function gameLoop() {
               targetStage: targetLevel,
               clientTimestamp: clientTime,
             });
+
             gameStateMessage.showMessage(2);
           }
         }
@@ -584,7 +584,6 @@ Promise.all([
   });
 
   serverSocket.on('gameStart', (data) => {
-    console.log(data.message);
     if (data.status === 'fail') {
       alert(data.message);
       window.location.href = '/';
@@ -594,6 +593,7 @@ Promise.all([
       if (!isInitGame) {
         initGameData = data.initGameStateInfo;
         console.log(initGameData);
+
         initGameState();
         initGame();
       }
@@ -601,7 +601,6 @@ Promise.all([
   });
 
   serverSocket.on('gameEnd', (data) => {
-    console.log(data.message);
     if (data.status === 'fail') {
       alert(data.message);
       window.location.href = '/';
