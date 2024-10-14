@@ -369,10 +369,10 @@ function gameLoop() {
 
           const clientTime = Date.now();
 
-          // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
-          if (monsters.length === 0) {
+          // 총 스폰 수 만큼 스폰이 됐고 필드에 몬스터가 더 없을 때
+          if (monsters.length === 0 && monstersSpawned === totalSpawnCount) {
             const targetLevel = monsterLevel + 1;
-            // console.log(assets.wave.data.length);
+
             if (targetLevel > assets.wave.data.length) {
               // 모든 웨이브 완료 시
               sendEvent(3, {
@@ -463,6 +463,7 @@ function startStage() {
   // 스테이지 이동 시 필요한 초기화
   // monsterPath = generateRandomMonsterPath();
   // initMap();
+  clearInterval(monsterSpawnTimer);
 
   const { wave } = assets;
   totalSpawnCount = wave.data[monsterLevel - 1].total_spawn_count;
@@ -499,6 +500,7 @@ function retryGame() {
   monstersSpawned = 0;
   totalSpawnCount = 0;
   gameEndMessage.isVictory = false;
+  clearInterval(monsterSpawnTimer);
 
   // 현재 진행중인 애니메이션 프레임을 종료 시킴 => 안하면 게임 속도가 빨라짐 (중첩)
   cancelAnimationFrame(animationId);
@@ -640,7 +642,7 @@ Promise.all([
   serverSocket.on('BuyTower', (data) => {
     if (data.status === 'success') {
       placeNewTower();
-      userGold -= towerCost;
+      userGold -= data.cost;
     } else if (data.status === 'fail' && data.message === 'tower limit') {
       alert('타워는 10개까지만 구매 가능합니다.');
     } else if (data.status === 'fail' && data.message === 'not enough gold') {
