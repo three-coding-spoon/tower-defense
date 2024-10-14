@@ -1,0 +1,42 @@
+{
+  "name": "monster",
+  "version": "1.0.0",
+  "data": [
+    {
+      "id": 100,
+      "hp": 100,
+      "attackPower": 10,
+      "score": 10
+    },
+    {
+      "id": 101,
+      "hp": 120,
+      "attackPower": 12,
+      "score": 20
+    },
+    {
+      "id": 102,
+      "hp": 60,
+      "attackPower": 20,
+      "score": 30
+    },
+    {
+      "id": 103,
+      "hp": 200,
+      "attackPower": 6,
+      "score": 40
+    },
+    {
+      "id": 104,
+      "hp": 150,
+      "attackPower": 16,
+      "score": 50
+    },
+    {
+      "id": 105,
+      "hp": 300,
+      "attackPower": 30,
+      "score": 300
+    }
+  ]
+}

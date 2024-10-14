@@ -1,0 +1,56 @@
+{
+  "name": "monster_unlock",
+  "version": "1.0.0",
+  "data": [
+    {
+      "id": 200,
+      "wave_id": 1000,
+      "monster_id": [1, 2, 3]
+    },
+    {
+      "id": 201,
+      "wave_id": 1001,
+      "monster_id": [2, 3, 4]
+    },
+    {
+      "id": 202,
+      "wave_id": 1002,
+      "monster_id": [1, 2, 3]
+    },
+    {
+      "id": 203,
+      "wave_id": 1003,
+      "monster_id": [1, 2, 3, 4]
+    },
+    {
+      "id": 204,
+      "wave_id": 1004,
+      "monster_id": [2, 3, 4]
+    },
+    {
+      "id": 205,
+      "wave_id": 1005,
+      "monster_id": [3, 4]
+    },
+    {
+      "id": 206,
+      "wave_id": 1006,
+      "monster_id": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": 207,
+      "wave_id": 1007,
+      "monster_id": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": 208,
+      "wave_id": 1008,
+      "monster_id": [0, 1, 2, 3, 4]
+    },
+    {
+      "id": 209,
+      "wave_id": 1009,
+      "monster_id": [0, 1, 2, 3, 4]
+    }
+  ]
+}
