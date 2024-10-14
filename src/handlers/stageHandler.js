@@ -4,11 +4,9 @@ import { getStage, setStage } from '../models/stageModel.js';
 import { getGameAssets } from '../init/assets.js';
 import { addLog } from '../utils/log.js';
 
-/**
- * 스테이지 이동 핸들러
- */
+// 스테이지 이동 핸들러
 export const moveStageHandler = (userId, payload, socket) => {
-  const { currentStage, targetStage, clientTimestamp } = payload;
+  const { currentStage, targetStage } = payload;
 
   // 현재 스테이지 확인
   const currentStages = getStage(userId);
@@ -54,8 +52,9 @@ export const moveStageHandler = (userId, payload, socket) => {
   // 스테이지 업데이트
   const timestamp = Date.now();
   setStage(userId, targetStage, timestamp);
-  addLog(userId, 11, `${userId}번 유저가 ${targetStage}번 스테이지로 이동했습니다.`, timestamp);
+  addLog(userId, 11, `${userId}번 유저가 ${targetStage}번 스테이지로 이동했습니다.`);
 
+  // 결과 쏴줌
   socket.emit('moveStage', {
     status: 'success', // 오타 수정
     targetStage,

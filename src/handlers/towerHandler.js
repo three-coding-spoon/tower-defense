@@ -18,14 +18,14 @@ export const InitialTowerHandler = async (userId, payload, socket) => {
     socket.emit('InitialTower', { status: 'success', message: 'Initial Tower complete', towerPos });
     return;
   }
-}
+};
 
 /** 유저 타워 정보 업데이트 핸들러 **/
 export const userTowerUpdate = async (userId, payload, socket) => {
   const { towerData, index } = payload;
 
   updateUserTowerData(userId, towerData, index)
-}
+};
 
 /** 타워 구매 핸들러 **/
 export const handleBuyTower = async (userId, payload, socket) => {
