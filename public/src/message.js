@@ -58,8 +58,35 @@ export class GameStateMessage {
         break;
       case 7:
         this.currentMessage = '최고 랭킹이 갱신되었습니다!';
+        break;
       case 8:
         this.currentMessage = '내 최고 점수가 갱신되었습니다!';
+        break;
+      case 9:
+        this.currentMessage = '타워는 10개까지만 구매 가능합니다.';
+        break;
+      case 10:
+        this.currentMessage = '골드가 부족합니다.';
+        break;
+      case 11:
+        this.currentMessage = '존재하지 않는 타워입니다.';
+        break;
+      case 12:
+        this.currentMessage = '환불할 수 있는 타워가 없습니다.';
+        break;
+      case 13:
+        this.currentMessage = '타워 데이터가 손상되었습니다.';
+        break;
+      case 14:
+        this.currentMessage = '이미 최대로 강화된 타워가 선택되었습니다.';
+        break;
+      case 15:
+        this.currentMessage = '환불할 타워를 먼저 선택해주세요.';
+        break;
+      case 16:
+        this.currentMessage = '강화할 타워를 먼저 선택해주세요.';
+        break;
+
       default:
         this.currentMessage = null;
     }
