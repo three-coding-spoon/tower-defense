@@ -596,6 +596,7 @@ Promise.all([
 
   serverSocket.on('newHighScore', (data) => {
     gameStateMessage.showMessage(7);
+    highScore = data.highScore;
     console.log(data);
   });
 
