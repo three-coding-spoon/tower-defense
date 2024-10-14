@@ -24,28 +24,35 @@ const gameEndMessage = new GameEndMessage();
 const NUM_OF_MONSTERS = 6; // 몬스터 개수
 
 // 초기화할 게임 세팅 파트
+let initGameData = null; // 초기화 데이터 묶음. 게임 시작 핸들러 이벤트로 데이터 받아올 예정
+let isInitGame = false;
+
 let userGold = 0; // 유저 골드
 let base; // 기지 객체
 let baseHp = 1000; // 기지 체력
 let towerCost = 0; // 타워 구입 비용
 let numOfInitialTowers = 3; // 초기 타워 개수
 let towerId = 0;
+
+// 몬스터 초기 세팅
+const monsters = [];
 let monsterLevel = 0; // 몬스터 레벨
 let monsterSpawnInterval = 1000; // 몬스터 생성 주기
-let initGameData = null; // 초기화 데이터 묶음. 게임 시작 핸들러 이벤트로 데이터 받아올 예정
-let animationId = null; // 애니메이션 아이디
-const monsters = [];
-const towers = [];
-let score = 0; // 게임 점수
-let highScore = 0; // 기존 최고 랭킹 점수
-let isInitGame = false;
 let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
 let totalSpawnCount = 0; // 현재 스테이지에서 스폰해야 할 총 몬스터 수
-let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
+let monsterSpawnTimer = null; // 몬스터 스폰을 위한 타이머
 let isBonusSpawned = false;
 
-// 선택된 타워 인덱스
-let selectedTowerIndex = null;
+// 애니메이션 세팅
+let animationId = null; // 애니메이션 아이디
+
+// 타워 세팅
+const towers = [];
+let selectedTowerIndex = null; // 선택된 타워 인덱스
+
+// 점수 세팅
+let score = 0; // 게임 점수
+let highScore = 0; // 기존 최고 랭킹 점수
 
 // 버튼 생성 파트
 const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame); // 재도전 버튼
@@ -369,7 +376,7 @@ function gameLoop() {
         const clientTime = Date.now();
 
         // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
-        if (monsters.length === 0) {
+        if (monsters.length === 0 && monstersSpawned === totalSpawnCount) {
           const targetLevel = monsterLevel + 1;
           // console.log(assets.wave.data.length);
           if (targetLevel > assets.wave.data.length) {
@@ -393,12 +400,18 @@ function gameLoop() {
       }
     }
   }
+
+  // 게임 현황에 대한 메시지 표시
+  gameStateMessage.draw(ctx);
+
+  // 게임 종료 시 메뉴판 표시
+  gameEndMessage.draw(ctx);
+
   // 게임 종료 시 게임 종료, 재도전 버튼 표시할 수 있도록 설정
   // 또한 타워 구입, 판매, 업그레이드는 가려주기로 설정
   if (gameOver) {
     retryButton.show();
     exitButton.show();
-    buyTowerButton.hide();
     buyTowerButton.hide();
     refundTowerButton.hide();
     upgradeTowerButton.hide();
@@ -417,11 +430,6 @@ function gameLoop() {
     selectedTowerInfo.innerHTML = '선택된 타워: 없음';
   }
 
-  // 게임 현황에 대한 메시지 표시
-  gameStateMessage.draw(ctx);
-
-  // 게임 종료 시 메뉴판 표시
-  gameEndMessage.draw(ctx);
   animationId = requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
 }
 
@@ -452,7 +460,8 @@ function initGame() {
   monstersSpawned = 0;
 
   // 몬스터를 주기적으로 스폰
-  monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
+  startSpawnMonster();
+  // monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
   gameLoop(); // 게임 루프 최초 실행
   isInitGame = true;
 }
@@ -466,7 +475,8 @@ function startStage() {
   totalSpawnCount = wave.data[monsterLevel - 1].total_spawn_count;
   monstersSpawned = 0;
   isBonusSpawned = false;
-  monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
+  startSpawnMonster();
+  // monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
 
   if (!isInitGame) {
     gameLoop();
@@ -502,6 +512,13 @@ function retryGame() {
   cancelAnimationFrame(animationId);
   animationId = null;
   sendEvent(2);
+}
+
+function startSpawnMonster() {
+  if (monsterSpawnTimer !== null) {
+    clearInterval(monsterSpawnTimer);
+  }
+  monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
 }
 
 function pauseGame() {
