@@ -37,7 +37,7 @@ const monsters = [];
 const towers = [];
 
 let score = 0; // 게임 점수
-let highScore = 0; // 기존 최고 점수
+let highScore = 0; // 기존 최고 랭킹 점수
 let isInitGame = false;
 
 let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
@@ -333,10 +333,9 @@ function gameLoop() {
         }
       });
     });
-
+    
     // 선택된 타워 하이라이팅
     highlightSelectedTower();
-
     // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
     base.draw(ctx, baseImage);
 
@@ -402,6 +401,11 @@ function gameLoop() {
       }
     }
   }
+  // 게임 현황에 대한 메시지 표시
+  gameStateMessage.draw(ctx);
+
+  // 게임 종료 시 메뉴판 표시
+  gameEndMessage.draw(ctx, isVictory);
 
   // 선택된 타워 정보 업데이트
   if (selectedTowerIndex !== null) {
@@ -430,7 +434,6 @@ function gameLoop() {
     refundTowerButton.hide();
     upgradeTowerButton.hide();
   }
-
   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
   // if (!gameOver) {
   //   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
@@ -489,7 +492,7 @@ function startStage() {
 function initGameState(initGameStateInfo) {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameStateInfo.userGold;
-  baseHp = initGameStateInfo.baseHp;
+  baseHp = initGameStateInfo.baseHp - 90;
   numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
   monsterLevel = initGameStateInfo.monsterLevel;
   monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
@@ -676,7 +679,6 @@ Promise.all([
     }
   });
 });
-
 const sendEvent = (handlerId, payload, timestamp) => {
   serverSocket.emit('event', {
     userId,

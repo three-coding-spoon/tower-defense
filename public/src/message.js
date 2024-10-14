@@ -51,10 +51,10 @@ export class GameStateMessage {
         this.currentMessage = '타워가 배치되었습니다!';
         break;
       case 5:
-        this.currentMessage = '타워가 강화되었습니다!';
+        this.currentMessage = '타워가 업그레이드 되었습니다!';
         break;
       case 6:
-        this.currentMessage = '타워가 판매되었습니다!';
+        this.currentMessage = '타워가 환불되었습니다!';
         break;
       case 7:
         this.currentMessage = '최고 랭킹이 갱신되었습니다!';
