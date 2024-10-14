@@ -1,136 +1,159 @@
 <!DOCTYPE html>
 <html lang="ko">
-
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="author" content="Changmin Kang" />
     <title>내일배움캠프 Node.js 트랙 타워 디펜스 게임</title>
     <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
     <link rel="stylesheet" type="text/css" href="./styles/index.css" />
-    <style>
-        body {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #2d2d2d;
-            flex-direction: column;
-        }
+    <link rel="stylesheet" type="text/css" href="./styles/rank.css" />
+    <style></style>
+  </head>
 
-        #gameCanvas {
-            border: 2px solid #000;
-            display: none;
-        }
-
-        .button-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .button-container button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-        }
-
-        #title {
-            color: rgb(231, 231, 231);
-            font-size: 80px;
-            /* font-style: ; */
-            border-bottom: 3px solid;
-            border-color: gray;
-            padding-bottom: 3px;
-            margin-top: 10px;
-        }
-
-        #connectUser {
-            font-size: 30px;
-            color: rgb(231, 231, 231);
-            /* font-style: ; */
-            margin: 10px auto 10px auto;
-        }
-    </style>
-</head>
-
-<body>
+  <body>
     <div class="button-container">
-        <div id="title">Tower Defence</div>
-        <div id="connectUser"></div>
-        <div class="user-container">
-            <button id="rankingListButton">랭크 조회</button>
-            <button id="playButton">게임 플레이</button>
-            <button id="logoutButton">로그아웃</button>
-        </div>
+      <div id="title">Tower Defence</div>
+      <div id="connectUser"></div>
+      <div class="user-container">
+        <button class="btn-open-modal" id="rankingListButton">랭크 조회</button>
+        <button id="playButton">게임 플레이</button>
+        <button id="logoutButton">로그아웃</button>
+      </div>
+    </div>
+    <div class="modal" id="rankListModal">
+      <div class="modal-content">
+        <div class="modal-header">Rank List</div>
+        <table>
+          <thead>
+            <tr>
+              <th class="rank">Rank</th>
+              <th>Username</th>
+              <th>High Score</th>
+            </tr>
+          </thead>
+          <tbody id="rankListBody">
+            <!-- 여기에 랭크 리스트가 나열 -->
+          </tbody>
+        </table>
+        <div class="modal-header">My Score</div>
+        <table>
+          <thead>
+            <tr>
+              <th class="rank">Rank</th>
+              <th>Username</th>
+              <th>High Score</th>
+            </tr>
+          </thead>
+          <tbody id="myRankBody">
+            <!-- 여기에 내 랭크가 출력 -->
+          </tbody>
+          <button type="button" class="btn-close-modal" id="modalCloseBtn">닫기</button>
+        </table>
+      </div>
     </div>
     <canvas id="gameCanvas" width="1920" height="1080"></canvas>
     <script src="https://cdn.socket.io/4.0.0/socket.io.min.js"></script>
     <script type="module">
-        const userDiv = document.getElementById('connectUser');
-        const username = sessionStorage.getItem('username');
-        userDiv.innerText += `${username} 님 로그인 되었습니다. `
-        const token = JSON.parse(sessionStorage.getItem('authorization'));
-        if (!token) {
-            alert('재로그인이 필요합니다.');
-            window.location.href = '/';
-        }
+      const userDiv = document.getElementById('connectUser');
+      const username = sessionStorage.getItem('username');
+      userDiv.innerText += `${username} 님 로그인 되었습니다. `;
+      const modal = document.querySelector('.modal');
+      const btnOpenModal = document.querySelector('.btn-open-modal');
+      const closeBtn = modal.querySelector('.btn-close-modal');
 
-        document
-            .getElementById("rankingListButton")
-            .addEventListener("click", () => {
-                fetch('/api/rank', {
-                    method: 'GET',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'authorization': `${token.value}`
-                    }
-                })
-                    .then(res => {
-                        return res.json();
-                    })
-                    .then(json => {
-                        if (json.status !== 'success') {
-                            // 조회에 성공했으면 랭킹 조회 리스트창이 출력되도록 할 예정...
-                            console.log(json.message);
-                        }
-                        else {
-                            // 조회에 실패했으면 조회 실패 알림창 출력
-                            alert(json.message);
-                        }
-                    })
-            });
+      const token = JSON.parse(sessionStorage.getItem('authorization'));
 
-        document.getElementById("playButton").addEventListener("click", () => {
-            document.querySelector(".button-container").style.display = "none";
-            document.getElementById("gameCanvas").style.display = "block";
-            import("./src/game.js");
-        });
+      if (!token) {
+        alert('재로그인이 필요합니다.');
+        window.location.href = '/';
+      }
 
-        document.getElementById("logoutButton").addEventListener("click", () => {
-            fetch('/api/auth/logout', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'authorization': `${token.value}`
-                }
-            })
-                .then(res => {
-                    if (res.status === 200) {
-                        alert('로그아웃이 되었습니다. 메인화면으로 이동합니다.');
-                    }
-                    else {
-                        return res.json()
-                    }
-                })
-                .then(json => {
-                    alert(json.message);
-                })
-            window.location.href = "/";
-        });
+      // 랭크 조회 버튼 이벤트
+      document.getElementById('rankingListButton').addEventListener('click', () => {
+        fetch('/api/rank', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `${token.value}`,
+          },
+        })
+          .then((res) => {
+            return res.json();
+          })
+          .then((json) => {
+            if (json.status === 'success') {
+              // 조회에 성공했으면 랭킹 조회 리스트창이 출력되도록 할 예정...
+              console.log(json.message);
+              console.log(json.data);
+              const rankList = json.data.rankList;
+              const rankListBody = document.getElementById('rankListBody');
+              const myRankBody = document.getElementById('myRankBody');
+              const myRank = rankList[json.data.myRankIndex];
+              myRankBody.innerHTML = ''; // 내 랭킹 초기화
+              rankListBody.innerHTML = ''; // 랭크 리스트 초기화
+              for (let i = 0; i < 10; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                                    <td class="rank">${i + 1}</td>
+                                    <td>${
+                                      rankList[i].username === username
+                                        ? `${rankList[i].username}\t&#128072`
+                                        : rankList[i].username
+                                    }</td>
+                                    <td>${rankList[i].highScore}</td>
+                                `;
+                rankListBody.appendChild(row);
+              }
+              if (json.data.myRankIndex >= 0) {
+                myRankBody.innerHTML += `
+                                <td class="rank">${json.data.myRankIndex + 1}</td>
+                                    <td>${myRank.username}</td>
+                                    <td>${myRank.highScore}</td>
+                                `;
+              }
+              modal.style.display = 'flex';
+            } else {
+              // 조회에 실패했으면 조회 실패 알림창 출력
+              alert(json.message);
+            }
+          });
+      });
+
+      // 모달 닫기 버튼 이벤트
+      closeBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+
+      // 게임 플레이 버튼 이벤트
+      document.getElementById('playButton').addEventListener('click', () => {
+        document.querySelector('.button-container').style.display = 'none';
+        document.getElementById('gameCanvas').style.display = 'block';
+        import('./src/game.js');
+        console.log('-------------------------------');
+      });
+
+      // 로그아웃 버튼 이벤트
+      document.getElementById('logoutButton').addEventListener('click', () => {
+        fetch('/api/auth/logout', {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            authorization: `${token.value}`,
+          },
+        })
+          .then((res) => {
+            if (res.status === 200) {
+              alert('로그아웃이 되었습니다. 메인화면으로 이동합니다.');
+            } else {
+              return res.json();
+            }
+          })
+          .then((json) => {
+            alert(json.message);
+          });
+        window.location.href = '/';
+      });
     </script>
-</body>
-
+  </body>
 </html>

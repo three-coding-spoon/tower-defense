@@ -23,20 +23,16 @@ const gameEndMessage = new GameEndMessage();
 
 const NUM_OF_MONSTERS = 6; // 몬스터 개수
 
-// 클래스로 만들고싶다.....
-let userGold = 10000; // 유저 골드
+// 초기화할 게임 세팅들 ...
+let userGold = 0; // 유저 골드
 let base; // 기지 객체
-let baseHp = 100; // 기지 체력
-
-let towerCost = 1000; // 타워 구입 비용
-let towerUpgradeCost = 1000;
-let numOfInitialTowers = 1; // 초기 타워 개수
+let baseHp = 0; // 기지 체력
+let towerCost = 0; // 타워 구입 비용
+let numOfInitialTowers = 3; // 초기 타워 개수
 let towerId = 0;
-let isrefund = false;
-let isupgrade = false;
-
-let monsterLevel = 1; // 몬스터 레벨
+let monsterLevel = 0; // 몬스터 레벨
 let monsterSpawnInterval = 1000; // 몬스터 생성 주기
+let initGameData = null; // 초기화 데이터 묶음. 게임 시작 핸들러 이벤트로 데이터 받아올 예정
 const monsters = [];
 const towers = [];
 
@@ -44,12 +40,21 @@ let score = 0; // 게임 점수
 let highScore = 0; // 기존 최고 점수
 let isInitGame = false;
 
+let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
+let totalSpawnCount = 0; // 현재 스테이지에서 스폰해야 할 총 몬스터 수
+let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
+
+let isBonusSpawned = false;
+
+// 선택된 타워 인덱스
+let selectedTowerIndex = null;
+
 // 버튼 생성 파트
 const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame);
 const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 160}px`, null, exitGame);
 const buyTowerButton = new Button('타워 구입', '10px', '10px', clickBuyTower);
 const refundTowerButton = new Button('타워 판매', '10px', '150px', clickRefundTower);
-const upgradeTowerButton = new Button('타워 판매', '10px', '150px', clickupgradeTower);
+const upgradeTowerButton = new Button('타워 강화', '10px', '290px', clickupgradeTower);
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -72,6 +77,19 @@ for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
 }
 
 let monsterPath;
+
+// 선택된 타워 정보 표시 요소 생성
+const selectedTowerInfo = document.createElement('div');
+selectedTowerInfo.style.position = 'absolute';
+selectedTowerInfo.style.bottom = '10px';
+selectedTowerInfo.style.left = '10px';
+selectedTowerInfo.style.padding = '10px';
+selectedTowerInfo.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+selectedTowerInfo.style.color = 'white';
+selectedTowerInfo.style.fontSize = '16px';
+selectedTowerInfo.style.borderRadius = '5px';
+selectedTowerInfo.innerHTML = '선택된 타워: 없음';
+document.body.appendChild(selectedTowerInfo);
 
 function generateRandomMonsterPath() {
   const path = [];
@@ -173,6 +191,18 @@ function clickBuyTower() {
   sendEvent(21, { userGold: userGold });
 }
 
+function highlightSelectedTower() {
+  if (selectedTowerIndex === null) return;
+
+  const tower = towers[selectedTowerIndex];
+  ctx.save();
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 3;
+  // 타워 주변에 사각형을 그려 하이라이트
+  ctx.strokeRect(tower.x - 5, tower.y - 5, tower.width + 10, tower.height + 10);
+  ctx.restore();
+}
+
 function placeNewTower() {
   gameStateMessage.showMessage(4);
   const { x, y } = getRandomPositionNearPath(200);
@@ -191,74 +221,33 @@ function placeNewTower() {
 // }
 
 function clickRefundTower() {
-  // btnDiplay()
-  // 클릭하여 환불할 타워 지정하기
-  canvas.addEventListener(
-    'click',
-    (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const clickX = event.clientX - rect.left;
-      const clickY = event.clientY - rect.top;
-      const towerRangeX = 40;
-      const towerRangeY = 40;
-
-      // 클릭한 타워의 정보 확인
-      for (let i = 0; i < towers.length; i++) {
-        const tower = towers[i];
-        const towerIndex = i;
-
-        const towerCenterX = tower.x + tower.width / 2;
-        const towerCenterY = tower.y + tower.height / 2;
-
-        const deltaX = Math.abs(towerCenterX - clickX);
-        const deltaY = Math.abs(towerCenterY - clickY);
-
-        if (deltaX <= towerRangeX && deltaY <= towerRangeY) {
-          sendEvent(22, { tower: tower, towerIndex: towerIndex });
-          break;
-        }
-      }
-    },
-    { once: true },
-  );
+  if (selectedTowerIndex === null) {
+    alert('환불할 타워를 먼저 선택해주세요.');
+    return;
+  }
+  const tower = towers[selectedTowerIndex];
+  sendEvent(22, { tower: tower, towerIndex: selectedTowerIndex });
 }
 
 function refundTower(index, refundAmount) {
   gameStateMessage.showMessage(6);
   towers.splice(index, 1);
   userGold += refundAmount;
+
+  // 선택된 타워가 제거되었으므로 선택 상태 초기화
+  selectedTowerIndex = null;
+  upgradeTowerButton.disabled = true;
 }
 
 // 타워 강화
 function clickupgradeTower() {
-  canvas.addEventListener(
-    'click',
-    (event) => {
-      const rect = canvas.getBoundingClientRect();
-      const clickX = event.clientX - rect.left;
-      const clickY = event.clientY - rect.top;
-      const towerRangeX = 40;
-      const towerRangeY = 40;
+  if (selectedTowerIndex === null) {
+    alert('강화할 타워를 먼저 선택해주세요.');
+    return;
+  }
 
-      // 클릭한 타워의 정보 확인
-      for (let i = 0; i < towers.length; i++) {
-        const tower = towers[i];
-        const towerIndex = i;
-
-        const towerCenterX = tower.x + tower.width / 2;
-        const towerCenterY = tower.y + tower.height / 2;
-
-        const deltaX = Math.abs(towerCenterX - clickX);
-        const deltaY = Math.abs(towerCenterY - clickY);
-
-        if (deltaX <= towerRangeX && deltaY <= towerRangeY) {
-          sendEvent(23, { userGold: userGold, tower: tower, towerIndex: towerIndex });
-          break;
-        }
-      }
-    },
-    { once: true },
-  );
+  const tower = towers[selectedTowerIndex];
+  sendEvent(23, { userGold: userGold, tower: tower, towerIndex: selectedTowerIndex });
 }
 
 function upgradeTower(index, cost) {
@@ -269,6 +258,10 @@ function upgradeTower(index, cost) {
   tower.upgrade();
   userGold -= upgradeCost;
   sendEvent(30, { towerData: tower, index: index });
+
+  // 선택된 타워가 강화되었으므로 선택 상태 초기화
+  selectedTowerIndex = null;
+  upgradeTowerButton.disabled = true;
 }
 
 function placeBase() {
@@ -341,6 +334,9 @@ function gameLoop() {
       });
     });
 
+    // 선택된 타워 하이라이팅
+    highlightSelectedTower();
+
     // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
     base.draw(ctx, baseImage);
 
@@ -406,6 +402,20 @@ function gameLoop() {
       }
     }
   }
+
+  // 선택된 타워 정보 업데이트
+  if (selectedTowerIndex !== null) {
+    const selectedTower = towers[selectedTowerIndex];
+    selectedTowerInfo.innerHTML = `
+        <strong>선택된 타워 정보</strong><br>
+        레벨: ${selectedTower.level}<br>
+        공격력: ${selectedTower.attackPower}<br>
+        사거리: ${selectedTower.range}
+      `;
+  } else {
+    selectedTowerInfo.innerHTML = '선택된 타워: 없음';
+  }
+
   // 게임 현황에 대한 메시지 표시
   gameStateMessage.draw(ctx);
 
@@ -440,8 +450,13 @@ function initGame() {
   gameStateMessage.showMessage(1);
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
-  placeInitialTowers(); // 설정된 초기 타워 개수만큼 사전에 타워 배치
   placeBase(); // 기지 배치
+
+  for (let i = 0; i < numOfInitialTowers; i++) {
+    const { x, y } = getRandomPositionNearPath(200);
+    sendEvent(20, { towerPos: { x, y }, towerId });
+    towerId++;
+  } // 설정된 초기 타워 개수만큼 사전에 타워 배치
 
   // 현재 스테이지의 total_spawn_count 설정
   const { wave } = assets;
@@ -474,7 +489,7 @@ function startStage() {
 function initGameState(initGameStateInfo) {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameStateInfo.userGold;
-  baseHp = initGameStateInfo.baseHp - 90;
+  baseHp = initGameStateInfo.baseHp;
   numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
   monsterLevel = initGameStateInfo.monsterLevel;
   monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
@@ -662,48 +677,6 @@ Promise.all([
   });
 });
 
-// // 타워 구매 버튼
-// const buyTowerButton = document.createElement('button');
-// buyTowerButton.textContent = '타워 구매';
-// buyTowerButton.style.position = 'absolute';
-// buyTowerButton.style.top = '10px';
-// buyTowerButton.style.right = '10px';
-// buyTowerButton.style.padding = '10px 20px';
-// buyTowerButton.style.fontSize = '16px';
-// buyTowerButton.style.cursor = 'pointer';
-
-// buyTowerButton.addEventListener('click', clickBuyTower);
-
-// document.body.appendChild(buyTowerButton);
-
-// // 타워 판매 버튼
-// const refundTowerButton = document.createElement('button');
-// refundTowerButton.textContent = '타워 판매';
-// refundTowerButton.style.position = 'absolute';
-// refundTowerButton.style.top = '10px';
-// refundTowerButton.style.right = '150px';
-// refundTowerButton.style.padding = '10px 20px';
-// refundTowerButton.style.fontSize = '16px';
-// refundTowerButton.style.cursor = 'pointer';
-
-// refundTowerButton.addEventListener('click', clickRefundTower);
-
-// document.body.appendChild(refundTowerButton);
-
-// // 타워 강화 버튼
-// const upgradeTowerButton = document.createElement('button');
-// upgradeTowerButton.textContent = '타워 강화';
-// upgradeTowerButton.style.position = 'absolute';
-// upgradeTowerButton.style.top = '10px';
-// upgradeTowerButton.style.right = '290px';
-// upgradeTowerButton.style.padding = '10px 20px';
-// upgradeTowerButton.style.fontSize = '16px';
-// upgradeTowerButton.style.cursor = 'pointer';
-
-// upgradeTowerButton.addEventListener('click', clickupgradeTower);
-
-// document.body.appendChild(upgradeTowerButton);
-
 const sendEvent = (handlerId, payload, timestamp) => {
   serverSocket.emit('event', {
     userId,
@@ -717,5 +690,39 @@ const sendEvent = (handlerId, payload, timestamp) => {
 const updateGameState = (serverState) => {};
 
 const updateTowerState = (serverState) => {};
+
+// 캔버스 클릭 이벤트 핸들러 추가 (타워 선택)
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  let found = false;
+  for (let i = 0; i < towers.length; i++) {
+    const tower = towers[i];
+
+    // 사각형 범위 검사
+    if (
+      clickX >= tower.x &&
+      clickX <= tower.x + tower.width &&
+      clickY >= tower.y &&
+      clickY <= tower.y + tower.height
+    ) {
+      selectedTowerIndex = i;
+      found = true;
+      console.log(`타워 선택됨: 인덱스 ${i}`);
+      break;
+    }
+  }
+
+  if (found) {
+    upgradeTowerButton.disabled = false;
+    console.log('강화 버튼 활성화');
+  } else {
+    selectedTowerIndex = null;
+    upgradeTowerButton.disabled = true;
+    console.log('강화 버튼 비활성화');
+  }
+});
 
 export { sendEvent };
