@@ -101,7 +101,7 @@ export const handleUpgradeTower = async (userId, payload, socket) => {
     socket.emit('upgradeTower', { status: 'fail', message: 'not enough gold' });
     return;
   } else if (userGold >= cost) {
-    socket.emit('upgradeTower', { status: 'success', message: 'not enough gold', index, cost });
+    socket.emit('upgradeTower', { status: 'success', message: 'Upgraded tower', index, cost });
     return;
   }
 };
