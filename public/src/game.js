@@ -1,3 +1,5 @@
+// src/game.js
+
 import { Base } from './base.js';
 import { Monster } from './monster.js';
 import { Tower } from './tower.js';
@@ -24,7 +26,7 @@ let base; // 기지 객체
 let baseHp = 100; // 기지 체력
 
 let towerCost = 1000; // 타워 구입 비용
-let towerUpgradeCost = 1000
+let towerUpgradeCost = 1000;
 let numOfInitialTowers = 1; // 초기 타워 개수
 let towerId = 0;
 let isrefund = false;
@@ -43,6 +45,9 @@ let stopGameLoop = false;
 let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
 let totalSpawnCount = 0; // 현재 스테이지에서 스폰해야 할 총 몬스터 수
 let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
+
+// 선택된 타워 인덱스
+let selectedTowerIndex = null;
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -65,6 +70,19 @@ for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
 }
 
 let monsterPath;
+
+// 선택된 타워 정보 표시 요소 생성
+const selectedTowerInfo = document.createElement('div');
+selectedTowerInfo.style.position = 'absolute';
+selectedTowerInfo.style.bottom = '10px';
+selectedTowerInfo.style.left = '10px';
+selectedTowerInfo.style.padding = '10px';
+selectedTowerInfo.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+selectedTowerInfo.style.color = 'white';
+selectedTowerInfo.style.fontSize = '16px';
+selectedTowerInfo.style.borderRadius = '5px';
+selectedTowerInfo.innerHTML = '선택된 타워: 없음';
+document.body.appendChild(selectedTowerInfo);
 
 function generateRandomMonsterPath() {
   const path = [];
@@ -118,10 +136,9 @@ function drawPath() {
     const angle = Math.atan2(deltaY, deltaX); // 두 점 사이의 각도는 tan-1(y/x)로 구해야 함 (자세한 것은 역삼각함수 참고): 삼각함수는 변의 비율! 역삼각함수는 각도를 구하는 것!
 
     for (let j = gap; j < distance - gap; j += segmentLength) {
-      // 사실 이거는 삼각함수에 대한 기본적인 이해도가 있으면 충분히 이해하실 수 있습니다.
-      // 자세한 것은 https://thirdspacelearning.com/gcse-maths/geometry-and-measure/sin-cos-tan-graphs/ 참고 부탁해요!
-      const x = startX + Math.cos(angle) * j; // 다음 이미지 x좌표 계산(각도의 코사인 값은 x축 방향의 단위 벡터 * j를 곱하여 경로를 따라 이동한 x축 좌표를 구함)
-      const y = startY + Math.sin(angle) * j; // 다음 이미지 y좌표 계산(각도의 사인 값은 y축 방향의 단위 벡터 * j를 곱하여 경로를 따라 이동한 y축 좌표를 구함)
+      // 삼각함수를 사용하여 경로를 따라 이미지 위치 계산
+      const x = startX + Math.cos(angle) * j; // 다음 이미지 x좌표 계산
+      const y = startY + Math.sin(angle) * j; // 다음 이미지 y좌표 계산
       drawRotatedImage(pathImage, x, y, imageWidth, imageHeight, angle);
     }
   }
@@ -157,80 +174,60 @@ function getRandomPositionNearPath(maxDistance) {
 }
 
 function placeInitialTowers(x, y) {
-    const tower = new Tower(x, y, 1);
-    towers.push(tower);
-    sendEvent(30, { towerData: tower, index: towers.length -1 });
+  const tower = new Tower(x, y, 1);
+  towers.push(tower);
+  sendEvent(30, { towerData: tower, index: towers.length - 1 });
 }
 
 function clickBuyTower() {
-  sendEvent((21), { userGold: userGold })
+  sendEvent(21, { userGold: userGold });
 }
 
 function placeNewTower() {
-    const { x, y } = getRandomPositionNearPath(200);
-    const tower = new Tower(x, y, 1);
-    towers.push(tower);
-    sendEvent(30, { towerData: tower, index: towers.length -1 });
-    towerId++; // 타워 건설 후, 타워 Id를 더한다.
-    console.log(towerId);
+  const { x, y } = getRandomPositionNearPath(200);
+  const tower = new Tower(x, y, 1);
+  towers.push(tower);
+  sendEvent(30, { towerData: tower, index: towers.length - 1 });
+  towerId++; // 타워 건설 후, 타워 Id를 더한다.
+  console.log(towerId);
 }
 
-// function btnDiplay()  {
-//   const target = document.getElementsByTagName('button');
-//   if (target.style.display !== 'none') {
-//     target.style.display === 'none';
-//   }
-// }
-
 function clickRefundTower() {
-  // btnDiplay()
-  // 클릭하여 환불할 타워 지정하기
-  canvas.addEventListener('click', (event) => {
-  const rect = canvas.getBoundingClientRect();
-  const clickX = event.clientX - rect.left;
-  const clickY = event.clientY - rect.top;
-  const towerRangeX = 40;
-  const towerRangeY = 40;
-  
-  // 클릭한 타워의 정보 확인
-  for (let i = 0; i < towers.length; i++) {
-    const tower = towers[i];
-    const towerIndex = i;
+  if (selectedTowerIndex === null) {
+    alert('환불할 타워를 먼저 선택해주세요.');
+    return;
+  }
 
-    const towerCenterX = tower.x + tower.width / 2;
-    const towerCenterY = tower.y + tower.height / 2;
-
-    const deltaX = Math.abs(towerCenterX - clickX);
-    const deltaY = Math.abs(towerCenterY - clickY);
-
-    if (deltaX <= towerRangeX && deltaY <= towerRangeY) {
-      sendEvent(22, { tower: tower, towerIndex: towerIndex });
-      console.log(towers)
-      break;
-    }
-    }
-  }, { once : true });
-};
+  const tower = towers[selectedTowerIndex];
+  sendEvent(22, { tower: tower, towerIndex: selectedTowerIndex });
+}
 
 function refundTower(index, refundAmount) {
   towers.splice(index, 1);
   userGold += refundAmount;
+
+  // 선택된 타워가 제거되었으므로 선택 상태 초기화
+  selectedTowerIndex = null;
+  upgradeTowerButton.disabled = true;
 }
 
-// 타워 강화
 function clickupgradeTower() {
-  const towerIndex = Math.floor(Math.random() * towers.length);
-  const tower = towers[towerIndex];
-  sendEvent((23), {userGold: userGold, tower: tower, index: towerIndex});
-} 
+  if (selectedTowerIndex === null) {
+    alert('강화할 타워를 먼저 선택해주세요.');
+    return;
+  }
+
+  const tower = towers[selectedTowerIndex];
+  sendEvent(23, { userGold: userGold, tower: tower, index: selectedTowerIndex });
+}
 
 function upgradeTower(index, cost) {
   const tower = towers[index];
   const upgradeCost = cost;
 
-  tower.upgrade()
-  userGold -= upgradeCost
-  sendEvent((30), {towerData: tower, index: index});
+  tower.upgrade();
+  userGold -= upgradeCost;
+  sendEvent(30, { towerData: tower, index: index });
 }
 
 function placeBase() {
@@ -256,6 +253,18 @@ function spawnMonster() {
   }
 }
 
+function highlightSelectedTower() {
+  if (selectedTowerIndex === null) return;
+
+  const tower = towers[selectedTowerIndex];
+  ctx.save();
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 3;
+  // 타워 주변에 사각형을 그려 하이라이트
+  ctx.strokeRect(tower.x - 5, tower.y - 5, tower.width + 10, tower.height + 10);
+  ctx.restore();
+}
+
 function gameLoop() {
   // 렌더링 시에는 항상 배경 이미지부터 그려야 합니다! 그래야 다른 이미지들이 배경 이미지 위에 그려져요!
   ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
@@ -269,10 +278,10 @@ function gameLoop() {
   ctx.fillStyle = 'yellow';
   ctx.fillText(`골드: ${userGold}`, 100, 150); // 골드 표시
   ctx.fillStyle = 'black';
-  ctx.fillText(`현재 레벨: ${monsterLevel}`, 100, 200); // 최고 기록 표시
+  ctx.fillText(`현재 레벨: ${monsterLevel}`, 100, 200);
 
   // 타워 그리기 및 몬스터 공격 처리
-  towers.forEach((tower) => {
+  towers.forEach((tower, index) => {
     tower.draw(ctx, towerImage);
     tower.updateCooldown();
     monsters.forEach((monster) => {
@@ -285,7 +294,9 @@ function gameLoop() {
     });
   });
 
-  // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
+  // 선택된 타워 하이라이팅
+  highlightSelectedTower();
+
   base.draw(ctx, baseImage);
 
   for (let i = monsters.length - 1; i >= 0; i--) {
@@ -311,11 +322,8 @@ function gameLoop() {
         });
       }
 
-      // 기존 코드
-      // 잡거나 몬스터가 베이스를 공격하면 소멸시킨다
       monsters.splice(i, 1);
 
-      // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
       if (monsters.length === 0) {
         const clientTime = Date.now();
         const targetLevel = monsterLevel + 1;
@@ -326,6 +334,19 @@ function gameLoop() {
         });
       }
     }
+  }
+
+  // 선택된 타워 정보 업데이트
+  if (selectedTowerIndex !== null) {
+    const selectedTower = towers[selectedTowerIndex];
+    selectedTowerInfo.innerHTML = `
+      <strong>선택된 타워 정보</strong><br>
+      레벨: ${selectedTower.level}<br>
+      공격력: ${selectedTower.attackPower}<br>
+      사거리: ${selectedTower.range}
+    `;
+  } else {
+    selectedTowerInfo.innerHTML = '선택된 타워: 없음';
   }
 
   if (!stopGameLoop) {
@@ -351,7 +372,6 @@ function initGame() {
 
   // 현재 스테이지의 total_spawn_count 설정
   const { wave } = assets;
-  console.log(wave.data)
   totalSpawnCount = wave.data[monsterLevel - 1].total_spawn_count;
   monstersSpawned = 0;
 
@@ -504,14 +524,11 @@ Promise.all([
     if (data.status === 'success') {
       placeNewTower();
       userGold -= towerCost;
-    } 
-    else if (data.status === 'fail' && data.message === 'tower limit') {
+    } else if (data.status === 'fail' && data.message === 'tower limit') {
       alert('타워는 10개까지만 구매 가능합니다.');
-    }
-    else if (data.status === 'fail' && data.message === 'not enough gold') {
+    } else if (data.status === 'fail' && data.message === 'not enough gold') {
       alert('골드가 부족합니다.');
-    }
-    else {
+    } else {
       console.error('Error occurred while buy the tower!');
       alert('Error occurred while buy the tower!');
     }
@@ -520,41 +537,31 @@ Promise.all([
   serverSocket.on('RefundTower', (data) => {
     if (data.status === 'fail' && data.message === 'tower mismatch') {
       alert('존재하지 않는 타워입니다.');
-    }
-    else if (data.status === 'fail' && data.message === 'No towers on the field') {
+    } else if (data.status === 'fail' && data.message === 'No towers on the field') {
       alert('환불할 수 있는 타워가 없습니다.');
-    }
-    else if (data.status === 'success') {
-      refundTower(data.index, data.refundAmount) 
-    }
-    else {
+    } else if (data.status === 'success') {
+      refundTower(data.index, data.refundAmount);
+    } else {
       console.error('Error occurred while refund the tower!');
       alert('Error occurred while refund the tower!');
     }
   });
 
   serverSocket.on('upgradeTower', (data) => {
-    if(data.status === 'fail' && data.message === 'Tower data corrupted'){
+    if (data.status === 'fail' && data.message === 'Tower data corrupted') {
       alert('타워 데이터가 손상되었습니다.');
-    }
-    else if (data.status === 'fail' && data.message === 'max level') {
+    } else if (data.status === 'fail' && data.message === 'max level') {
       alert('이미 최대로 강화된 타워가 선택되었습니다.');
-    }
-    else if (data.status === 'fail' && data.message === 'not enough gold') {
+    } else if (data.status === 'fail' && data.message === 'not enough gold') {
       alert('골드가 부족합니다.');
-    }
-    else if (data.status === 'success') {
-      upgradeTower(data.index, data.cost) 
-    }
-    else {
+    } else if (data.status === 'success') {
+      upgradeTower(data.index, data.cost);
+    } else {
       console.error('Error occurred while upgrade the tower!');
       alert('Error occurred while upgrade the tower!');
     }
-  })
+  });
 });
-
-
-
 
 // 타워 구매 버튼
 const buyTowerButton = document.createElement('button');
@@ -593,6 +600,7 @@ upgradeTowerButton.style.right = '290px';
 upgradeTowerButton.style.padding = '10px 20px';
 upgradeTowerButton.style.fontSize = '16px';
 upgradeTowerButton.style.cursor = 'pointer';
+upgradeTowerButton.disabled = true; // 초기에는 비활성화
 
 upgradeTowerButton.addEventListener('click', clickupgradeTower);
 
@@ -612,4 +620,36 @@ const updateGameState = (serverState) => {};
 
 const updateTowerState = (serverState) => {};
 
-export { sendEvent };
+// 캔버스 클릭 이벤트 핸들러 추가 (타워 선택)
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  let found = false;
+  for (let i = 0; i < towers.length; i++) {
+    const tower = towers[i];
+
+    // 사각형 범위 검사
+    if (
+      clickX >= tower.x &&
+      clickX <= tower.x + tower.width &&
+      clickY >= tower.y &&
+      clickY <= tower.y + tower.height
+    ) {
+      selectedTowerIndex = i;
+      found = true;
+      console.log(`타워 선택됨: 인덱스 ${i}`);
+      break;
+    }
+  }
+
+  if (found) {
+    upgradeTowerButton.disabled = false;
+    console.log('강화 버튼 활성화');
+  } else {
+    selectedTowerIndex = null;
+    upgradeTowerButton.disabled = true;
+    console.log('강화 버튼 비활성화');
+  }
+});

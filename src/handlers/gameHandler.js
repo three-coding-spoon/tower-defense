@@ -9,6 +9,7 @@ import { broadcastNewHighScore } from './broadcastHandler.js';
 import { initGameStateInfo } from '../../constants.js';
 import { getTopHighScore } from '../models/scoreModel.js';
 import { getUserById } from '../models/userModel.js';
+import { initTower } from '../models/towerModel.js';
 
 export const gameStart = (userId, payload, socket, io) => {
   try {
@@ -22,7 +23,7 @@ export const gameStart = (userId, payload, socket, io) => {
     // 유저의 몹 카운트와 스테이지 정보 초기화
     initMobCounts(userId);
     createStage(userId);
-    // initTowers(userId);
+    initTower(userId);
 
     // 유저의 몹 카운트와 스테이지 정보가 초기화가 되었는지 확인
     const userMobCount = getMobCount(userId);
