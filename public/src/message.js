@@ -19,16 +19,14 @@ export class GameStateMessage {
   }
 
   draw(ctx) {
+    const halfWidth = ctx.canvas.width / 2;
+    const halfHeight = ctx.canvas.height / 2;
     // 현재 메시지가 있으면 캔버스에 그리기
     if (this.currentMessage) {
-      ctx.font = '24px Arial';
+      ctx.font = '30px Arial';
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
-      ctx.fillText(
-        this.currentMessage,
-        ctx.canvas.width / 2,
-        ctx.canvas.height / 2 - ctx.canvas.height / 3,
-      );
+      ctx.fillText(this.currentMessage, halfWidth, halfHeight - ctx.canvas.height / 3);
     }
   }
 
@@ -84,29 +82,32 @@ export class GameEndMessage {
     this.isVisible = false; // 메뉴판의 표시 여부
   }
 
-  draw(ctx) {
+  draw(ctx, isVicory) {
+    const title = isVicory ? 'Game Clear!' : 'Game Over';
+    const halfWidth = ctx.canvas.width / 2;
+    const halfHeight = ctx.canvas.height / 2;
     if (!this.isVisible) return; // 메뉴판이 표시되지 않을 때는 그리지 않음
 
     // 배경 박스 그리기
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-    ctx.fillRect(ctx.canvas.width / 2 - 350, ctx.canvas.height / 2 - 250, 700, 500);
+    ctx.fillStyle = 'rgba(25, 25, 25, 0.3)'; // 배경색 투명도 지정이 안됨
+    ctx.fillRect(halfWidth - halfWidth / 2, halfHeight - halfHeight / 2, halfWidth, halfHeight);
 
     // 텍스트 설정
-    ctx.font = '30px Arial';
-    ctx.fillStyle = 'white';
+    ctx.font = '50px Arial';
     ctx.textAlign = 'center';
-    ctx.fillText('게임 종료', ctx.canvas.width / 2, ctx.canvas.height / 2 - 50);
+    ctx.fillStyle = isVicory ? 'yellow' : 'red';
+    ctx.fillText(title, halfWidth, halfHeight - ctx.canvas.height * 0.15);
 
-    // 버튼 그리기
-    ctx.fillStyle = 'gray';
-    ctx.fillRect(ctx.canvas.width / 2 - 100, ctx.canvas.height / 2, 200, 40);
-    ctx.fillStyle = 'gray';
-    ctx.fillRect(ctx.canvas.width / 2 - 100, ctx.canvas.height / 2 + 60, 200, 40);
+    // // 버튼 그리기
+    // ctx.fillStyle = 'gray';
+    // ctx.fillRect(halfWidth - 100, halfHeight, 200, 40);
+    // ctx.fillStyle = 'gray';
+    // ctx.fillRect(halfWidth - 100, halfHeight + 60, 200, 40);
 
-    // 버튼 텍스트
-    ctx.fillStyle = 'white';
-    ctx.fillText('재도전', ctx.canvas.width / 2, ctx.canvas.height / 2 + 25);
-    ctx.fillText('게임 종료', ctx.canvas.width / 2, ctx.canvas.height / 2 + 85);
+    // // 버튼 텍스트
+    // ctx.fillStyle = 'white';
+    // ctx.fillText('재도전', halfWidth, halfHeight + 25);
+    // ctx.fillText('게임 종료', halfWidth, halfHeight + 85);
   }
 
   show() {

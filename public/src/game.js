@@ -3,6 +3,7 @@ import { Monster } from './monster.js';
 import { Tower } from './tower.js';
 import { CLIENT_VERSION } from './constant.js';
 import { GameStateMessage, GameEndMessage } from './message.js';
+import { Button } from './button.js';
 
 /* 
   어딘가에 엑세스 토큰이 저장이 안되어 있다면 로그인을 유도하는 코드를 여기에 추가해주세요!
@@ -10,6 +11,7 @@ import { GameStateMessage, GameEndMessage } from './message.js';
 let userId = null;
 let assets = {};
 let gameOver = false;
+let isVictory = false;
 
 const authObj = JSON.parse(sessionStorage.getItem('authorization'));
 
@@ -21,20 +23,20 @@ const gameEndMessage = new GameEndMessage();
 
 const NUM_OF_MONSTERS = 6; // 몬스터 개수
 
-// 클래스로 만들고싶다.....
+// 초기화할 게임 세팅들 ...
 let userGold = 0; // 유저 골드
 let base; // 기지 객체
 let baseHp = 0; // 기지 체력
-
 let towerCost = 0; // 타워 구입 비용
 let numOfInitialTowers = 3; // 초기 타워 개수
 let monsterLevel = 0; // 몬스터 레벨
 let monsterSpawnInterval = 1000; // 몬스터 생성 주기
+let initGameData = null; // 초기화 데이터 묶음. 게임 시작 핸들러 이벤트로 데이터 받아올 예정
 const monsters = [];
 const towers = [];
 
 let score = 0; // 게임 점수
-let highScore = 0; // 기존 최고 점수
+let highScore = 0; // 기존 최고 랭킹 점수
 let isInitGame = false;
 
 let monstersSpawned = 0; // 현재 스테이지에서 스폰된 몬스터 수
@@ -42,6 +44,11 @@ let totalSpawnCount = 0; // 현재 스테이지에서 스폰해야 할 총 몬�
 let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
 
 let isBonusSpawned = false;
+
+// 버튼 생성 파트
+const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame);
+const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 160}px`, null, exitGame);
+const buyTowerButton = new Button('타워 구입', '10px', '10px', placeNewTower);
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -229,7 +236,7 @@ function gameLoop() {
     ctx.font = '25px Times New Roman';
     ctx.textAlign = 'start';
     ctx.fillStyle = 'skyblue';
-    ctx.fillText(`최고 기록: ${highScore}`, 100, 50); // 최고 기록 표시
+    ctx.fillText(`최고 랭킹 점수: ${highScore}`, 100, 50); // 최고 기록 표시
     ctx.fillStyle = 'white';
     ctx.fillText(`점수: ${score}`, 100, 100); // 현재 스코어 표시
     ctx.fillStyle = 'yellow';
@@ -300,6 +307,7 @@ function gameLoop() {
             });
             gameOver = true;
             // 게임 클리어에 따른 메시지 박스 출력 (재도전, 게임 종료)
+            isVictory = true;
             alert('게임 클리어!');
 
             // stopGameLoop = true;
@@ -319,7 +327,14 @@ function gameLoop() {
   gameStateMessage.draw(ctx);
 
   // 게임 종료 시 메뉴판 표시
-  gameEndMessage.draw(ctx);
+  gameEndMessage.draw(ctx, isVictory);
+
+  // 게임 종료 시 게임 종료, 재도전 버튼 표시할 수 있도록 설정
+  if (gameOver) {
+    retryButton.show();
+    exitButton.show();
+    buyTowerButton.hide();
+  }
 
   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
   // if (!gameOver) {
@@ -331,6 +346,9 @@ function initGame() {
   if (isInitGame) {
     return;
   }
+  buyTowerButton.show();
+  retryButton.hide();
+  exitButton.hide();
   gameEndMessage.hide();
   gameStateMessage.showMessage(1);
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
@@ -369,11 +387,32 @@ function startStage() {
 function initGameState(initGameStateInfo) {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameStateInfo.userGold;
-  baseHp = initGameStateInfo.baseHp;
+  baseHp = initGameStateInfo.baseHp - 90;
   numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
   monsterLevel = initGameStateInfo.monsterLevel;
   monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
   score = initGameStateInfo.score;
+}
+
+function retryGame() {
+  // 게임 재시작 해주기 위한 초기화 작업
+  console.log('게임 재시작 합니다.');
+  gameOver = false;
+  isVictory = false;
+  isInitGame = false;
+  isBonusSpawned = false;
+  monstersSpawned = 0;
+  totalSpawnCount = 0;
+  // 배열안에 있는 값을 모두 삭제하는 법 => arr.length = 0
+  monsters.length = 0;
+  towers.length = 0;
+  initGame(initGameData);
+}
+
+function exitGame() {
+  // 게임을 종료하기 위한 작업
+  console.log('게임을 종료합니다.');
+  location.reload();
 }
 
 // 이미지 로딩 완료 후 서버와 연결하고 게임 초기화
@@ -440,8 +479,8 @@ Promise.all([
       // [수빈] 추후 초기화 작업도 서버에서 data로 보내줄 예정. 초기화 데이터는 서버 인메모리 형식
       // [수빈] initGame() 이든 initGameState() 이든 둘 중 하나만 초기화로 써야 할거같음.
       if (!isInitGame) {
-        console.log(data.initGameStateInfo);
-        initGameState(data.initGameStateInfo);
+        initGameData = data.initGameStateInfo;
+        initGameState(initGameData);
         initGame();
       }
     }
@@ -485,19 +524,6 @@ Promise.all([
     }
   });
 });
-
-const buyTowerButton = document.createElement('button');
-buyTowerButton.textContent = '타워 구입';
-buyTowerButton.style.position = 'absolute';
-buyTowerButton.style.top = '10px';
-buyTowerButton.style.right = '10px';
-buyTowerButton.style.padding = '10px 20px';
-buyTowerButton.style.fontSize = '16px';
-buyTowerButton.style.cursor = 'pointer';
-
-buyTowerButton.addEventListener('click', placeNewTower);
-
-document.body.appendChild(buyTowerButton);
 
 const sendEvent = (handlerId, payload, timestamp) => {
   serverSocket.emit('event', {
