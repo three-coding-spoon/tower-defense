@@ -185,9 +185,12 @@ function getRandomPositionNearPath(maxDistance) {
 }
 
 function placeInitialTowers(x, y) {
-  const tower = new Tower(x, y, 1);
-  towers.push(tower);
-  sendEvent(30, { towerData: tower, index: towers.length - 1 });
+  for (let i = 0; i < numOfInitialTowers; i++) {
+    const { x: newX, y: newY } = getRandomPositionNearPath(200);
+    const tower = new Tower(newX, newY, 1);
+    towers.push(tower);
+    sendEvent(30, { towerData: tower, index: towers.length - 1 });
+  }
 }
 
 function clickBuyTower() {
@@ -476,7 +479,7 @@ function startStage() {
 function initGameState() {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameData.userGold;
-  baseHp = initGameData.baseHp + 1000;
+  baseHp = initGameData.baseHp;
   numOfInitialTowers = initGameData.numOfInitialTowers;
   monsterLevel = initGameData.monsterLevel;
   monsterSpawnInterval = initGameData.monsterSpawnInterval;
@@ -590,6 +593,7 @@ Promise.all([
       // [수빈] initGame() 이든 initGameState() 이든 둘 중 하나만 초기화로 써야 할거같음.
       if (!isInitGame) {
         initGameData = data.initGameStateInfo;
+        console.log(initGameData);
         initGameState();
         initGame();
       }

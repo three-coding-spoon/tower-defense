@@ -37,59 +37,24 @@ export class GameStateMessage {
     // if (this.currentMessage) return;
 
     // statusId에 따라 메시지 설정
-    switch (statusId) {
-      case 1:
-        this.currentMessage = '게임이 시작됩니다!';
-        break;
-      case 2:
-        this.currentMessage = '다음 스테이지로 이동합니다!';
-        break;
-      case 3:
-        this.currentMessage = '적을 모두 물리쳤습니다!';
-        break;
-      case 4:
-        this.currentMessage = '타워가 배치되었습니다!';
-        break;
-      case 5:
-        this.currentMessage = '타워가 업그레이드 되었습니다!';
-        break;
-      case 6:
-        this.currentMessage = '타워가 환불되었습니다!';
-        break;
-      case 7:
-        this.currentMessage = '최고 랭킹이 갱신되었습니다!';
-        break;
-      case 8:
-        this.currentMessage = '내 최고 점수가 갱신되었습니다!';
-        break;
-      case 9:
-        this.currentMessage = '타워는 10개까지만 구매 가능합니다.';
-        break;
-      case 10:
-        this.currentMessage = '골드가 부족합니다.';
-        break;
-      case 11:
-        this.currentMessage = '존재하지 않는 타워입니다.';
-        break;
-      case 12:
-        this.currentMessage = '환불할 수 있는 타워가 없습니다.';
-        break;
-      case 13:
-        this.currentMessage = '타워 데이터가 손상되었습니다.';
-        break;
-      case 14:
-        this.currentMessage = '이미 최대로 강화된 타워가 선택되었습니다.';
-        break;
-      case 15:
-        this.currentMessage = '환불할 타워를 먼저 선택해주세요.';
-        break;
-      case 16:
-        this.currentMessage = '강화할 타워를 먼저 선택해주세요.';
-        break;
-
-      default:
-        this.currentMessage = null;
-    }
+    const messages = {
+      1: '게임을 시작합니다!',
+      2: '다음 스테이지로 이동합니다!',
+      4: '타워를 구매했습니다!',
+      5: '타워를 강화했습니다!',
+      6: '타워를 판매했습니다!',
+      7: '새로운 최고 랭킹 점수를 달성했습니다!',
+      8: '새로운 개인 최고 점수를 달성했습니다!',
+      9: '타워 개수 한도에 도달했습니다!',
+      10: '골드가 부족합니다!',
+      11: '타워 정보가 일치하지 않습니다!',
+      12: '필드에 타워가 없습니다!',
+      13: '타워 데이터가 손상되었습니다!',
+      14: '최대 레벨에 도달했습니다!',
+      15: '선택된 타워가 없습니다!',
+      16: '타워를 선택해주세요!',
+    };
+    this.currentMessage = messages[statusId] || null;
 
     // 2초 후에 메시지를 지우는 타임아웃 설정
     if (this.currentMessage) {
