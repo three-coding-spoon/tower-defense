@@ -76,11 +76,14 @@ export const gameEnd = async (userId, payload, socket, io) => {
     console.log('myHighScore: ', myHighScore);
     if (myHighScore < serverScore) {
       await updateHighScore(userId, serverScore);
+      socket.emit('newMyHighScore', {
+        status: 'success',
+        message: '내 최고 점수를 갱신하였습니다!',
+      });
       console.log('내 최고 점수를 갱신하여 점수를 새로 등록합니다. ' + serverScore);
     }
 
-    const user = getUserById(userId);
-    console.log(user);
+    const user = await getUserById(userId);
 
     // 하이스코어 갱신 여부 확인
     const highScore = await getTopHighScore();

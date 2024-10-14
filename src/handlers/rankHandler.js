@@ -1,5 +1,5 @@
 import { authValidation } from '../middlewares/authMiddleware.js';
-import { getMyHighScore, getRankList } from '../models/scoreModel.js';
+import { getRankList } from '../models/scoreModel.js';
 import { getUserByName } from '../models/userModel.js';
 
 /** 랭크 리스트를 조회하는 API */
