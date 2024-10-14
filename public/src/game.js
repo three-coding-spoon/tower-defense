@@ -29,6 +29,7 @@ let base; // 기지 객체
 let baseHp = 0; // 기지 체력
 let towerCost = 0; // 타워 구입 비용
 let numOfInitialTowers = 3; // 초기 타워 개수
+let towerId = 0;
 let monsterLevel = 0; // 몬스터 레벨
 let monsterSpawnInterval = 1000; // 몬스터 생성 주기
 let initGameData = null; // 초기화 데이터 묶음. 게임 시작 핸들러 이벤트로 데이터 받아올 예정
@@ -45,10 +46,15 @@ let monsterSpawnTimer = 1000; // 몬스터 스폰을 위한 타이머
 
 let isBonusSpawned = false;
 
+// 선택된 타워 인덱스
+let selectedTowerIndex = null;
+
 // 버튼 생성 파트
 const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame);
 const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 160}px`, null, exitGame);
-const buyTowerButton = new Button('타워 구입', '10px', '10px', placeNewTower);
+const buyTowerButton = new Button('타워 구입', '10px', '10px', clickBuyTower);
+const refundTowerButton = new Button('타워 판매', '10px', '150px', clickRefundTower);
+const upgradeTowerButton = new Button('타워 강화', '10px', '290px', clickupgradeTower);
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -71,6 +77,19 @@ for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
 }
 
 let monsterPath;
+
+// 선택된 타워 정보 표시 요소 생성
+const selectedTowerInfo = document.createElement('div');
+selectedTowerInfo.style.position = 'absolute';
+selectedTowerInfo.style.bottom = '10px';
+selectedTowerInfo.style.left = '10px';
+selectedTowerInfo.style.padding = '10px';
+selectedTowerInfo.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+selectedTowerInfo.style.color = 'white';
+selectedTowerInfo.style.fontSize = '16px';
+selectedTowerInfo.style.borderRadius = '5px';
+selectedTowerInfo.innerHTML = '선택된 타워: 없음';
+document.body.appendChild(selectedTowerInfo);
 
 function generateRandomMonsterPath() {
   const path = [];
@@ -162,30 +181,87 @@ function getRandomPositionNearPath(maxDistance) {
   };
 }
 
-function placeInitialTowers() {
-  /* 
-    타워를 초기에 배치하는 함수입니다.
-    무언가 빠진 코드가 있는 것 같지 않나요? 
-  */
-  for (let i = 0; i < numOfInitialTowers; i++) {
-    const { x, y } = getRandomPositionNearPath(200);
-    console.log(x, y);
-    const tower = new Tower(x, y, towerCost);
-    towers.push(tower);
-    tower.draw(ctx, towerImage);
-  }
+function placeInitialTowers(x, y) {
+  const tower = new Tower(x, y, 1);
+  towers.push(tower);
+  sendEvent(30, { towerData: tower, index: towers.length - 1 });
+}
+
+function clickBuyTower() {
+  sendEvent(21, { userGold: userGold });
+}
+
+function highlightSelectedTower() {
+  if (selectedTowerIndex === null) return;
+
+  const tower = towers[selectedTowerIndex];
+  ctx.save();
+  ctx.strokeStyle = 'red';
+  ctx.lineWidth = 3;
+  // 타워 주변에 사각형을 그려 하이라이트
+  ctx.strokeRect(tower.x - 5, tower.y - 5, tower.width + 10, tower.height + 10);
+  ctx.restore();
 }
 
 function placeNewTower() {
-  /* 
-    타워를 구입할 수 있는 자원이 있을 때 타워 구입 후 랜덤 배치하면 됩니다.
-    빠진 코드들을 채워넣어주세요! 
-  */
   gameStateMessage.showMessage(4);
   const { x, y } = getRandomPositionNearPath(200);
-  const tower = new Tower(x, y);
+  const tower = new Tower(x, y, 1);
   towers.push(tower);
-  tower.draw(ctx, towerImage);
+  sendEvent(30, { towerData: tower, index: towers.length - 1 });
+  towerId++; // 타워 건설 후, 타워 Id를 더한다.
+  console.log(towerId);
+}
+
+// function btnDiplay()  {
+//   const target = document.getElementsByTagName('button');
+//   if (target.style.display !== 'none') {
+//     target.style.display === 'none';
+//   }
+// }
+
+function clickRefundTower() {
+  if (selectedTowerIndex === null) {
+    alert('환불할 타워를 먼저 선택해주세요.');
+    return;
+  }
+  const tower = towers[selectedTowerIndex];
+  sendEvent(22, { tower: tower, towerIndex: selectedTowerIndex });
+}
+
+function refundTower(index, refundAmount) {
+  gameStateMessage.showMessage(6);
+  towers.splice(index, 1);
+  userGold += refundAmount;
+
+  // 선택된 타워가 제거되었으므로 선택 상태 초기화
+  selectedTowerIndex = null;
+  upgradeTowerButton.disabled = true;
+}
+
+// 타워 강화
+function clickupgradeTower() {
+  if (selectedTowerIndex === null) {
+    alert('강화할 타워를 먼저 선택해주세요.');
+    return;
+  }
+
+  const tower = towers[selectedTowerIndex];
+  sendEvent(23, { userGold: userGold, tower: tower, towerIndex: selectedTowerIndex });
+}
+
+function upgradeTower(index, cost) {
+  gameStateMessage.showMessage(5);
+  const tower = towers[index];
+  const upgradeCost = cost;
+
+  tower.upgrade();
+  userGold -= upgradeCost;
+  sendEvent(30, { towerData: tower, index: index });
+
+  // 선택된 타워가 강화되었으므로 선택 상태 초기화
+  selectedTowerIndex = null;
+  upgradeTowerButton.disabled = true;
 }
 
 function placeBase() {
@@ -257,7 +333,9 @@ function gameLoop() {
         }
       });
     });
-
+    
+    // 선택된 타워 하이라이팅
+    highlightSelectedTower();
     // 몬스터가 공격을 했을 수 있으므로 기지 다시 그리기
     base.draw(ctx, baseImage);
 
@@ -329,13 +407,33 @@ function gameLoop() {
   // 게임 종료 시 메뉴판 표시
   gameEndMessage.draw(ctx, isVictory);
 
+  // 선택된 타워 정보 업데이트
+  if (selectedTowerIndex !== null) {
+    const selectedTower = towers[selectedTowerIndex];
+    selectedTowerInfo.innerHTML = `
+        <strong>선택된 타워 정보</strong><br>
+        레벨: ${selectedTower.level}<br>
+        공격력: ${selectedTower.attackPower}<br>
+        사거리: ${selectedTower.range}
+      `;
+  } else {
+    selectedTowerInfo.innerHTML = '선택된 타워: 없음';
+  }
+
+  // 게임 현황에 대한 메시지 표시
+  gameStateMessage.draw(ctx);
+
+  // 게임 종료 시 메뉴판 표시
+  gameEndMessage.draw(ctx, isVictory);
+
   // 게임 종료 시 게임 종료, 재도전 버튼 표시할 수 있도록 설정
   if (gameOver) {
     retryButton.show();
     exitButton.show();
     buyTowerButton.hide();
+    refundTowerButton.hide();
+    upgradeTowerButton.hide();
   }
-
   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
   // if (!gameOver) {
   //   requestAnimationFrame(gameLoop); // 지속적으로 다음 프레임에 gameLoop 함수 호출할 수 있도록 함
@@ -347,14 +445,21 @@ function initGame() {
     return;
   }
   buyTowerButton.show();
+  refundTowerButton.show();
+  upgradeTowerButton.show();
   retryButton.hide();
   exitButton.hide();
   gameEndMessage.hide();
   gameStateMessage.showMessage(1);
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
-  placeInitialTowers(); // 설정된 초기 타워 개수만큼 사전에 타워 배치
   placeBase(); // 기지 배치
+
+  for (let i = 0; i < numOfInitialTowers; i++) {
+    const { x, y } = getRandomPositionNearPath(200);
+    sendEvent(20, { towerPos: { x, y }, towerId });
+    towerId++;
+  } // 설정된 초기 타워 개수만큼 사전에 타워 배치
 
   // 현재 스테이지의 total_spawn_count 설정
   const { wave } = assets;
@@ -523,8 +628,57 @@ Promise.all([
       alert('Error occured on Wave transition!');
     }
   });
-});
 
+  serverSocket.on('InitialTower', (data) => {
+    if (data.status === 'success') {
+      placeInitialTowers(data.towerPos.x, data.towerPos.y); // 설정된 초기 타워 개수만큼 사전에 타워 배치
+    } else {
+      alert('Error on InitialTower');
+    }
+  });
+
+  serverSocket.on('BuyTower', (data) => {
+    if (data.status === 'success') {
+      placeNewTower();
+      userGold -= towerCost;
+    } else if (data.status === 'fail' && data.message === 'tower limit') {
+      alert('타워는 10개까지만 구매 가능합니다.');
+    } else if (data.status === 'fail' && data.message === 'not enough gold') {
+      alert('골드가 부족합니다.');
+    } else {
+      console.error('Error occurred while buy the tower!');
+      alert('Error occurred while buy the tower!');
+    }
+  });
+
+  serverSocket.on('RefundTower', (data) => {
+    if (data.status === 'fail' && data.message === 'tower mismatch') {
+      alert('존재하지 않는 타워입니다.');
+    } else if (data.status === 'fail' && data.message === 'No towers on the field') {
+      alert('환불할 수 있는 타워가 없습니다.');
+    } else if (data.status === 'success') {
+      refundTower(data.index, data.refundAmount);
+    } else {
+      console.error('Error occurred while refund the tower!');
+      alert('Error occurred while refund the tower!');
+    }
+  });
+
+  serverSocket.on('upgradeTower', (data) => {
+    if (data.status === 'fail' && data.message === 'Tower data corrupted') {
+      alert('타워 데이터가 손상되었습니다.');
+    } else if (data.status === 'fail' && data.message === 'max level') {
+      alert('이미 최대로 강화된 타워가 선택되었습니다.');
+    } else if (data.status === 'fail' && data.message === 'not enough gold') {
+      alert('골드가 부족합니다.');
+    } else if (data.status === 'success') {
+      upgradeTower(data.index, data.cost);
+    } else {
+      console.error('Error occurred while upgrade the tower!');
+      alert('Error occurred while upgrade the tower!');
+    }
+  });
+});
 const sendEvent = (handlerId, payload, timestamp) => {
   serverSocket.emit('event', {
     userId,
@@ -538,5 +692,39 @@ const sendEvent = (handlerId, payload, timestamp) => {
 const updateGameState = (serverState) => {};
 
 const updateTowerState = (serverState) => {};
+
+// 캔버스 클릭 이벤트 핸들러 추가 (타워 선택)
+canvas.addEventListener('click', (event) => {
+  const rect = canvas.getBoundingClientRect();
+  const clickX = event.clientX - rect.left;
+  const clickY = event.clientY - rect.top;
+
+  let found = false;
+  for (let i = 0; i < towers.length; i++) {
+    const tower = towers[i];
+
+    // 사각형 범위 검사
+    if (
+      clickX >= tower.x &&
+      clickX <= tower.x + tower.width &&
+      clickY >= tower.y &&
+      clickY <= tower.y + tower.height
+    ) {
+      selectedTowerIndex = i;
+      found = true;
+      console.log(`타워 선택됨: 인덱스 ${i}`);
+      break;
+    }
+  }
+
+  if (found) {
+    upgradeTowerButton.disabled = false;
+    console.log('강화 버튼 활성화');
+  } else {
+    selectedTowerIndex = null;
+    upgradeTowerButton.disabled = true;
+    console.log('강화 버튼 비활성화');
+  }
+});
 
 export { sendEvent };

@@ -1,34 +1,30 @@
 <!DOCTYPE html>
 <html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Changmin Kang" />
+    <title>Tower Defence</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="./styles/index.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="author" content="Changmin Kang" />
-  <title>Tower Defence</title>
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
-  <link rel="stylesheet" type="text/css" href="./styles/index.css" />
-</head>
-
-<body>
-  <div class="button-container">
-    <div id="title">Tower Defence</div>
-    <div class="user-container">
-      <button id="registerButton">회원가입</button>
-      <button id="loginButton">로그인</button>
+  <body>
+    <div class="button-container">
+      <div id="title">Tower Defence</div>
+      <div class="user-container">
+        <button id="registerButton">회원가입</button>
+        <button id="loginButton">로그인</button>
+      </div>
     </div>
-  </div>
-  <script type="module">
-    document
-      .getElementById("registerButton")
-      .addEventListener("click", () => {
-        window.location.href = "join";
+    <script type="module">
+      document.getElementById('registerButton').addEventListener('click', () => {
+        window.location.href = 'join';
       });
 
-    document.getElementById("loginButton").addEventListener("click", () => {
-      window.location.href = "login";
-    });
-  </script>
-</body>
-
+      document.getElementById('loginButton').addEventListener('click', () => {
+        window.location.href = 'login';
+      });
+    </script>
+  </body>
 </html>
