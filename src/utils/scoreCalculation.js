@@ -1,11 +1,7 @@
 // src/utils/scoreCalculation.js
 
 import { getGameAssets } from '../init/assets.js';
-import {
-  getMobCount,
-  hasSpawnedGoldenGoblin,
-  setSpawnedGoldenGoblin,
-} from '../models/mobCountModel.js';
+import { getMobCount, hasSpawnedGoldenGoblin } from '../models/mobCountModel.js';
 import { getStage } from '../models/stageModel.js';
 
 // 잡은 몬스터들의 점수를 합산해 검증

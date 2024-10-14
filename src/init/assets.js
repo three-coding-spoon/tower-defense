@@ -1,6 +1,5 @@
-// 임시
+// src/init/assets.js
 
-// gameAssets.js
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -52,5 +51,3 @@ export const getMobById = (mobId) => {
   const index = gameAssets.monster.data.findIndex((monster) => monster.id === mobId);
   return gameAssets.monster.data[index];
 };
-
-export const getTowerById = () => {};

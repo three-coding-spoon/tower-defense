@@ -4,7 +4,7 @@ export class Tower {
   constructor(x, y, level) {
     this.x = x; // 타워 이미지 x 좌표
     this.y = y; // 타워 이미지 y 좌표
-    this.typeId = 300
+    this.typeId = 300;
     this.width = 78; // 타워 이미지 가로 길이 (이미지 파일 길이에 따라 변경 필요하며 세로 길이와 비율을 맞춰주셔야 합니다!)
     this.height = 150; // 타워 이미지 세로 길이
     this.range = 300; // 타워 사거리
@@ -14,14 +14,14 @@ export class Tower {
     this.init(level);
     this.target = null; // 타워 광선의 목표
   }
-  
+
   getLevel() {
     return this.level;
   }
 
   init(level) {
     this.level = level; // 타워 레벨
-    this.price = 1000 * level; // 레벨당 타워 가치 
+    this.price = 1000 * level; // 레벨당 타워 가치
     this.attackPower = 50 * level; // 타워 공격력
   }
 
@@ -41,13 +41,9 @@ export class Tower {
       ctx.closePath();
       this.beamDuration--;
     }
-    ctx.font = "15px Arial";
-    ctx.fillStyle = "red";
-    ctx.fillText(
-    `(레벨 ${this.level}) 공격력: ${this.attackPower}`,
-    this.x,
-    this.y - 5
-    );
+    ctx.font = '15px Arial';
+    ctx.fillStyle = 'red';
+    ctx.fillText(`(레벨 ${this.level}) 공격력: ${this.attackPower}`, this.x, this.y - 5);
   }
 
   attack(monster) {

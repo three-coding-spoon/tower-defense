@@ -218,13 +218,6 @@ function placeNewTower() {
   console.log(towerId);
 }
 
-// function btnDiplay()  {
-//   const target = document.getElementsByTagName('button');
-//   if (target.style.display !== 'none') {
-//     target.style.display === 'none';
-//   }
-// }
-
 function clickRefundTower() {
   if (selectedTowerIndex === null) {
     gameStateMessage.showMessage(15);
@@ -461,15 +454,13 @@ function initGame() {
 
   // 몬스터를 주기적으로 스폰
   startSpawnMonster();
-  // monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
+
   gameLoop(); // 게임 루프 최초 실행
   isInitGame = true;
 }
 
 function startStage() {
   // 스테이지 이동 시 필요한 초기화
-  // monsterPath = generateRandomMonsterPath();
-  // initMap();
   clearInterval(monsterSpawnTimer);
 
   const { wave } = assets;
@@ -477,7 +468,6 @@ function startStage() {
   monstersSpawned = 0;
   isBonusSpawned = false;
   startSpawnMonster();
-  // monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
 
   if (!isInitGame) {
     gameLoop();
@@ -707,10 +697,6 @@ const sendEvent = (handlerId, payload, timestamp) => {
     payload,
   });
 };
-
-const updateGameState = (serverState) => {};
-
-const updateTowerState = (serverState) => {};
 
 // 캔버스 클릭 이벤트 핸들러 추가 (타워 선택)
 canvas.addEventListener('click', (event) => {

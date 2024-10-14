@@ -1,9 +1,7 @@
 // src/handlers/towerHandler.js
 
-// import { getUserById, updateUserGold } from '../models/userModel.js';
 import { getGameAssets } from '../init/assets.js';
 import { updateUserTowerData, getAllUserTowers, removeUserTower } from '../models/towerModel.js';
-// import { calculateRefundAmount, calculateUpgradeCost } from '../utils/towerCalculator.js';
 
 /** 타워 기본 제공 핸들러 **/
 export const InitialTowerHandler = async (userId, payload, socket) => {
@@ -21,7 +19,7 @@ export const InitialTowerHandler = async (userId, payload, socket) => {
 };
 
 /** 유저 타워 정보 업데이트 핸들러 **/
-export const userTowerUpdate = async (userId, payload, socket) => {
+export const userTowerUpdate = async (userId, payload) => {
   const { towerData, index } = payload;
 
   updateUserTowerData(userId, towerData, index);
