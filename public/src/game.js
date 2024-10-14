@@ -470,6 +470,7 @@ function startStage() {
   // 스테이지 이동 시 필요한 초기화
   // monsterPath = generateRandomMonsterPath();
   // initMap();
+  clearInterval(monsterSpawnTimer);
 
   const { wave } = assets;
   totalSpawnCount = wave.data[monsterLevel - 1].total_spawn_count;
@@ -507,6 +508,7 @@ function retryGame() {
   monstersSpawned = 0;
   totalSpawnCount = 0;
   gameEndMessage.isVictory = false;
+  clearInterval(monsterSpawnTimer);
 
   // 현재 진행중인 애니메이션 프레임을 종료 시킴 => 안하면 게임 속도가 빨라짐 (중첩)
   cancelAnimationFrame(animationId);
@@ -655,7 +657,7 @@ Promise.all([
   serverSocket.on('BuyTower', (data) => {
     if (data.status === 'success') {
       placeNewTower();
-      userGold -= towerCost;
+      userGold -= data.cost;
     } else if (data.status === 'fail' && data.message === 'tower limit') {
       gameStateMessage.showMessage(9);
     } else if (data.status === 'fail' && data.message === 'not enough gold') {
