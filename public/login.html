@@ -1,48 +1,47 @@
 <!DOCTYPE html>
 <html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Changmin Kang" />
+    <title>내일배움캠프 Node.js 트랙 타워 디펜스 게임</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="./styles/index.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="author" content="Changmin Kang" />
-  <title>내일배움캠프 Node.js 트랙 타워 디펜스 게임</title>
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
-  <link rel="stylesheet" type="text/css" href="./styles/index.css" />
-</head>
-
-<body>
-  <div class="form-container">
-    <div id="title">Tower Defence</div>
-    <h2>로그인</h2>
-    <div class="user-container">
-      <div class="input_userInfo">
-        <li>
-          <span>
-            <label for="userId">ID: </label>
-          </span>
-          <div>
-            <input type="text" id="username" placeholder="아이디" />
-          </div>
-        </li>
-        <li>
-          <span>
-            <label for="password">PW: </label>
-          </span>
-          <div>
-            <input type="password" id="password" placeholder="비밀번호" />
-          </div>
-        </li>
+  <body>
+    <div class="form-container">
+      <div id="title">Tower Defence</div>
+      <h2>로그인</h2>
+      <div class="user-container">
+        <div class="input_userInfo">
+          <li>
+            <span>
+              <label for="userId">ID: </label>
+            </span>
+            <div>
+              <input type="text" id="username" placeholder="아이디" />
+            </div>
+          </li>
+          <li>
+            <span>
+              <label for="password">PW: </label>
+            </span>
+            <div>
+              <input type="password" id="password" placeholder="비밀번호" />
+            </div>
+          </li>
+        </div>
+        <button id="login">로그인</button>
+        <button id="back">뒤로가기</button>
       </div>
-      <button id="login">로그인</button>
-      <button id="back">뒤로가기</button>
     </div>
-  </div>
-  <script>
-    document.getElementById("login").addEventListener("click", () => {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+    <script>
+      document.getElementById('login').addEventListener('click', () => {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
 
-      /* 
+        /* 
         로그인 API 호출 후 로그인 성공 시 index.html로 이동시켜주세요!
         이 때, 엑세스 토큰은 어딘가에 저장을 해놔야겠죠?! 
  
@@ -53,34 +52,32 @@
             > accessToken 인증 작업은 간단해짐 (원래 했던거 그대로)
             > 인증이 안된 경우 sessionStorage 비워주는 작업도 간단
       */
-      const body = { username, password };
+        const body = { username, password };
 
-      fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body)
-      })
-        .then(res => {
-          if (res.status === 200) {
-            const expiresIn = Date.now() + 1000 * 60 * 60  // 임시 유효기간 1일
-            const accessToken = res.headers.get('authorization');
-            const tokenObj = { value: accessToken, expire: expiresIn }
-            sessionStorage.setItem('authorization', JSON.stringify(tokenObj));
-            sessionStorage.setItem('username', username);
-          }
-          return res.json();
+        fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
         })
-        .then(json => {
-          alert(json.message);
-          if (json.isLogin === 'true')
-            window.location.href = "/room";
-        })
-    });
+          .then((res) => {
+            if (res.status === 200) {
+              const expiresIn = Date.now() + 1000 * 60 * 60; // 임시 유효기간 1일
+              const accessToken = res.headers.get('authorization');
+              const tokenObj = { value: accessToken, expire: expiresIn };
+              sessionStorage.setItem('authorization', JSON.stringify(tokenObj));
+              sessionStorage.setItem('username', username);
+            }
+            return res.json();
+          })
+          .then((json) => {
+            alert(json.message);
+            if (json.isLogin === 'true') window.location.href = '/room';
+          });
+      });
 
-    document.getElementById("back").addEventListener("click", () => {
-      window.location.href = "/";
-    });
-  </script>
-</body>
-
+      document.getElementById('back').addEventListener('click', () => {
+        window.location.href = '/';
+      });
+    </script>
+  </body>
 </html>

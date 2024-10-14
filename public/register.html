@@ -1,57 +1,56 @@
 <!DOCTYPE html>
 <html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="author" content="Changmin Kang" />
+    <title>내일배움캠프 Node.js 트랙 타워 디펜스 게임</title>
+    <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
+    <link rel="stylesheet" type="text/css" href="./styles/index.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="author" content="Changmin Kang" />
-  <title>내일배움캠프 Node.js 트랙 타워 디펜스 게임</title>
-  <link rel="icon" type="image/x-icon" href="/images/favicon.ico" />
-  <link rel="stylesheet" type="text/css" href="./styles/index.css" />
-</head>
-
-<body>
-  <div class="form-container">
-    <div id="title">Tower Defence</div>
-    <h2>회원가입</h2>
-    <div class="user-container">
-      <div class="input_userInfo">
-        <li>
-          <span>
-            <label for="userId">ID: </label>
-          </span>
-          <div>
-            <input type="text" id="username" placeholder="아이디" />
-          </div>
-        </li>
-        <li>
-          <span>
-            <label for="password">PW: </label>
-          </span>
-          <div>
-            <input type="password" id="password" placeholder="비밀번호" />
-          </div>
-        </li>
-        <li>
-          <span>
-            <label for="confirmPassword">PW 확인: </label>
-          </span>
-          <div>
-            <input type="password" id="confirmPassword" placeholder="비밀번호 2차 확인" />
-          </div>
-        </li>
+  <body>
+    <div class="form-container">
+      <div id="title">Tower Defence</div>
+      <h2>회원가입</h2>
+      <div class="user-container">
+        <div class="input_userInfo">
+          <li>
+            <span>
+              <label for="userId">ID: </label>
+            </span>
+            <div>
+              <input type="text" id="username" placeholder="아이디" />
+            </div>
+          </li>
+          <li>
+            <span>
+              <label for="password">PW: </label>
+            </span>
+            <div>
+              <input type="password" id="password" placeholder="비밀번호" />
+            </div>
+          </li>
+          <li>
+            <span>
+              <label for="confirmPassword">PW 확인: </label>
+            </span>
+            <div>
+              <input type="password" id="confirmPassword" placeholder="비밀번호 2차 확인" />
+            </div>
+          </li>
+        </div>
+        <button id="register">회원가입</button>
+        <button id="back">뒤로가기</button>
       </div>
-      <button id="register">회원가입</button>
-      <button id="back">뒤로가기</button>
     </div>
-  </div>
-  <script>
-    document.getElementById("register").addEventListener("click", () => {
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
+    <script>
+      document.getElementById('register').addEventListener('click', () => {
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
 
-      /* 
+        /* 
         회원가입 API 호출 후 회원가입 성공 시 index.html로 이동시켜주세요!
       */
 
@@ -85,10 +84,32 @@
       }
     });
 
-    document.getElementById("back").addEventListener("click", () => {
-      window.location.href = "/";
-    });
-  </script>
-</body>
+        if (password !== confirmPassword) {
+          alert('비밀번호가 서로 일치하지 않습니다.');
+        } else {
+          const body = { username, password };
+          fetch('/api/auth/register', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body),
+          })
+            .then((res) => {
+              if (res.status === 201) {
+                alert('회원가입에 성공하였습니다.');
+                window.location.href = '/';
+              } else {
+                return res.json();
+              }
+            })
+            .then((json) => {
+              alert(json.message);
+            });
+        }
+      });
 
+      document.getElementById('back').addEventListener('click', () => {
+        window.location.href = '/';
+      });
+    </script>
+  </body>
 </html>

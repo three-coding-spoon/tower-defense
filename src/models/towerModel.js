@@ -2,6 +2,10 @@
 
 const userTowers = new Map();
 
+export const initTowers = (userId) => {
+  userTowers.set(userId, []);
+};
+
 export const updateUserTowerData = (userId, towerData, index = null) => {
   const towers = userTowers.get(userId) || [];
 
@@ -30,7 +34,7 @@ export const removeUserTower = (userId, index) => {
   const towers = userTowers.get(userId) || [];
   if (index >= 0 && index < towers.length) {
     towers.splice(index, 1); // 해당 인덱스의 타워 제거
-    userTowers.set(userId, towers);
+    // userTowers.set(userId, towers);
   }
 };
 

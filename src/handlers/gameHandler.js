@@ -9,6 +9,7 @@ import { broadcastNewHighScore } from './broadcastHandler.js';
 import { initGameStateInfo } from '../../constants.js';
 import { getTopHighScore } from '../models/scoreModel.js';
 import { getUserById } from '../models/userModel.js';
+import { initTowers, getAllUserTowers } from '../models/towerModel.js';
 import { addLog } from '../utils/log.js';
 
 export const gameStart = (userId, payload, socket, io) => {
@@ -21,14 +22,16 @@ export const gameStart = (userId, payload, socket, io) => {
     }
     socket.emit('gameAssets', assets);
 
-    // 유저의 몹 카운트와 스테이지 정보 초기화
+    // 유저의 몹 카운트와 스테이지, 타워 정보 초기화
     initMobCounts(userId);
     createStage(userId);
+    initTowers(userId);
 
-    // 유저의 몹 카운트와 스테이지 정보가 초기화가 되었는지 확인
+    // 유저의 몹 카운트와 스테이지, 타워 정보가 초기화가 되었는지 확인
     const userMobCount = getMobCount(userId);
     const userStage = getStage(userId);
-    if (!userMobCount || !userStage) {
+    const userTower = getAllUserTowers(userId);
+    if (!userMobCount || !userStage || !userTower) {
       socket.emit('gameStart', { status: 'fail', message: '게임 초기화에 실패했습니다.' });
       addLog(userId, 2, `${userId}번 유저의 게임 초기화에 실패했습니다.`);
     }
