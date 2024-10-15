@@ -1,6 +1,5 @@
-// 임시
+// src/init/assets.js
 
-// gameAssets.js
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';

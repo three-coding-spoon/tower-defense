@@ -18,12 +18,11 @@ export class Base {
       this.height,
     );
 
-    ctx.font = '16px Arial';
+    ctx.font = '16px DepartureMono-Regular';
     ctx.fillStyle = 'white';
-    ctx.textAlign = 'start';
     ctx.fillText(
       `HP: ${this.hp}/${this.maxHp}`,
-      this.x - this.width,
+      this.x - this.width + 5,
       this.y - this.height / 2 - 10,
     );
   }
