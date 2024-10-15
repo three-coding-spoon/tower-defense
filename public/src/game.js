@@ -564,6 +564,7 @@ function retryGame() {
   // 배열안에 있는 값을 모두 삭제하는 법 => arr.length = 0
   monsters.length = 0;
   towers.length = 0;
+  traps.length = 0;
   gameOver = false;
   isInitGame = false;
   isBonusSpawned = false;
