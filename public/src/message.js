@@ -86,6 +86,12 @@ export class GameStateMessage {
       case 16:
         this.currentMessage = '강화할 타워를 먼저 선택해주세요.';
         break;
+      case 17:
+        this.currentMessage = '트랩이 배치되었습니다.';
+        break;
+      case 18:
+        this.currentMessage = '트랩은 10개까지만 구매 가능합니다.';
+        break;
 
       default:
         this.currentMessage = null;

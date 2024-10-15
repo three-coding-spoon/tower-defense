@@ -1,6 +1,7 @@
 import { Base } from './base.js';
 import { Monster } from './monster.js';
 import { Tower } from './tower.js';
+import { Trap } from './trap.js';
 import { CLIENT_VERSION } from './constant.js';
 import { GameStateMessage, GameEndMessage } from './message.js';
 import { Button } from './button.js';
@@ -48,6 +49,7 @@ let animationId = null; // 애니메이션 아이디
 
 // 타워 세팅
 const towers = [];
+const traps = [];
 let selectedTowerIndex = null; // 선택된 타워 인덱스
 
 // 점수 세팅
@@ -60,6 +62,7 @@ const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 160}px
 const buyTowerButton = new Button('타워 구입', '10px', '10px', clickBuyTower);
 const refundTowerButton = new Button('타워 판매', '10px', '150px', clickRefundTower);
 const upgradeTowerButton = new Button('타워 강화', '10px', '290px', clickupgradeTower);
+const buyTrapButton = new Button('트랩 구입', '10px', '430px', clickBuyTrap);
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
@@ -73,6 +76,9 @@ baseImage.src = 'images/base.png';
 
 const pathImage = new Image();
 pathImage.src = 'images/path.png';
+
+const trapImage = new Image();
+trapImage.src = 'images/trap.png';
 
 const monsterImages = [];
 for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
@@ -184,6 +190,36 @@ function getRandomPositionNearPath(maxDistance) {
     x: posX + offsetX,
     y: posY + offsetY,
   };
+}
+
+function getRandomPositionOnPath() {
+  // 타워 배치를 위한 몬스터가 지나가는 경로 상에서 maxDistance 범위 내에서 랜덤한 위치를 반환하는 함수!
+  const segmentIndex = Math.floor(Math.random() * (monsterPath.length - 1));
+  const startX = monsterPath[segmentIndex].x;
+  const startY = monsterPath[segmentIndex].y;
+  const endX = monsterPath[segmentIndex + 1].x;
+  const endY = monsterPath[segmentIndex + 1].y;
+
+  const t = Math.random();
+  const posX = startX + t * (endX - startX);
+  const posY = startY + t * (endY - startY);
+
+  return {
+    x: posX,
+    y: posY,
+  };
+}
+
+function clickBuyTrap() {
+  sendEvent(40, { userGold: userGold });
+}
+
+function placeNewTrap() {
+  gameStateMessage.showMessage(17);
+  const { x, y } = getRandomPositionOnPath();
+  const trap = new Trap(x, y);
+  traps.push(trap);
+  sendEvent(41, { trapData: trap, index: traps.length - 1 });
 }
 
 function placeInitialTowers(x, y) {
@@ -338,6 +374,18 @@ function gameLoop() {
       });
     });
 
+    traps.forEach((trap) => {
+      trap.draw(ctx, trapImage);
+      monsters.forEach((monster) => {
+        const distance = Math.sqrt(
+          Math.pow(trap.x - monster.x, 2) + Math.pow(trap.y - monster.y, 2),
+        );
+        if (distance < trap.range) {
+          trap.attack(monster);
+        }
+      });
+    });
+
     // 선택된 타워 하이라이팅
     highlightSelectedTower();
 
@@ -415,6 +463,7 @@ function gameLoop() {
     buyTowerButton.hide();
     refundTowerButton.hide();
     upgradeTowerButton.hide();
+    buyTrapButton.hide();
   }
 
   // 선택된 타워 정보 업데이트
@@ -440,6 +489,7 @@ function initGame() {
   buyTowerButton.show();
   refundTowerButton.show();
   upgradeTowerButton.show();
+  buyTrapButton.show();
   retryButton.hide();
   exitButton.hide();
   gameEndMessage.hide();
@@ -543,6 +593,7 @@ Promise.all([
   new Promise((resolve) => (towerImage.onload = resolve)),
   new Promise((resolve) => (baseImage.onload = resolve)),
   new Promise((resolve) => (pathImage.onload = resolve)),
+  new Promise((resolve) => (trapImage.onload = resolve)),
   ...monsterImages.map((img) => new Promise((resolve) => (img.onload = resolve))),
 ]).then(() => {
   if (!authObj) {
@@ -693,6 +744,20 @@ Promise.all([
     } else {
       console.error('Error occurred while upgrade the tower!');
       alert('Error occurred while upgrade the tower!');
+    }
+  });
+
+  serverSocket.on('BuyTrap', (data) => {
+    if (data.status === 'success') {
+      placeNewTrap();
+      userGold -= data.cost;
+    } else if (data.status === 'fail' && data.message === 'trap limit') {
+      gameStateMessage.showMessage(18);
+    } else if (data.status === 'fail' && data.message === 'not enough gold') {
+      gameStateMessage.showMessage(10);
+    } else {
+      console.error('Error occurred while buy the tower!');
+      alert('Error occurred while buy the tower!');
     }
   });
 });

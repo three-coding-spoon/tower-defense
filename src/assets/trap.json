@@ -1,0 +1,11 @@
+{
+  "name": "trap",
+  "version": "1.0.0",
+  "data": [
+    {
+      "attackPower": 40,
+      "cost": 1000,
+      "range": 300
+    }
+  ]
+}
