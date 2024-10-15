@@ -13,11 +13,11 @@ export class Monster {
     this.y = path[0].y; // 몬스터의 y 좌표 (최초 위치는 경로의 첫 번째 지점)
     this.width = 80; // 몬스터 이미지 가로 길이
     this.height = 80; // 몬스터 이미지 세로 길이
-    this.speed = 7; // 몬스터의 이동 속도
     this.level = level; // 몬스터 레벨
     this.monsterNumber = !isBonus ? this.createMonster(monster_unlock) : 5; // 몬스터 번호 (현재 스테이지에 나올 수 있는 몬스터 번호)
     this.baseHp = monster_data.data[this.monsterNumber].hp;
     this.baseAttackPower = monster_data.data[this.monsterNumber].attackPower;
+    this.speed = monster_data.data[this.monsterNumber].speed; // 몬스터의 이동 속도
     this.image = monsterImages[this.monsterNumber]; // 몬스터 이미지
     this.score = monster_data.data[this.monsterNumber].score;
     this.isKilledByPlayer = false; // 몹이 플레이어에 의해 죽었는지 여부
@@ -58,7 +58,6 @@ export class Monster {
 
     // monster_id 배열에서 무작위 몬스터 선택
     const monsterId = allowedMonsters[Math.floor(Math.random() * allowedMonsters.length)];
-    console.log(monsterId);
     return monsterId;
   }
 
@@ -99,6 +98,7 @@ export class Monster {
       this.hp = 0;
       this.isKilledByPlayer = true; // 플레이어가 보내버림
     }
+    this.hp = Math.round(this.hp);
   }
 
   draw(ctx) {
