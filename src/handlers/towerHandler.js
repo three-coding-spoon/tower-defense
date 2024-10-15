@@ -4,7 +4,7 @@ import { getGameAssets } from '../init/assets.js';
 import { updateUserTowerData, getAllUserTowers, removeUserTower } from '../models/towerModel.js';
 import { initGameStateInfo } from '../../constants.js';
 
-/** 타워 기본 제공 핸들러 **/
+// 타워 기본 제공 핸들러
 export const initialTowerHandler = async (userId, payload, socket) => {
   const { towersLength } = payload;
   const initialTowerNum = initGameStateInfo.numOfInitialTowers;
@@ -16,14 +16,14 @@ export const initialTowerHandler = async (userId, payload, socket) => {
   socket.emit('initialTower', { status: 'success', message: 'Initial Tower complete' });
 };
 
-/** 유저 타워 정보 업데이트 핸들러 **/
+// 유저 타워 정보 업데이트 핸들러
 export const userTowerUpdate = async (userId, payload) => {
   const { towerData, index } = payload;
 
   updateUserTowerData(userId, towerData, index);
 };
 
-/** 타워 구매 핸들러 **/
+// 타워 구매 핸들러
 export const handleBuyTower = async (userId, payload, socket) => {
   const { userGold, towerId } = payload;
   const { tower } = getGameAssets();
@@ -47,7 +47,7 @@ export const handleBuyTower = async (userId, payload, socket) => {
   }
 };
 
-/** 타워 판매 핸들러 **/
+// 타워 판매 핸들러
 export const handleRefundTower = async (userId, payload, socket) => {
   const { tower, towerIndex } = payload;
 
@@ -71,7 +71,7 @@ export const handleRefundTower = async (userId, payload, socket) => {
   }
 };
 
-/** 타워 강화 핸들러 **/
+// 타워 강화 핸들러
 export const handleUpgradeTower = async (userId, payload, socket) => {
   const { userGold, tower, towerIndex } = payload;
 

@@ -3,14 +3,14 @@
 import { getGameAssets } from '../init/assets.js';
 import { updateUserTrapData, getAllUserTraps } from '../models/trapModels.js';
 
-/** 유저 트랩 정보 업데이트 핸들러 **/
+// 유저 트랩 정보 업데이트 핸들러
 export const userTrapUpdate = async (userId, payload, socket) => {
   const { trapData, index } = payload;
 
   updateUserTrapData(userId, trapData, index);
 };
 
-/** 트랩 구매 핸들러 **/
+// 트랩 구매 핸들러
 export const handleBuyTrap = async (userId, payload, socket) => {
   const { userGold } = payload;
   const { trap } = getGameAssets();

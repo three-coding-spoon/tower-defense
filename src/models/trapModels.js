@@ -10,12 +10,12 @@ export const updateUserTrapData = (userId, trapData, index = null) => {
   const traps = userTraps.get(userId) || [];
 
   if (index !== null && index >= 0 && index < traps.length) {
-    // 기존 타워 업데이트
+    // 기존 트랩 업데이트
     traps[index] = { ...traps[index], ...trapData };
     userTraps.set(userId, traps);
     return traps[index];
   } else {
-    // 새로운 타워를 추가
+    // 새로운 트랩 추가
     traps.push(trapData);
     userTraps.set(userId, traps);
     return trapData;

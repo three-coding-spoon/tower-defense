@@ -14,7 +14,7 @@ export class Trap {
 
   draw(ctx, trapImage) {
     ctx.drawImage(trapImage, this.x, this.y, this.width, this.height);
-    ctx.font = '15px Arial';
+    ctx.font = '15px DepartureMono-Regular';
     ctx.fillStyle = 'red';
     ctx.fillText(`공격력: ${this.attackPower}`, this.x, this.y - 5);
   }

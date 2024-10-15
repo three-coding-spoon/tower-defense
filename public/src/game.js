@@ -595,7 +595,6 @@ function exitGame() {
 // 이미지 로딩 완료 후 서버와 연결하고 게임 초기화
 Promise.all([
   new Promise((resolve) => (backgroundImage.onload = resolve)),
-  //new Promise((resolve) => (towerImage.onload = resolve)),
   new Promise((resolve) => (baseImage.onload = resolve)),
   new Promise((resolve) => (pathImage.onload = resolve)),
   new Promise((resolve) => (trapImage.onload = resolve)),
@@ -615,13 +614,6 @@ Promise.all([
       },
     });
   }
-
-  /* 
-    서버의 이벤트들을 받는 코드들은 여기다가 쭉 작성해주시면 됩니다! 
-    e.g. serverSocket.on("...", () => {...});
-    이 때, 상태 동기화 이벤트의 경우에 아래의 코드를 마지막에 넣어주세요! 최초의 상태 동기화 이후에 게임을 초기화해야 하기 때문입니다! 
-  */
-  //serverSocket.on('response', async (data) => {});
 
   serverSocket.on('connection', async (data) => {
     highScore = data.highScore;
@@ -653,8 +645,6 @@ Promise.all([
       alert(data.message);
       window.location.href = '/';
     } else {
-      // [수빈] 추후 초기화 작업도 서버에서 data로 보내줄 예정. 초기화 데이터는 서버 인메모리 형식
-      // [수빈] initGame() 이든 initGameState() 이든 둘 중 하나만 초기화로 써야 할거같음.
       if (!isInitGame) {
         initGameData = data.initGameStateInfo;
         console.log(initGameData);
@@ -709,59 +699,79 @@ Promise.all([
     }
   });
 
+  // buyTower 이벤트 핸들러
   serverSocket.on('buyTower', (data) => {
     if (data.status === 'success') {
       placeNewTower(data.towerId);
       userGold -= data.cost;
-    } else if (data.status === 'fail' && data.message === 'tower limit') {
-      gameStateMessage.showMessage(9);
-    } else if (data.status === 'fail' && data.message === 'not enough gold') {
-      gameStateMessage.showMessage(10);
     } else {
-      console.error('Error occurred while buy the tower!');
-      alert('Error occurred while buy the tower!');
+      // status가 'fail'인 경우
+      if (data.message === 'tower limit') {
+        gameStateMessage.showMessage(9);
+      } else if (data.message === 'not enough gold') {
+        gameStateMessage.showMessage(10);
+      } else {
+        // 예상치 못한 에러
+        console.error('Error occurred while buying the tower!');
+        alert('Error occurred while buying the tower!');
+      }
     }
   });
 
+  // refundTower 이벤트 핸들러
   serverSocket.on('refundTower', (data) => {
-    if (data.status === 'fail' && data.message === 'tower mismatch') {
-      gameStateMessage.showMessage(11);
-    } else if (data.status === 'fail' && data.message === 'No towers on the field') {
-      gameStateMessage.showMessage(12);
-    } else if (data.status === 'success') {
+    if (data.status === 'success') {
       refundTower(data.index, data.refundAmount);
     } else {
-      console.error('Error occurred while refund the tower!');
-      alert('Error occurred while refund the tower!');
+      // status가 'fail'인 경우
+      if (data.message === 'tower mismatch') {
+        gameStateMessage.showMessage(11);
+      } else if (data.message === 'No towers on the field') {
+        gameStateMessage.showMessage(12);
+      } else {
+        // 예상치 못한 에러
+        console.error('Error occurred while refunding the tower!');
+        alert('Error occurred while refunding the tower!');
+      }
     }
   });
 
+  // upgradeTower 이벤트 핸들러
   serverSocket.on('upgradeTower', (data) => {
-    if (data.status === 'fail' && data.message === 'Tower data corrupted') {
-      gameStateMessage.showMessage(13);
-    } else if (data.status === 'fail' && data.message === 'max level') {
-      gameStateMessage.showMessage(14);
-    } else if (data.status === 'fail' && data.message === 'not enough gold') {
-      gameStateMessage.showMessage(10);
-    } else if (data.status === 'success') {
+    if (data.status === 'success') {
       upgradeTower(data.index, data.cost);
     } else {
-      console.error('Error occurred while upgrade the tower!');
-      alert('Error occurred while upgrade the tower!');
+      // status가 'fail'인 경우
+      if (data.message === 'Tower data corrupted') {
+        gameStateMessage.showMessage(13);
+      } else if (data.message === 'max level') {
+        gameStateMessage.showMessage(14);
+      } else if (data.message === 'not enough gold') {
+        gameStateMessage.showMessage(10);
+      } else {
+        // 예상치 못한 에러
+        console.error('Error occurred while upgrading the tower!');
+        alert('Error occurred while upgrading the tower!');
+      }
     }
   });
 
+  // BuyTrap 이벤트 핸들러
   serverSocket.on('BuyTrap', (data) => {
     if (data.status === 'success') {
       placeNewTrap();
       userGold -= data.cost;
-    } else if (data.status === 'fail' && data.message === 'trap limit') {
-      gameStateMessage.showMessage(18);
-    } else if (data.status === 'fail' && data.message === 'not enough gold') {
-      gameStateMessage.showMessage(10);
     } else {
-      console.error('Error occurred while buy the tower!');
-      alert('Error occurred while buy the tower!');
+      // status가 'fail'인 경우
+      if (data.message === 'trap limit') {
+        gameStateMessage.showMessage(18);
+      } else if (data.message === 'not enough gold') {
+        gameStateMessage.showMessage(10);
+      } else {
+        // 예상치 못한 에러
+        console.error('Error occurred while buying the trap!');
+        alert('Error occurred while buying the trap!');
+      }
     }
   });
 });
