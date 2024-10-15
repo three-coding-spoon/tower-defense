@@ -433,7 +433,6 @@ function initGame() {
   exitButton.hide();
   gameEndMessage.hide();
   gameStateMessage.showMessage(1);
-  ctx.globalAlpha = 1;
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
   placeBase(); // 기지 배치
@@ -626,7 +625,7 @@ Promise.all([
     }
   });
 
-  serverSocket.on('InitialTower', (data) => {
+  serverSocket.on('initialTower', (data) => {
     if (data.status === 'success') {
       placeInitialTowers(data.towerPos.x, data.towerPos.y); // 설정된 초기 타워 개수만큼 사전에 타워 배치
     } else {
@@ -634,7 +633,7 @@ Promise.all([
     }
   });
 
-  serverSocket.on('BuyTower', (data) => {
+  serverSocket.on('buyTower', (data) => {
     if (data.status === 'success') {
       placeNewTower();
       userGold -= data.cost;
@@ -648,7 +647,7 @@ Promise.all([
     }
   });
 
-  serverSocket.on('RefundTower', (data) => {
+  serverSocket.on('refundTower', (data) => {
     if (data.status === 'fail' && data.message === 'tower mismatch') {
       gameStateMessage.showMessage(11);
     } else if (data.status === 'fail' && data.message === 'No towers on the field') {

@@ -4,16 +4,16 @@ import { getGameAssets } from '../init/assets.js';
 import { updateUserTowerData, getAllUserTowers, removeUserTower } from '../models/towerModel.js';
 
 /** 타워 기본 제공 핸들러 **/
-export const InitialTowerHandler = async (userId, payload, socket) => {
+export const initialTowerHandler = async (userId, payload, socket) => {
   const { towerPos, towerId } = payload;
   const towers = getAllUserTowers(userId);
 
   if (!towerPos) {
-    socket.emit('InitialTower', { status: 'fail', message: 'No Data' });
+    socket.emit('initialTower', { status: 'fail', message: 'No Data' });
     return;
   }
   if (towers.length === towerId) {
-    socket.emit('InitialTower', { status: 'success', message: 'Initial Tower complete', towerPos });
+    socket.emit('initialTower', { status: 'success', message: 'Initial Tower complete', towerPos });
     return;
   }
 };
@@ -34,17 +34,17 @@ export const handleBuyTower = async (userId, payload, socket) => {
 
   // 타워 개수 확인
   if (towers.length >= 10) {
-    socket.emit('BuyTower', { status: 'fail', message: 'tower limit' });
+    socket.emit('buyTower', { status: 'fail', message: 'tower limit' });
     return;
   }
   // 골드 확인
   else if (userGold < tower.data[0].cost) {
-    socket.emit('BuyTower', { status: 'fail', message: 'not enough gold' });
+    socket.emit('buyTower', { status: 'fail', message: 'not enough gold' });
     return;
   }
   // 골드 차감
   else if (userGold >= tower.data[0].cost) {
-    socket.emit('BuyTower', { status: 'success', cost: tower.data[0].cost });
+    socket.emit('buyTower', { status: 'success', cost: tower.data[0].cost });
     return;
   }
 };
@@ -60,15 +60,15 @@ export const handleRefundTower = async (userId, payload, socket) => {
   const refundAmount = tower.price / 2;
   // 서버 데이터에서 타워 제거
   if (towers.length === 0) {
-    socket.emit('RefundTower', { status: 'fail', message: 'No towers on the field' });
+    socket.emit('refundTower', { status: 'fail', message: 'No towers on the field' });
     return;
   }
   if (towers[index].x === tower.x && towers[index].y === tower.y) {
     removeUserTower(userId, index);
-    socket.emit('RefundTower', { status: 'success', index, refundAmount });
+    socket.emit('refundTower', { status: 'success', index, refundAmount });
     return;
   } else {
-    socket.emit('RefundTower', { status: 'fail', message: 'tower mismatch' });
+    socket.emit('refundTower', { status: 'fail', message: 'tower mismatch' });
     return;
   }
 };
