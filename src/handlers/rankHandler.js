@@ -2,7 +2,7 @@ import { authValidation } from '../middlewares/authMiddleware.js';
 import { getRankList } from '../models/scoreModel.js';
 import { getUserByName } from '../models/userModel.js';
 
-/** 랭크 리스트를 조회하는 API */
+// 랭크 리스트를 조회하는 API
 export const ranks = async (req, res, next) => {
   try {
     const auth = req.header('authorization');

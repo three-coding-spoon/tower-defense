@@ -17,6 +17,5 @@ export const broadcastNewHighScore = async (username, io, serverScore) => {
     console.error(`Error in broadcastNewHighScore: ${error.message}`);
     io.emit('newHighScore', { status: 'fail', message: 'Error in broadcastNewHighScore.' });
     return;
-    // return { status: 'fail', message: 'Failed to broadcast new high score', handlerId: 4 };
   }
 };
