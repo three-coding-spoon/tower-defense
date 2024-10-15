@@ -17,7 +17,7 @@ export const handleBuyTrap = async (userId, payload, socket) => {
 
   const traps = getAllUserTraps(userId);
 
-  // 타워 개수 확인
+  // 트랩 개수 확인
   if (traps.length >= 10) {
     socket.emit('BuyTrap', { status: 'fail', message: 'Trap limit' });
     return;
