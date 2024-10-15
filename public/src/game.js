@@ -24,6 +24,8 @@ audioManager.addSoundEffect('click', '../sound/click.mp3', 0.3);
 audioManager.addSoundEffect('beam_attack', '../sound/beam_attack.mp3', 0.15);
 audioManager.addSoundEffect('lose', '../sound/lose.mp3', 0.4);
 audioManager.addSoundEffect('win', '../sound/win.mp3', 0.2);
+audioManager.addSoundEffect('set_trap', '../sound/set_trap.mp3', 0.25);
+audioManager.addSoundEffect('attack_trap', '../sound/attack_trap.mp3', 0.15);
 
 const NUM_OF_MONSTERS = 6; // 몬스터 개수
 
@@ -221,8 +223,9 @@ function clickBuyTrap() {
 
 function placeNewTrap() {
   gameStateMessage.showMessage(17);
+  audioManager.playSoundEffect('set_trap');
   const { x, y } = getRandomPositionOnPath();
-  const trap = new Trap(x, y);
+  const trap = new Trap(x, y, audioManager);
   traps.push(trap);
   sendEvent(41, { trapData: trap, index: traps.length - 1 });
 }
