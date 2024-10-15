@@ -14,6 +14,7 @@
 📦ROOT
  ┣ 📂public
  ┃ ┣ 📂images               -   이미지 파일 묶음 폴더
+ ┃ ┣ 📂sound                -   소리 파일 묶음 폴더
  ┃ ┣ 📂src                  -   client 소스코드 묶음 폴더
  ┃ ┃ ┣ 📜base.js
  ┃ ┃ ┣ 📜button.js              -   버튼 관련 스크립트 ..
@@ -34,6 +35,7 @@
  ┃ ┃ ┣ 📜monster.json
  ┃ ┃ ┣ 📜monster_unlock.json
  ┃ ┃ ┣ 📜tower.json
+ ┃ ┃ ┣ 📜trap.json
  ┃ ┃ ┗ 📜wave.json
  ┃ ┣ 📂handlers             -   이벤트 처리 묶음 폴더
  ┃ ┃ ┣ 📜authHandler.js
@@ -45,7 +47,8 @@
  ┃ ┃ ┣ 📜rankHandler.js
  ┃ ┃ ┣ 📜registerHandler.js
  ┃ ┃ ┣ 📜stageHandler.js
- ┃ ┃ ┗ 📜towerHandler.js
+ ┃ ┃ ┣ 📜towerHandler.js
+ ┃ ┃ ┗ 📜trapHandler.js
  ┃ ┣ 📂init                 -   서버 초기화 세팅 묶음 폴더
  ┃ ┃ ┣ 📜assets.js
  ┃ ┃ ┗ 📜socket.js
@@ -56,6 +59,7 @@
  ┃ ┃ ┣ 📜scoreModel.js          -   유저 별 스코어 데이터
  ┃ ┃ ┣ 📜stageModel.js          -   유저 별 스테이지 데이터
  ┃ ┃ ┣ 📜towerModel.js          -   유저 별 타워 데이터
+ ┃ ┃ ┣ 📜trapModel.js           -   유저 별 트랩 데이터
  ┃ ┃ ┗ 📜userModel.js           -   유저 데이터
  ┃ ┣ 📂routes
  ┃ ┃ ┣ 📜authRoutes.js          -   인증 관련 라우터 묶음 코드
@@ -109,6 +113,8 @@
 - 게임 재도전 기능 추가 => 소켓 연결을 끊지 않고 재도전 할 수 있는 기능 구현
 - 게임 로그 추가 => 모든 유저의 행동 패턴 추적을 위한 로그 구현
 - 타워 선택 추가 => 타워를 선택하여 업그레이드 및 환불할 수 있도록 기능 및 UI 구현
+- 타워 종류 추가 => 타워의 종류를 추가하여 다양한 타워를 설치할 수 있는 기능 구현
+- 경로에 깔리는 트랩 추가 => 몬스터가 다니는 경로에 트랩을 설치할 수 있는 기능 구현
 - 현황 메시지 추가 => 특정 이벤트 혹은 동작에 따른 이벤트 메시지 출력 기능 구현
 - 그 외 폰트 및 UI/UX 작업 ...
 
