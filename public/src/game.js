@@ -4,6 +4,7 @@ import { Tower } from './tower.js';
 import { CLIENT_VERSION } from './constant.js';
 import { GameStateMessage, GameEndMessage } from './message.js';
 import { Button } from './button.js';
+import { AudioManager } from './audio.js';
 
 let userId = null;
 let assets = {};
@@ -16,6 +17,12 @@ const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 const gameStateMessage = new GameStateMessage();
 const gameEndMessage = new GameEndMessage();
+const audioManager = new AudioManager();
+audioManager.setBackgroundMusic('../sound/background.mp3', 0.3);
+audioManager.addSoundEffect('click', '../sound/click.mp3', 0.3);
+audioManager.addSoundEffect('beam_attack', '../sound/beam_attack.mp3', 0.15);
+audioManager.addSoundEffect('lose', '../sound/lose.mp3', 0.4);
+audioManager.addSoundEffect('win', '../sound/win.mp3', 0.2);
 
 const NUM_OF_MONSTERS = 6; // 몬스터 개수
 
@@ -184,7 +191,7 @@ function getRandomPositionNearPath(maxDistance) {
 function placeInitialTowers() {
   for (let i = 0; i < numOfInitialTowers; i++) {
     const { x: newX, y: newY } = getRandomPositionNearPath(200);
-    const tower = new Tower(newX, newY, 1);
+    const tower = new Tower(newX, newY, 1, audioManager);
     towers.push(tower);
     sendEvent(30, { towerData: tower, index: towers.length - 1 });
   }
@@ -194,6 +201,7 @@ function placeInitialTowers() {
 }
 
 function clickBuyTower() {
+  audioManager.playSoundEffect('click');
   sendEvent(21, { userGold: userGold });
 }
 
@@ -212,13 +220,14 @@ function highlightSelectedTower() {
 function placeNewTower() {
   gameStateMessage.showMessage(4);
   const { x, y } = getRandomPositionNearPath(200);
-  const tower = new Tower(x, y, 1);
+  const tower = new Tower(x, y, 1, audioManager);
   towers.push(tower);
   sendEvent(30, { towerData: tower, index: towers.length - 1 });
   towerId++; // 타워 건설 후, 타워 Id를 더한다.
 }
 
 function clickRefundTower() {
+  audioManager.playSoundEffect('click');
   if (selectedTowerIndex === null) {
     gameStateMessage.showMessage(15);
     return;
@@ -239,6 +248,7 @@ function refundTower(index, refundAmount) {
 
 // 타워 강화
 function clickupgradeTower() {
+  audioManager.playSoundEffect('click');
   if (selectedTowerIndex === null) {
     gameStateMessage.showMessage(16);
     return;
@@ -346,6 +356,8 @@ function gameLoop() {
           });
           // 게임 오버에 따른 메시지 박스 출력 (재도전, 게임 종료)
           gameEndMessage.show();
+          audioManager.pauseBackgroundMusic();
+          audioManager.playSoundEffect('lose');
           gameOver = true;
         }
         monster.draw(ctx);
@@ -378,6 +390,8 @@ function gameLoop() {
             // 게임 클리어에 따른 메시지 박스 출력 (재도전, 게임 종료)
             gameEndMessage.isVictory = true;
             gameEndMessage.show();
+            audioManager.pauseBackgroundMusic();
+            audioManager.playSoundEffect('win');
             gameOver = true;
           } else {
             sendEvent(11, {
@@ -436,6 +450,9 @@ function initGame() {
   exitButton.hide();
   gameEndMessage.hide();
   gameStateMessage.showMessage(1);
+
+  audioManager.playBackgroundMusic();
+
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
   placeBase(); // 기지 배치
@@ -473,7 +490,7 @@ function startStage() {
 function initGameState() {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameData.userGold;
-  baseHp = initGameData.baseHp - 190;
+  baseHp = initGameData.baseHp + 20000;
   numOfInitialTowers = initGameData.numOfInitialTowers;
   monsterLevel = initGameData.monsterLevel;
   monsterSpawnInterval = initGameData.monsterSpawnInterval;
@@ -481,6 +498,9 @@ function initGameState() {
 }
 
 function retryGame() {
+  // 사운드 재생
+  audioManager.playSoundEffect('click');
+
   // 게임 재시작 해주기 위한 초기화 작업
   console.log('게임 재시작 합니다.');
 
@@ -493,6 +513,7 @@ function retryGame() {
   monstersSpawned = 0;
   totalSpawnCount = 0;
   gameEndMessage.isVictory = false;
+  audioManager.resetBackgroundMusic();
   clearInterval(monsterSpawnTimer);
 
   // 현재 진행중인 애니메이션 프레임을 종료 시킴 => 안하면 게임 속도가 빨라짐 (중첩)
@@ -509,6 +530,9 @@ function startSpawnMonster() {
 }
 
 function exitGame() {
+  // 사운드 재생
+  audioManager.playSoundEffect('click');
+
   // 게임을 종료하기 위한 작업
   console.log('게임을 종료합니다.');
   location.reload();
