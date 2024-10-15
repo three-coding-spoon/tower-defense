@@ -311,9 +311,9 @@ function spawnMonster() {
 function gameLoop() {
   // 렌더링 시에는 항상 배경 이미지부터 그려야 합니다! 그래야 다른 이미지들이 배경 이미지 위에 그려져요!
   if (!gameOver) {
+    ctx.globalAlpha = 1;
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
     drawPath(monsterPath); // 경로 다시 그리기
-
     ctx.font = '25px DNFBitBitv2';
     ctx.textAlign = 'start';
     ctx.fillStyle = 'skyblue';

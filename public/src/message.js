@@ -56,7 +56,7 @@ export class GameStateMessage {
     };
     this.currentMessage = messages[statusId] || null;
 
-    // 2초 후에 메시지를 지우는 타임아웃 설정
+    // 메시지를 지우는 타임아웃 설정
     if (this.currentMessage) {
       this.messageTimeout = setTimeout(() => {
         this.currentMessage = null;
@@ -73,6 +73,14 @@ export class GameEndMessage {
   constructor() {
     this.isVictory = false;
     this.isVisible = false; // 메뉴판의 표시 여부
+    this.lastShakeTime = Date.now(); // 마지막으로 떨림 위치를 업데이트한 시간
+    this.shakeInterval = 500; // 떨림 위치를 변경하는 시간 간격 (ms)
+    this.shakeOffsets = []; // 각 글자의 떨림 방향
+  }
+
+  // 500 프레임마다 각 문자의 떨림 높이를 랜덤하게 변경하는 함수
+  updateShakeOffsets(length) {
+    this.shakeOffsets = Array.from({ length }, () => (Math.random() < 0.5 ? -5 : 5));
   }
 
   draw(ctx) {
@@ -81,8 +89,15 @@ export class GameEndMessage {
     const halfHeight = ctx.canvas.height / 2;
     if (!this.isVisible) return; // 메뉴판이 표시되지 않을 때는 그리지 않음
 
+    // 현재 시간 가져오고, 일정 시간 간격이 지나면 떨림 방향 업데이트
+    const currentTime = Date.now();
+    if (currentTime - this.lastShakeTime > this.shakeInterval) {
+      this.updateShakeOffsets(title.length);
+      this.lastShakeTime = currentTime; // 마지막 업데이트 시간 갱신
+    }
+
     // 배경 박스 그리기
-    ctx.globalAlpha = 0.5;
+    ctx.globalAlpha = 0.3;
     ctx.fillStyle = 'rgb(57, 104, 83)'; // 배경색 투명도 지정이 안됨
     ctx.fillRect(
       halfWidth - halfWidth / 2 + 100,
@@ -90,7 +105,7 @@ export class GameEndMessage {
       halfWidth - 200,
       halfHeight,
     );
-    ctx.globalAlpha = 0.8;
+    ctx.globalAlpha = 0.5;
     ctx.strokeStyle = 'rgb(37, 84, 63)';
     ctx.strokeRect(
       halfWidth - halfWidth / 2 + 100,
@@ -99,13 +114,22 @@ export class GameEndMessage {
       halfHeight,
     );
 
-    ctx.globalAlpha = 1;
-
     // 텍스트 설정
     ctx.font = '60px DNFBitBitv2';
     ctx.textAlign = 'center';
     ctx.fillStyle = this.isVictory ? 'yellow' : 'red';
-    ctx.fillText(title, halfWidth, halfHeight - ctx.canvas.height * 0.15);
+
+    // 각 글자를 개별적으로 떨리게 그리기
+    const letters = title.split('');
+    const letterSpacing = 55; // 글자 간 간격
+    let startX = halfWidth - (letters.length / 2) * letterSpacing + 35;
+
+    letters.forEach((letter, index) => {
+      // 현재 글자의 떨림 방향 가져오기
+      const shakeOffset = this.shakeOffsets[index] || 0;
+      ctx.fillText(letter, startX, halfHeight - ctx.canvas.height * 0.15 + shakeOffset);
+      startX += letterSpacing; // 다음 글자의 위치로 이동
+    });
   }
 
   show() {
