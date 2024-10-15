@@ -2,6 +2,10 @@
 
 const userTraps = new Map();
 
+export const initTraps = (userId) => {
+  userTraps.set(userId, []);
+};
+
 export const updateUserTrapData = (userId, trapData, index = null) => {
   const traps = userTraps.get(userId) || [];
 
