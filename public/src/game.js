@@ -5,13 +5,9 @@ import { CLIENT_VERSION } from './constant.js';
 import { GameStateMessage, GameEndMessage } from './message.js';
 import { Button } from './button.js';
 
-/* 
-  어딘가에 엑세스 토큰이 저장이 안되어 있다면 로그인을 유도하는 코드를 여기에 추가해주세요!
-*/
 let userId = null;
 let assets = {};
 let gameOver = false;
-let gamePause = false;
 
 const authObj = JSON.parse(sessionStorage.getItem('authorization'));
 
@@ -30,7 +26,6 @@ let isInitGame = false;
 let userGold = 0; // 유저 골드
 let base; // 기지 객체
 let baseHp = 1000; // 기지 체력
-let towerCost = 0; // 타워 구입 비용
 let numOfInitialTowers = 3; // 초기 타워 개수
 let towerId = 0;
 
@@ -55,8 +50,8 @@ let score = 0; // 게임 점수
 let highScore = 0; // 기존 최고 랭킹 점수
 
 // 버튼 생성 파트
-const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame); // 재도전 버튼
-const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 160}px`, null, exitGame); // 게임 종료 버튼
+const retryButton = new Button('재도전', `${ctx.canvas.height / 2}px`, null, retryGame); // 재도전 버튼
+const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 60}px`, null, exitGame); // 게임 종료 버튼
 const buyTowerButton = new Button('타워 구입', '10px', '10px', clickBuyTower);
 const refundTowerButton = new Button('타워 판매', '10px', '150px', clickRefundTower);
 const upgradeTowerButton = new Button('타워 강화', '10px', '290px', clickupgradeTower);
@@ -186,10 +181,16 @@ function getRandomPositionNearPath(maxDistance) {
   };
 }
 
-function placeInitialTowers(x, y) {
-  const tower = new Tower(x, y, 1);
-  towers.push(tower);
-  sendEvent(30, { towerData: tower, index: towers.length - 1 });
+function placeInitialTowers() {
+  for (let i = 0; i < numOfInitialTowers; i++) {
+    const { x: newX, y: newY } = getRandomPositionNearPath(200);
+    const tower = new Tower(newX, newY, 1);
+    towers.push(tower);
+    sendEvent(30, { towerData: tower, index: towers.length - 1 });
+  }
+
+  // 여기서 개수만큼 타워가 소환됐는지 확인하는 핸들러 발사
+  sendEvent(20, { towersLength: towers.length });
 }
 
 function clickBuyTower() {
@@ -215,15 +216,7 @@ function placeNewTower() {
   towers.push(tower);
   sendEvent(30, { towerData: tower, index: towers.length - 1 });
   towerId++; // 타워 건설 후, 타워 Id를 더한다.
-  console.log(towerId);
 }
-
-// function btnDiplay()  {
-//   const target = document.getElementsByTagName('button');
-//   if (target.style.display !== 'none') {
-//     target.style.display === 'none';
-//   }
-// }
 
 function clickRefundTower() {
   if (selectedTowerIndex === null) {
@@ -294,8 +287,6 @@ function spawnMonster() {
 
     monsters.push(newMonster);
 
-    // 이때 몹의 고유 ID는 monster.length - 1;
-
     // 새로운 보너스 몬스터가 스폰되었을 때 플래그 설정
     if (shouldSpawnBonus) {
       isBonusSpawned = true;
@@ -313,7 +304,7 @@ function gameLoop() {
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
     drawPath(monsterPath); // 경로 다시 그리기
 
-    ctx.font = '25px Times New Roman';
+    ctx.font = '25px DNFBitBitv2';
     ctx.textAlign = 'start';
     ctx.fillStyle = 'skyblue';
     ctx.fillText(`최고 랭킹 점수: ${highScore}`, 100, 50); // 최고 기록 표시
@@ -378,7 +369,7 @@ function gameLoop() {
         // 몬스터를 다 잡거나 하여 필드에 몬스터가 더 없을 때
         if (monsters.length === 0 && monstersSpawned === totalSpawnCount) {
           const targetLevel = monsterLevel + 1;
-          // console.log(assets.wave.data.length);
+
           if (targetLevel > assets.wave.data.length) {
             // 모든 웨이브 완료 시
             sendEvent(3, {
@@ -394,6 +385,7 @@ function gameLoop() {
               targetStage: targetLevel,
               clientTimestamp: clientTime,
             });
+
             gameStateMessage.showMessage(2);
           }
         }
@@ -448,11 +440,7 @@ function initGame() {
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
   placeBase(); // 기지 배치
 
-  for (let i = 0; i < numOfInitialTowers; i++) {
-    const { x, y } = getRandomPositionNearPath(200);
-    sendEvent(20, { towerPos: { x, y }, towerId });
-    towerId++;
-  } // 설정된 초기 타워 개수만큼 사전에 타워 배치
+  placeInitialTowers(); // 설정된 초기 타워 개수만큼 사전에 타워 배치
 
   // 현재 스테이지의 total_spawn_count 설정
   const { wave } = assets;
@@ -461,15 +449,13 @@ function initGame() {
 
   // 몬스터를 주기적으로 스폰
   startSpawnMonster();
-  // monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
+
   gameLoop(); // 게임 루프 최초 실행
   isInitGame = true;
 }
 
 function startStage() {
   // 스테이지 이동 시 필요한 초기화
-  // monsterPath = generateRandomMonsterPath();
-  // initMap();
   clearInterval(monsterSpawnTimer);
 
   const { wave } = assets;
@@ -477,7 +463,6 @@ function startStage() {
   monstersSpawned = 0;
   isBonusSpawned = false;
   startSpawnMonster();
-  // monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
 
   if (!isInitGame) {
     gameLoop();
@@ -485,14 +470,14 @@ function startStage() {
   }
 }
 
-function initGameState(initGameStateInfo) {
+function initGameState() {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
-  userGold = initGameStateInfo.userGold;
-  baseHp = initGameStateInfo.baseHp + 1000;
-  numOfInitialTowers = initGameStateInfo.numOfInitialTowers;
-  monsterLevel = initGameStateInfo.monsterLevel;
-  monsterSpawnInterval = initGameStateInfo.monsterSpawnInterval;
-  score = initGameStateInfo.score;
+  userGold = initGameData.userGold;
+  baseHp = initGameData.baseHp - 190;
+  numOfInitialTowers = initGameData.numOfInitialTowers;
+  monsterLevel = initGameData.monsterLevel;
+  monsterSpawnInterval = initGameData.monsterSpawnInterval;
+  score = initGameData.score;
 }
 
 function retryGame() {
@@ -521,14 +506,6 @@ function startSpawnMonster() {
     clearInterval(monsterSpawnTimer);
   }
   monsterSpawnTimer = setInterval(spawnMonster, monsterSpawnInterval);
-}
-
-function pauseGame() {
-  gamePause = true;
-}
-
-function continueGame() {
-  gamePause = false;
 }
 
 function exitGame() {
@@ -593,7 +570,6 @@ Promise.all([
   });
 
   serverSocket.on('gameStart', (data) => {
-    console.log(data.message);
     if (data.status === 'fail') {
       alert(data.message);
       window.location.href = '/';
@@ -602,14 +578,15 @@ Promise.all([
       // [수빈] initGame() 이든 initGameState() 이든 둘 중 하나만 초기화로 써야 할거같음.
       if (!isInitGame) {
         initGameData = data.initGameStateInfo;
-        initGameState(initGameData);
+        console.log(initGameData);
+
+        initGameState();
         initGame();
       }
     }
   });
 
   serverSocket.on('gameEnd', (data) => {
-    console.log(data.message);
     if (data.status === 'fail') {
       alert(data.message);
       window.location.href = '/';
@@ -618,6 +595,7 @@ Promise.all([
 
   serverSocket.on('newHighScore', (data) => {
     gameStateMessage.showMessage(7);
+    highScore = data.highScore;
     console.log(data);
   });
 
@@ -646,15 +624,13 @@ Promise.all([
     }
   });
 
-  serverSocket.on('InitialTower', (data) => {
-    if (data.status === 'success') {
-      placeInitialTowers(data.towerPos.x, data.towerPos.y); // 설정된 초기 타워 개수만큼 사전에 타워 배치
-    } else {
-      alert('Error on InitialTower');
+  serverSocket.on('initialTower', (data) => {
+    if (!data.status === 'success') {
+      alert(data.message);
     }
   });
 
-  serverSocket.on('BuyTower', (data) => {
+  serverSocket.on('buyTower', (data) => {
     if (data.status === 'success') {
       placeNewTower();
       userGold -= data.cost;
@@ -668,7 +644,7 @@ Promise.all([
     }
   });
 
-  serverSocket.on('RefundTower', (data) => {
+  serverSocket.on('refundTower', (data) => {
     if (data.status === 'fail' && data.message === 'tower mismatch') {
       gameStateMessage.showMessage(11);
     } else if (data.status === 'fail' && data.message === 'No towers on the field') {
@@ -696,6 +672,8 @@ Promise.all([
     }
   });
 });
+
+// 서버에 이벤트 요청
 const sendEvent = (handlerId, payload, timestamp) => {
   serverSocket.emit('event', {
     userId,
@@ -705,10 +683,6 @@ const sendEvent = (handlerId, payload, timestamp) => {
     payload,
   });
 };
-
-const updateGameState = (serverState) => {};
-
-const updateTowerState = (serverState) => {};
 
 // 캔버스 클릭 이벤트 핸들러 추가 (타워 선택)
 canvas.addEventListener('click', (event) => {

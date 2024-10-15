@@ -56,7 +56,7 @@ export const moveStageHandler = (userId, payload, socket) => {
 
   // 결과 쏴줌
   socket.emit('moveStage', {
-    status: 'success', // 오타 수정
+    status: 'success',
     targetStage,
     reward: 1000,
   });

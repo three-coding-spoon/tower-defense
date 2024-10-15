@@ -23,7 +23,7 @@ export class GameStateMessage {
     const halfHeight = ctx.canvas.height / 2;
     // 현재 메시지가 있으면 캔버스에 그리기
     if (this.currentMessage) {
-      ctx.font = '30px Arial';
+      ctx.font = '30px DNFBitBitv2';
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
       ctx.fillText(this.currentMessage, halfWidth, halfHeight - ctx.canvas.height / 3);
@@ -37,66 +37,31 @@ export class GameStateMessage {
     // if (this.currentMessage) return;
 
     // statusId에 따라 메시지 설정
-    switch (statusId) {
-      case 1:
-        this.currentMessage = '게임이 시작됩니다!';
-        break;
-      case 2:
-        this.currentMessage = '다음 스테이지로 이동합니다!';
-        break;
-      case 3:
-        this.currentMessage = '적을 모두 물리쳤습니다!';
-        break;
-      case 4:
-        this.currentMessage = '타워가 배치되었습니다!';
-        break;
-      case 5:
-        this.currentMessage = '타워가 업그레이드 되었습니다!';
-        break;
-      case 6:
-        this.currentMessage = '타워가 환불되었습니다!';
-        break;
-      case 7:
-        this.currentMessage = '최고 랭킹이 갱신되었습니다!';
-        break;
-      case 8:
-        this.currentMessage = '내 최고 점수가 갱신되었습니다!';
-        break;
-      case 9:
-        this.currentMessage = '타워는 10개까지만 구매 가능합니다.';
-        break;
-      case 10:
-        this.currentMessage = '골드가 부족합니다.';
-        break;
-      case 11:
-        this.currentMessage = '존재하지 않는 타워입니다.';
-        break;
-      case 12:
-        this.currentMessage = '환불할 수 있는 타워가 없습니다.';
-        break;
-      case 13:
-        this.currentMessage = '타워 데이터가 손상되었습니다.';
-        break;
-      case 14:
-        this.currentMessage = '이미 최대로 강화된 타워가 선택되었습니다.';
-        break;
-      case 15:
-        this.currentMessage = '환불할 타워를 먼저 선택해주세요.';
-        break;
-      case 16:
-        this.currentMessage = '강화할 타워를 먼저 선택해주세요.';
-        break;
-
-      default:
-        this.currentMessage = null;
-    }
+    const messages = {
+      1: '게임을 시작합니다!',
+      2: '다음 스테이지로 이동합니다!',
+      4: '타워를 구매했습니다!',
+      5: '타워를 강화했습니다!',
+      6: '타워를 판매했습니다!',
+      7: '새로운 최고 랭킹 점수를 달성했습니다!',
+      8: '새로운 개인 최고 점수를 달성했습니다!',
+      9: '타워 개수 한도에 도달했습니다!',
+      10: '골드가 부족합니다!',
+      11: '타워 정보가 일치하지 않습니다!',
+      12: '필드에 타워가 없습니다!',
+      13: '타워 데이터가 손상되었습니다!',
+      14: '최대 레벨에 도달했습니다!',
+      15: '선택된 타워가 없습니다!',
+      16: '타워를 선택해주세요!',
+    };
+    this.currentMessage = messages[statusId] || null;
 
     // 2초 후에 메시지를 지우는 타임아웃 설정
     if (this.currentMessage) {
       this.messageTimeout = setTimeout(() => {
         this.currentMessage = null;
         this.messageTimeout = null; // 타임아웃 초기화하여 메시지 숨김
-      }, 2000); // 현재 2초동안 노출되도록 설정
+      }, 2500); // 현재 2.5초동안 노출되도록 설정
     }
   }
 }
@@ -117,25 +82,30 @@ export class GameEndMessage {
     if (!this.isVisible) return; // 메뉴판이 표시되지 않을 때는 그리지 않음
 
     // 배경 박스 그리기
-    ctx.fillStyle = 'rgba(25, 25, 25, 0.3)'; // 배경색 투명도 지정이 안됨
-    ctx.fillRect(halfWidth - halfWidth / 2, halfHeight - halfHeight / 2, halfWidth, halfHeight);
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = 'rgb(57, 104, 83)'; // 배경색 투명도 지정이 안됨
+    ctx.fillRect(
+      halfWidth - halfWidth / 2 + 100,
+      halfHeight - halfHeight / 2,
+      halfWidth - 200,
+      halfHeight,
+    );
+    ctx.globalAlpha = 0.8;
+    ctx.strokeStyle = 'rgb(37, 84, 63)';
+    ctx.strokeRect(
+      halfWidth - halfWidth / 2 + 100,
+      halfHeight - halfHeight / 2,
+      halfWidth - 200,
+      halfHeight,
+    );
+
+    ctx.globalAlpha = 1;
 
     // 텍스트 설정
-    ctx.font = '50px Arial';
+    ctx.font = '60px DNFBitBitv2';
     ctx.textAlign = 'center';
     ctx.fillStyle = this.isVictory ? 'yellow' : 'red';
     ctx.fillText(title, halfWidth, halfHeight - ctx.canvas.height * 0.15);
-
-    // // 버튼 그리기
-    // ctx.fillStyle = 'gray';
-    // ctx.fillRect(halfWidth - 100, halfHeight, 200, 40);
-    // ctx.fillStyle = 'gray';
-    // ctx.fillRect(halfWidth - 100, halfHeight + 60, 200, 40);
-
-    // // 버튼 텍스트
-    // ctx.fillStyle = 'white';
-    // ctx.fillText('재도전', halfWidth, halfHeight + 25);
-    // ctx.fillText('게임 종료', halfWidth, halfHeight + 85);
   }
 
   show() {

@@ -1,13 +1,15 @@
 import express from 'express';
-import { createServer } from 'http';
-import initSocket from './init/socket.js';
-import { loadGameAssets } from './init/assets.js';
 import dotenv from 'dotenv';
-import authRoutes from './routes/authRoutes.js';
-import rankRoutes from './routes/rankRoutes.js';
-// 라우터 더 필요하면 추가
+import { createServer } from 'http';
+
 import path from 'path';
 import { fileURLToPath } from 'url';
+
+import initSocket from './init/socket.js';
+import authRoutes from './routes/authRoutes.js';
+import rankRoutes from './routes/rankRoutes.js';
+import { loadGameAssets } from './init/assets.js';
+
 const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);
 

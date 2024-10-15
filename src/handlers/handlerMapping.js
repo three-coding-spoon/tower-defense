@@ -4,7 +4,13 @@ import { moveStageHandler } from './stageHandler.js';
 import { gameEnd, gameStart } from './gameHandler.js';
 import { broadcastNewHighScore } from './broadcastHandler.js';
 import { handleKillMob } from './MobHandler.js';
-import { InitialTowerHandler, userTowerUpdate, handleBuyTower, handleRefundTower, handleUpgradeTower } from './towerHandler.js';
+import {
+  initialTowerHandler,
+  userTowerUpdate,
+  handleBuyTower,
+  handleRefundTower,
+  handleUpgradeTower,
+} from './towerHandler.js';
 
 const handlerMappings = {
   2: gameStart,
@@ -12,7 +18,7 @@ const handlerMappings = {
   4: broadcastNewHighScore,
   5: handleKillMob,
   11: moveStageHandler,
-  20: InitialTowerHandler,
+  20: initialTowerHandler,
   21: handleBuyTower,
   22: handleRefundTower,
   23: handleUpgradeTower,

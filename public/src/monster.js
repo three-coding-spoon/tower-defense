@@ -21,7 +21,6 @@ export class Monster {
     this.image = monsterImages[this.monsterNumber]; // 몬스터 이미지
     this.score = monster_data.data[this.monsterNumber].score;
     this.isKilledByPlayer = false; // 몹이 플레이어에 의해 죽었는지 여부
-    this.isBonus = isBonus; // 보너스 몬스터 여부
     this.init(level);
   }
 
