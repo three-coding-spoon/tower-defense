@@ -50,8 +50,8 @@ let score = 0; // 게임 점수
 let highScore = 0; // 기존 최고 랭킹 점수
 
 // 버튼 생성 파트
-const retryButton = new Button('재도전', `${ctx.canvas.height / 2 + 110}px`, null, retryGame); // 재도전 버튼
-const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 160}px`, null, exitGame); // 게임 종료 버튼
+const retryButton = new Button('재도전', `${ctx.canvas.height / 2}px`, null, retryGame); // 재도전 버튼
+const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 60}px`, null, exitGame); // 게임 종료 버튼
 const buyTowerButton = new Button('타워 구입', '10px', '10px', clickBuyTower);
 const refundTowerButton = new Button('타워 판매', '10px', '150px', clickRefundTower);
 const upgradeTowerButton = new Button('타워 강화', '10px', '290px', clickupgradeTower);
@@ -301,7 +301,7 @@ function gameLoop() {
     ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height); // 배경 이미지 다시 그리기
     drawPath(monsterPath); // 경로 다시 그리기
 
-    ctx.font = '25px Times New Roman';
+    ctx.font = '25px DNFBitBitv2';
     ctx.textAlign = 'start';
     ctx.fillStyle = 'skyblue';
     ctx.fillText(`최고 랭킹 점수: ${highScore}`, 100, 50); // 최고 기록 표시
@@ -433,6 +433,7 @@ function initGame() {
   exitButton.hide();
   gameEndMessage.hide();
   gameStateMessage.showMessage(1);
+  ctx.globalAlpha = 1;
   monsterPath = generateRandomMonsterPath(); // 몬스터 경로 생성
   initMap(); // 맵 초기화 (배경, 몬스터 경로 그리기)
   placeBase(); // 기지 배치
@@ -474,7 +475,7 @@ function startStage() {
 function initGameState() {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameData.userGold;
-  baseHp = initGameData.baseHp;
+  baseHp = initGameData.baseHp - 190;
   numOfInitialTowers = initGameData.numOfInitialTowers;
   monsterLevel = initGameData.monsterLevel;
   monsterSpawnInterval = initGameData.monsterSpawnInterval;

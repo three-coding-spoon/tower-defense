@@ -1,5 +1,20 @@
+@font-face {
+  font-family: 'DNFBitBitv2';
+  font-style: normal;
+  font-weight: 400;
+  src: url('//cdn.df.nexon.com/img/common/font/DNFBitBitv2.otf') format('opentype');
+}
+@font-face {
+  font-family: 'DepartureMono-Regular';
+  src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/2409-1@1.0/DepartureMono-Regular.woff2')
+    format('woff2');
+  font-weight: normal;
+  font-style: normal;
+}
+
 * {
   box-sizing: border-box;
+  font-family: 'DNFBitBitv2';
 }
 
 body {
@@ -10,7 +25,6 @@ body {
   margin: 0;
   background-color: #2d2d2d;
   color: white;
-  font-family: Arial, sans-serif;
   flex-direction: column;
 }
 

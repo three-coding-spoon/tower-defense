@@ -41,9 +41,10 @@ export class Tower {
       ctx.closePath();
       this.beamDuration--;
     }
-    ctx.font = '15px Arial';
+    ctx.font = '15px DepartureMono-Regular';
     ctx.fillStyle = 'red';
-    ctx.fillText(`(레벨 ${this.level}) 공격력: ${this.attackPower}`, this.x, this.y - 5);
+    ctx.fillText(`(레벨 ${this.level})`, this.x, this.y - 30);
+    ctx.fillText(`(공격력: ${this.attackPower})`, this.x, this.y - 5);
   }
 
   attack(monster) {

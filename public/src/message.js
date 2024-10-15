@@ -23,7 +23,7 @@ export class GameStateMessage {
     const halfHeight = ctx.canvas.height / 2;
     // 현재 메시지가 있으면 캔버스에 그리기
     if (this.currentMessage) {
-      ctx.font = '30px Arial';
+      ctx.font = '30px DNFBitBitv2';
       ctx.fillStyle = 'white';
       ctx.textAlign = 'center';
       ctx.fillText(this.currentMessage, halfWidth, halfHeight - ctx.canvas.height / 3);
@@ -61,7 +61,7 @@ export class GameStateMessage {
       this.messageTimeout = setTimeout(() => {
         this.currentMessage = null;
         this.messageTimeout = null; // 타임아웃 초기화하여 메시지 숨김
-      }, 2000); // 현재 2초동안 노출되도록 설정
+      }, 2500); // 현재 2.5초동안 노출되도록 설정
     }
   }
 }
@@ -82,11 +82,27 @@ export class GameEndMessage {
     if (!this.isVisible) return; // 메뉴판이 표시되지 않을 때는 그리지 않음
 
     // 배경 박스 그리기
-    ctx.fillStyle = 'rgba(25, 25, 25, 0.3)'; // 배경색 투명도 지정이 안됨
-    ctx.fillRect(halfWidth - halfWidth / 2, halfHeight - halfHeight / 2, halfWidth, halfHeight);
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = 'rgb(57, 104, 83)'; // 배경색 투명도 지정이 안됨
+    ctx.fillRect(
+      halfWidth - halfWidth / 2 + 100,
+      halfHeight - halfHeight / 2,
+      halfWidth - 200,
+      halfHeight,
+    );
+    ctx.globalAlpha = 0.8;
+    ctx.strokeStyle = 'rgb(37, 84, 63)';
+    ctx.strokeRect(
+      halfWidth - halfWidth / 2 + 100,
+      halfHeight - halfHeight / 2,
+      halfWidth - 200,
+      halfHeight,
+    );
+
+    ctx.globalAlpha = 1;
 
     // 텍스트 설정
-    ctx.font = '50px Arial';
+    ctx.font = '60px DNFBitBitv2';
     ctx.textAlign = 'center';
     ctx.fillStyle = this.isVictory ? 'yellow' : 'red';
     ctx.fillText(title, halfWidth, halfHeight - ctx.canvas.height * 0.15);
