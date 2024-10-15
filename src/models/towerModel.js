@@ -33,8 +33,7 @@ export const getUserTowerByIndex = (userId, index) => {
 export const removeUserTower = (userId, index) => {
   const towers = userTowers.get(userId) || [];
   if (index >= 0 && index < towers.length) {
-    towers.splice(index, 1); // 해당 인덱스의 타워 제거
-    // userTowers.set(userId, towers);
+    towers.splice(index, 1);
   }
 };
 

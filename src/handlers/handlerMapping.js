@@ -11,6 +11,7 @@ import {
   handleRefundTower,
   handleUpgradeTower,
 } from './towerHandler.js';
+import { handleBuyTrap, userTrapUpdate } from './trapHandler.js';
 
 const handlerMappings = {
   2: gameStart,
@@ -23,6 +24,8 @@ const handlerMappings = {
   22: handleRefundTower,
   23: handleUpgradeTower,
   30: userTowerUpdate,
+  40: handleBuyTrap,
+  41: userTrapUpdate,
 };
 
 export default handlerMappings;

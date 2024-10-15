@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "data": [
     {
-      "typeId": 300,
-      "attackPower": 40,
+      "typeId": 1,
+      "attackPower": 35,
       "beamDuration": 50,
       "cost": 1000,
       "range": 300,
@@ -12,22 +12,22 @@
       "level": 0
     },
     {
-      "typeId": 301,
-      "attackPower": 80,
-      "beamDuration": 50,
-      "cost": 2000,
-      "range": 300,
-      "cooldown": 180,
+      "typeId": 2,
+      "attackPower": 10,
+      "beamDuration": 10,
+      "cost": 1500,
+      "range": 150,
+      "cooldown": 30,
       "level": 1
     },
     {
-      "typeId": 302,
-      "attackPower": 160,
-      "beamDuration": 50,
-      "cost": 3000,
-      "range": 300,
-      "cooldown": 180,
-      "level": 2
+      "typeId": 3,
+      "attackPower": 80,
+      "beamDuration": 200,
+      "cost": 2000,
+      "range": 500,
+      "cooldown": 500,
+      "level": 1
     }
   ]
 }

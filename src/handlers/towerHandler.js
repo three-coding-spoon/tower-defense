@@ -25,24 +25,24 @@ export const userTowerUpdate = async (userId, payload) => {
 
 /** 타워 구매 핸들러 **/
 export const handleBuyTower = async (userId, payload, socket) => {
-  const { userGold } = payload;
+  const { userGold, towerId } = payload;
   const { tower } = getGameAssets();
 
   const towers = getAllUserTowers(userId);
 
   // 타워 개수 확인
-  if (towers.length >= 10) {
+  if (towers.length >= 15) {
     socket.emit('buyTower', { status: 'fail', message: 'tower limit' });
     return;
   }
   // 골드 확인
-  else if (userGold < tower.data[0].cost) {
+  else if (userGold < tower.data[towerId].cost) {
     socket.emit('buyTower', { status: 'fail', message: 'not enough gold' });
     return;
   }
   // 골드 차감
-  else if (userGold >= tower.data[0].cost) {
-    socket.emit('buyTower', { status: 'success', cost: tower.data[0].cost });
+  else if (userGold >= tower.data[towerId].cost) {
+    socket.emit('buyTower', { status: 'success', cost: tower.data[towerId].cost, towerId });
     return;
   }
 };

@@ -1,6 +1,7 @@
 import { Base } from './base.js';
 import { Monster } from './monster.js';
 import { Tower } from './tower.js';
+import { Trap } from './trap.js';
 import { CLIENT_VERSION } from './constant.js';
 import { GameStateMessage, GameEndMessage } from './message.js';
 import { Button } from './button.js';
@@ -34,7 +35,6 @@ let userGold = 0; // 유저 골드
 let base; // 기지 객체
 let baseHp = 1000; // 기지 체력
 let numOfInitialTowers = 3; // 초기 타워 개수
-let towerId = 0;
 
 // 몬스터 초기 세팅
 const monsters = [];
@@ -50,6 +50,7 @@ let animationId = null; // 애니메이션 아이디
 
 // 타워 세팅
 const towers = [];
+const traps = [];
 let selectedTowerIndex = null; // 선택된 타워 인덱스
 
 // 점수 세팅
@@ -62,13 +63,11 @@ const exitButton = new Button('게임 종료', `${ctx.canvas.height / 2 + 60}px`
 const buyTowerButton = new Button('타워 구입', '10px', '10px', clickBuyTower);
 const refundTowerButton = new Button('타워 판매', '10px', '150px', clickRefundTower);
 const upgradeTowerButton = new Button('타워 강화', '10px', '290px', clickupgradeTower);
+const buyTrapButton = new Button('트랩 구입', '10px', '430px', clickBuyTrap);
 
 // 이미지 로딩 파트
 const backgroundImage = new Image();
 backgroundImage.src = 'images/bg.webp';
-
-const towerImage = new Image();
-towerImage.src = 'images/tower.png';
 
 const baseImage = new Image();
 baseImage.src = 'images/base.png';
@@ -76,11 +75,21 @@ baseImage.src = 'images/base.png';
 const pathImage = new Image();
 pathImage.src = 'images/path.png';
 
+const trapImage = new Image();
+trapImage.src = 'images/trap.png';
+
 const monsterImages = [];
 for (let i = 1; i <= NUM_OF_MONSTERS; i++) {
   const img = new Image();
   img.src = `images/monster${i}.png`;
   monsterImages.push(img);
+}
+
+const towerImages = [];
+for (let i = 1; i <= 3; i++) {
+  const img = new Image();
+  img.src = `images/tower${i}.png`;
+  towerImages.push(img);
 }
 
 let monsterPath;
@@ -101,18 +110,16 @@ document.body.appendChild(selectedTowerInfo);
 function generateRandomMonsterPath() {
   const path = [];
   let currentX = 0;
-  let currentY = Math.floor(Math.random() * 21) + 500; // 500 ~ 520 범위의 y 시작 (캔버스 y축 중간쯤에서 시작할 수 있도록 유도)
 
-  path.push({ x: currentX, y: currentY });
+  const amplitude = canvas.height / 3; // 진폭으로 상하 폭 결정
+  const frequency = 0.025; // 주파수로 곡률 결정
+  const phase = Math.random() * Math.PI * 2; // 위상으로 파형 결정 (시작 지점 변동)
 
-  while (currentX < canvas.width) {
-    currentX += Math.floor(Math.random() * 100) + 50; // 50 ~ 150 범위의 x 증가
-    // x 좌표에 대한 clamp 처리
-    if (currentX > canvas.width) {
-      currentX = canvas.width;
-    }
+  while (currentX <= canvas.width) {
+    const sineY = canvas.height / 2 + amplitude * Math.sin(frequency * currentX + phase);
+    const randomYChange = Math.floor(Math.random() * 100) - 50; // -50 ~ 50 범위의 랜덤 변화
+    let currentY = sineY + randomYChange;
 
-    currentY += Math.floor(Math.random() * 200) - 100; // -100 ~ 100 범위의 y 변경
     // y 좌표에 대한 clamp 처리
     if (currentY < 0) {
       currentY = 0;
@@ -122,6 +129,8 @@ function generateRandomMonsterPath() {
     }
 
     path.push({ x: currentX, y: currentY });
+
+    currentX += Math.floor(Math.random() * 50) + 20;
   }
 
   return path;
@@ -133,10 +142,10 @@ function initMap() {
 }
 
 function drawPath() {
-  const segmentLength = 20; // 몬스터 경로 세그먼트 길이
+  const segmentLength = 40; // 몬스터 경로 세그먼트 길이
   const imageWidth = 60; // 몬스터 경로 이미지 너비
   const imageHeight = 60; // 몬스터 경로 이미지 높이
-  const gap = 5; // 몬스터 경로 이미지 겹침 방지를 위한 간격
+  const gap = 2; // 몬스터 경로 이미지 겹침 방지를 위한 간격
 
   for (let i = 0; i < monsterPath.length - 1; i++) {
     const startX = monsterPath[i].x;
@@ -188,10 +197,42 @@ function getRandomPositionNearPath(maxDistance) {
   };
 }
 
+function getRandomPositionOnPath() {
+  // 타워 배치를 위한 몬스터가 지나가는 경로 범위 내에서 랜덤한 위치를 반환하는 함수!
+  const segmentIndex = Math.floor(Math.random() * (monsterPath.length - 1));
+  const startX = monsterPath[segmentIndex].x;
+  const startY = monsterPath[segmentIndex].y;
+  const endX = monsterPath[segmentIndex + 1].x;
+  const endY = monsterPath[segmentIndex + 1].y;
+
+  const t = Math.random();
+  const posX = startX + t * (endX - startX);
+  const posY = startY + t * (endY - startY);
+
+  return {
+    x: posX,
+    y: posY,
+  };
+}
+
+function clickBuyTrap() {
+  sendEvent(40, { userGold: userGold });
+}
+
+function placeNewTrap() {
+  gameStateMessage.showMessage(17);
+  const { x, y } = getRandomPositionOnPath();
+  const trap = new Trap(x, y);
+  traps.push(trap);
+  sendEvent(41, { trapData: trap, index: traps.length - 1 });
+}
+
 function placeInitialTowers() {
   for (let i = 0; i < numOfInitialTowers; i++) {
     const { x: newX, y: newY } = getRandomPositionNearPath(200);
-    const tower = new Tower(newX, newY, 1, audioManager);
+    const { x: newX, y: newY } = getRandomPositionNearPath(75);
+    const towerId = Math.floor(Math.random() * assets.tower.data.length);
+    const tower = new Tower(newX, newY, towerImages, 1, assets.tower, towerId, audioManager);
     towers.push(tower);
     sendEvent(30, { towerData: tower, index: towers.length - 1 });
   }
@@ -202,7 +243,8 @@ function placeInitialTowers() {
 
 function clickBuyTower() {
   audioManager.playSoundEffect('click');
-  sendEvent(21, { userGold: userGold });
+  const towerId = Math.floor(Math.random() * assets.tower.data.length);
+  sendEvent(21, { userGold: userGold, towerId: towerId });
 }
 
 function highlightSelectedTower() {
@@ -217,13 +259,12 @@ function highlightSelectedTower() {
   ctx.restore();
 }
 
-function placeNewTower() {
+function placeNewTower(towerId) {
   gameStateMessage.showMessage(4);
   const { x, y } = getRandomPositionNearPath(200);
-  const tower = new Tower(x, y, 1, audioManager);
+  const tower = new Tower(x, y, towerImages, 1, assets.tower, towerId, audioManager);
   towers.push(tower);
   sendEvent(30, { towerData: tower, index: towers.length - 1 });
-  towerId++; // 타워 건설 후, 타워 Id를 더한다.
 }
 
 function clickRefundTower() {
@@ -327,7 +368,7 @@ function gameLoop() {
 
     // 타워 그리기 및 몬스터 공격 처리
     towers.forEach((tower) => {
-      tower.draw(ctx, towerImage);
+      tower.draw(ctx);
       tower.updateCooldown();
       monsters.forEach((monster) => {
         const distance = Math.sqrt(
@@ -335,6 +376,18 @@ function gameLoop() {
         );
         if (distance < tower.range) {
           tower.attack(monster);
+        }
+      });
+    });
+
+    traps.forEach((trap) => {
+      trap.draw(ctx, trapImage);
+      monsters.forEach((monster) => {
+        const distance = Math.sqrt(
+          Math.pow(trap.x - monster.x, 2) + Math.pow(trap.y - monster.y, 2),
+        );
+        if (distance < trap.range) {
+          trap.attack(monster);
         }
       });
     });
@@ -421,6 +474,7 @@ function gameLoop() {
     buyTowerButton.hide();
     refundTowerButton.hide();
     upgradeTowerButton.hide();
+    buyTrapButton.hide();
   }
 
   // 선택된 타워 정보 업데이트
@@ -446,6 +500,7 @@ function initGame() {
   buyTowerButton.show();
   refundTowerButton.show();
   upgradeTowerButton.show();
+  buyTrapButton.show();
   retryButton.hide();
   exitButton.hide();
   gameEndMessage.hide();
@@ -490,7 +545,7 @@ function startStage() {
 function initGameState() {
   // 골드나 HP 등의 상태들 초기화 (서버 데이터에 의존)
   userGold = initGameData.userGold;
-  baseHp = initGameData.baseHp + 20000;
+  baseHp = initGameData.baseHp;
   numOfInitialTowers = initGameData.numOfInitialTowers;
   monsterLevel = initGameData.monsterLevel;
   monsterSpawnInterval = initGameData.monsterSpawnInterval;
@@ -541,9 +596,10 @@ function exitGame() {
 // 이미지 로딩 완료 후 서버와 연결하고 게임 초기화
 Promise.all([
   new Promise((resolve) => (backgroundImage.onload = resolve)),
-  new Promise((resolve) => (towerImage.onload = resolve)),
+  //new Promise((resolve) => (towerImage.onload = resolve)),
   new Promise((resolve) => (baseImage.onload = resolve)),
   new Promise((resolve) => (pathImage.onload = resolve)),
+  new Promise((resolve) => (trapImage.onload = resolve)),
   ...monsterImages.map((img) => new Promise((resolve) => (img.onload = resolve))),
 ]).then(() => {
   if (!authObj) {
@@ -656,7 +712,7 @@ Promise.all([
 
   serverSocket.on('buyTower', (data) => {
     if (data.status === 'success') {
-      placeNewTower();
+      placeNewTower(data.towerId);
       userGold -= data.cost;
     } else if (data.status === 'fail' && data.message === 'tower limit') {
       gameStateMessage.showMessage(9);
@@ -693,6 +749,20 @@ Promise.all([
     } else {
       console.error('Error occurred while upgrade the tower!');
       alert('Error occurred while upgrade the tower!');
+    }
+  });
+
+  serverSocket.on('BuyTrap', (data) => {
+    if (data.status === 'success') {
+      placeNewTrap();
+      userGold -= data.cost;
+    } else if (data.status === 'fail' && data.message === 'trap limit') {
+      gameStateMessage.showMessage(18);
+    } else if (data.status === 'fail' && data.message === 'not enough gold') {
+      gameStateMessage.showMessage(10);
+    } else {
+      console.error('Error occurred while buy the tower!');
+      alert('Error occurred while buy the tower!');
     }
   });
 });

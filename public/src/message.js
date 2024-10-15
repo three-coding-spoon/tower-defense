@@ -53,6 +53,8 @@ export class GameStateMessage {
       14: '최대 레벨에 도달했습니다!',
       15: '선택된 타워가 없습니다!',
       16: '타워를 선택해주세요!',
+      17: '트랩이 배치되었습니다.',
+      18: '트랩은 10개까지만 구매 가능합니다.',
     };
     this.currentMessage = messages[statusId] || null;
 
