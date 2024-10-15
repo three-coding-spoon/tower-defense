@@ -1,7 +1,7 @@
 // public/src/trap.js
 
 export class Trap {
-  constructor(x, y) {
+  constructor(x, y, audio) {
     this.x = x; // 트랩 이미지 x 좌표
     this.y = y; // 트랩 이미지 y 좌표
     this.typeId = 300;
@@ -10,6 +10,7 @@ export class Trap {
     this.range = 2; // 트랩 사거리
     this.cost = 1000; // 트랩 구매 가격
     this.attackPower = 30; // 트랩 공격력
+    this.audio = audio;
   }
 
   draw(ctx, trapImage) {
@@ -20,6 +21,7 @@ export class Trap {
   }
 
   attack(monster) {
+    this.audio.playSoundEffect('attack_trap');
     monster.takeDamage(this.attackPower);
   }
 }
