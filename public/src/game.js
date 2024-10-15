@@ -229,7 +229,6 @@ function placeNewTrap() {
 
 function placeInitialTowers() {
   for (let i = 0; i < numOfInitialTowers; i++) {
-    const { x: newX, y: newY } = getRandomPositionNearPath(200);
     const { x: newX, y: newY } = getRandomPositionNearPath(75);
     const towerId = Math.floor(Math.random() * assets.tower.data.length);
     const tower = new Tower(newX, newY, towerImages, 1, assets.tower, towerId, audioManager);

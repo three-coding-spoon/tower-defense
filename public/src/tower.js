@@ -1,7 +1,6 @@
 // public/src/tower.js
 
 export class Tower {
-  constructor(x, y, level, audio) {
   constructor(x, y, towerImages, level, tower_data, towerId, audio) {
     this.x = x; // 타워 이미지 x 좌표
     this.y = y; // 타워 이미지 y 좌표
