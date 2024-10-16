@@ -78,15 +78,14 @@ export const gameEnd = async (userId, payload, socket, io) => {
     }
 
     // 내 최고점수 확인 후 갱신 요청
-    const myHighScore = await getMyHighScore(userId);
-    console.log('myHighScore: ', myHighScore);
-    if (myHighScore < serverScore) {
+    const userHighScore = await getMyHighScore(userId);
+    console.log('myHighScore: ', userHighScore);
+    if (userHighScore < serverScore) {
       await updateHighScore(userId, serverScore);
       socket.emit('newMyHighScore', {
         status: 'success',
         message: '내 최고 점수를 갱신하였습니다!',
       });
-      console.log('내 최고 점수를 갱신하여 점수를 새로 등록합니다. ' + serverScore);
     }
 
     const user = await getUserById(userId);
@@ -112,7 +111,11 @@ export const gameEnd = async (userId, payload, socket, io) => {
       status: 'fail',
       message: '게임이 비정상적으로 종료되었습니다.' + error.message,
     });
-    addLog(userId, 3, `${userId}번 유저의 게임이 비정상적으로 종료되었습니다.`);
+    addLog(
+      userId,
+      3,
+      `${userId}번 유저의 게임이 비정상적으로 종료되었습니다. Error Message: ${error.message}`,
+    );
     return;
   }
 };
