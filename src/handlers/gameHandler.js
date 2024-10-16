@@ -6,7 +6,7 @@ import { getMyHighScore, updateHighScore } from '../models/scoreModel.js';
 import { initMobCounts, getMobCount, clearMobCounts } from '../models/mobCountModel.js';
 import { clearStage, createStage, getStage } from '../models/stageModel.js';
 import { broadcastNewHighScore } from './broadcastHandler.js';
-import { initGameStateInfo } from '../../constants.js';
+import { INIT_GAME_STATE_INFO } from '../../constants.js';
 import { getTopHighScore } from '../models/scoreModel.js';
 import { getUserById } from '../models/userModel.js';
 import { initTraps, getAllUserTraps } from '../models/trapModels.js';
@@ -42,7 +42,7 @@ export const gameStart = (userId, payload, socket, io) => {
     socket.emit('gameStart', {
       status: 'success',
       message: '게임 시작에 성공했습니다.',
-      initGameStateInfo,
+      initGameStateInfo: INIT_GAME_STATE_INFO,
     });
     addLog(userId, 2, `${userId}번 유저가 게임을 시작했습니다.`);
     return;
