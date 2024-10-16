@@ -322,9 +322,9 @@ function placeBase() {
 }
 
 function spawnMonster() {
-  const bonuseChance = 0.5;
+  const bonusChance = 0.05;
   if (monstersSpawned < totalSpawnCount) {
-    const isBonus = Math.random() <= bonuseChance;
+    const isBonus = Math.random() <= bonusChance;
 
     // 보너스 몬스터가 이미 스폰되었다면 마지막 파라미터를 false로 설정
     const shouldSpawnBonus = isBonus && !isBonusSpawned;
