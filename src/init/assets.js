@@ -52,5 +52,3 @@ export const getMobById = (mobId) => {
   const index = gameAssets.monster.data.findIndex((monster) => monster.id === mobId);
   return gameAssets.monster.data[index];
 };
-
-export const getTowerById = () => {};
