@@ -5,8 +5,9 @@ export class Button {
   constructor(text, top, right = null, onClick) {
     this.button = document.createElement('button');
     this.button.textContent = text;
+    this.button.style.display = 'none';
     this.button.style.position = 'absolute';
-    this.button.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+    this.button.style.backgroundColor = 'rgba(27, 54, 33, 0.8)';
     this.button.style.color = 'rgb(225,225,225)';
     this.button.style.top = top;
     this.button.style.right = right;

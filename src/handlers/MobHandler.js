@@ -9,9 +9,7 @@ import { getGameAssets, getMobById } from '../init/assets.js';
 import { getStage } from '../models/stageModel.js';
 import { addLog } from '../utils/log.js';
 
-/**
- * 몹 잡기 핸들러
- */
+// 몹 잡기 핸들러
 export const handleKillMob = (userId, payload, socket) => {
   const mobId = payload.monsterId + 100; // 클라이언트에서 보낸 monsterId를 서버에서 처리
   const { monster_unlock } = getGameAssets();

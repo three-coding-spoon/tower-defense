@@ -1,18 +1,11 @@
 // src/handlers/helper.js
 
-import { removeUser } from '../models/userModel.js';
 import { CLIENT_VERSION } from '../../constants.js';
 import handlerMappings from './handlerMapping.js';
 import { getTopHighScore } from '../models/scoreModel.js';
-import { initMobCounts } from '../models/mobCountModel.js';
-import { createStage } from '../models/stageModel.js';
 
 export const handleConnection = async (socket, userId) => {
   console.log(`New user connected: ${userId} with socket ID ${socket.id}`);
-
-  // 사용자별 몹 카운트 및 스테이지 초기화
-  initMobCounts(userId);
-  createStage(userId);
 
   // 하이 스코어 가져오기
   const highScore = await getTopHighScore();
@@ -21,7 +14,7 @@ export const handleConnection = async (socket, userId) => {
   socket.emit('connection', { userId: userId, highScore: highScore || 0 });
 };
 
-export const handleDisconnect = async (socket, userId) => {
+export const handleDisconnect = async (userId) => {
   // 사용자 정리
 
   console.log(`User disconnected: ${userId}`);
@@ -63,9 +56,4 @@ export const handleEvent = async (io, socket, data) => {
   } catch (err) {
     console.error(err.message);
   }
-
-  // finally {
-  //   // 응답 전송
-  //   socket.emit('response', response);
-  // }
 };

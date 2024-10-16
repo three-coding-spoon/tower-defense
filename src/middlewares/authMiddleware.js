@@ -1,6 +1,5 @@
 import jwt from 'jsonwebtoken';
 
-// 얘 왜 사용 안하지?
 export const authValidation = (accessToken) => {
   try {
     if (!accessToken) {

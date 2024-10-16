@@ -1,6 +1,5 @@
-// 임시
+// src/init/assets.js
 
-// gameAssets.js
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -30,14 +29,15 @@ const readFileAsync = (filename) => {
 
 export const loadGameAssets = async () => {
   try {
-    const [monster_unlock, monster, tower, wave] = await Promise.all([
+    const [monster_unlock, monster, tower, wave, trap] = await Promise.all([
       // 이런 형태로 필요한 파일 로드
       readFileAsync('monster_unlock.json'),
       readFileAsync('monster.json'),
       readFileAsync('tower.json'),
       readFileAsync('wave.json'),
+      readFileAsync('trap.json'),
     ]);
-    gameAssets = { monster_unlock, monster, tower, wave };
+    gameAssets = { monster_unlock, monster, tower, wave, trap };
     return gameAssets;
   } catch (error) {
     throw new Error('Failed to load game assets: ' + error.message);
@@ -52,5 +52,3 @@ export const getMobById = (mobId) => {
   const index = gameAssets.monster.data.findIndex((monster) => monster.id === mobId);
   return gameAssets.monster.data[index];
 };
-
-export const getTowerById = () => {};

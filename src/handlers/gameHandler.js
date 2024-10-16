@@ -6,10 +6,11 @@ import { getMyHighScore, updateHighScore } from '../models/scoreModel.js';
 import { initMobCounts, getMobCount, clearMobCounts } from '../models/mobCountModel.js';
 import { clearStage, createStage, getStage } from '../models/stageModel.js';
 import { broadcastNewHighScore } from './broadcastHandler.js';
-import { initGameStateInfo } from '../../constants.js';
+import { INIT_GAME_STATE_INFO } from '../../constants.js';
 import { getTopHighScore } from '../models/scoreModel.js';
 import { getUserById } from '../models/userModel.js';
-import { initTowers, getAllUserTowers } from '../models/towerModel.js';
+import { initTraps, getAllUserTraps } from '../models/trapModels.js';
+import { initTowers, getAllUserTowers, clearTowers } from '../models/towerModel.js';
 import { addLog } from '../utils/log.js';
 
 export const gameStart = (userId, payload, socket, io) => {
@@ -26,12 +27,14 @@ export const gameStart = (userId, payload, socket, io) => {
     initMobCounts(userId);
     createStage(userId);
     initTowers(userId);
+    initTraps(userId);
 
     // 유저의 몹 카운트와 스테이지, 타워 정보가 초기화가 되었는지 확인
     const userMobCount = getMobCount(userId);
     const userStage = getStage(userId);
     const userTower = getAllUserTowers(userId);
-    if (!userMobCount || !userStage || !userTower) {
+    const userTrap = getAllUserTraps(userId);
+    if (!userMobCount || !userStage || !userTower || !userTrap) {
       socket.emit('gameStart', { status: 'fail', message: '게임 초기화에 실패했습니다.' });
       addLog(userId, 2, `${userId}번 유저의 게임 초기화에 실패했습니다.`);
     }
@@ -39,7 +42,7 @@ export const gameStart = (userId, payload, socket, io) => {
     socket.emit('gameStart', {
       status: 'success',
       message: '게임 시작에 성공했습니다.',
-      initGameStateInfo,
+      initGameStateInfo: INIT_GAME_STATE_INFO,
     });
     addLog(userId, 2, `${userId}번 유저가 게임을 시작했습니다.`);
     return;
@@ -75,22 +78,21 @@ export const gameEnd = async (userId, payload, socket, io) => {
     }
 
     // 내 최고점수 확인 후 갱신 요청
-    const myHighScore = await getMyHighScore(userId);
-    console.log('myHighScore: ', myHighScore);
-    if (myHighScore < serverScore) {
+    const userHighScore = await getMyHighScore(userId);
+    console.log('myHighScore: ', userHighScore);
+    if (userHighScore < serverScore) {
       await updateHighScore(userId, serverScore);
       socket.emit('newMyHighScore', {
         status: 'success',
         message: '내 최고 점수를 갱신하였습니다!',
       });
-      console.log('내 최고 점수를 갱신하여 점수를 새로 등록합니다. ' + serverScore);
     }
 
     const user = await getUserById(userId);
 
     // 하이스코어 갱신 여부 확인
     const highScore = await getTopHighScore();
-    if (serverScore >= highScore) {
+    if (serverScore > highScore) {
       // 브로드캐스트 핸들러 호출
       await broadcastNewHighScore(user.username, io, serverScore);
       addLog(userId, 3, `${userId}번 유저가 하이 스코어 갱신. 최종 스코어: ${serverScore}`);
@@ -102,13 +104,18 @@ export const gameEnd = async (userId, payload, socket, io) => {
     // 유저 게임 데이터 초기화
     clearMobCounts(userId);
     clearStage(userId);
+    clearTowers(userId);
     return;
   } catch (error) {
     socket.emit('gameEnd', {
       status: 'fail',
       message: '게임이 비정상적으로 종료되었습니다.' + error.message,
     });
-    addLog(userId, 3, `${userId}번 유저의 게임이 비정상적으로 종료되었습니다.`);
+    addLog(
+      userId,
+      3,
+      `${userId}번 유저의 게임이 비정상적으로 종료되었습니다. Error Message: ${error.message}`,
+    );
     return;
   }
 };
