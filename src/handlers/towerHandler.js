@@ -2,12 +2,12 @@
 
 import { getGameAssets } from '../init/assets.js';
 import { updateUserTowerData, getAllUserTowers, removeUserTower } from '../models/towerModel.js';
-import { initGameStateInfo } from '../../constants.js';
+import { INIT_GAME_STATE_INFO } from '../../constants.js';
 
 // 타워 기본 제공 핸들러
 export const initialTowerHandler = async (userId, payload, socket) => {
   const { towersLength } = payload;
-  const initialTowerNum = initGameStateInfo.numOfInitialTowers;
+  const initialTowerNum = INIT_GAME_STATE_INFO.numOfInitialTowers;
 
   if (!towersLength === initialTowerNum) {
     socket.emit('initialTower', { status: 'fail', message: 'Initial tower data mismatched' });

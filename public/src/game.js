@@ -19,9 +19,9 @@ const ctx = canvas.getContext('2d');
 const gameStateMessage = new GameStateMessage();
 const gameEndMessage = new GameEndMessage();
 const audioManager = new AudioManager();
-audioManager.setBackgroundMusic('../sound/background.mp3', 0.3);
-audioManager.addSoundEffect('click', '../sound/click.mp3', 0.3);
-audioManager.addSoundEffect('beam_attack', '../sound/beam_attack.mp3', 0.15);
+audioManager.setBackgroundMusic('../sound/background.mp3', 0.23);
+audioManager.addSoundEffect('click', '../sound/click.mp3', 0.27);
+audioManager.addSoundEffect('beam_attack', '../sound/beam_attack.mp3', 0.11);
 audioManager.addSoundEffect('lose', '../sound/lose.mp3', 0.4);
 audioManager.addSoundEffect('win', '../sound/win.mp3', 0.2);
 audioManager.addSoundEffect('set_trap', '../sound/set_trap.mp3', 0.25);
@@ -322,9 +322,9 @@ function placeBase() {
 }
 
 function spawnMonster() {
-  const bonuseChance = 0.5;
+  const bonusChance = 0.05;
   if (monstersSpawned < totalSpawnCount) {
-    const isBonus = Math.random() <= bonuseChance;
+    const isBonus = Math.random() <= bonusChance;
 
     // 보너스 몬스터가 이미 스폰되었다면 마지막 파라미터를 false로 설정
     const shouldSpawnBonus = isBonus && !isBonusSpawned;
